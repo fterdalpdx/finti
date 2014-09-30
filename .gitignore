@@ -1,5 +1,8 @@
 .classpath
 .project
+.pyc
+.sqlite
+venv/
 .settings/
 eclipse-launch-profiles/
 target/

@@ -12,6 +12,7 @@
 
 	<properties>
 		<appengine.app.version>1</appengine.app.version>
+		<google-api-client.version>1.19.0</google-api-client.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -62,6 +63,11 @@
 			<artifactId>appengine-api-stubs</artifactId>
 			<version>1.9.11</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client-appengine</artifactId>
+			<version>${google-api-client.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -69,6 +69,16 @@
 			<artifactId>google-api-client-appengine</artifactId>
 			<version>${google-api-client.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-admin</artifactId>
+			<version>email_migration_v2-rev22-1.19.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-admin-directory</artifactId>
+			<version>directory_v1-rev42-1.19.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

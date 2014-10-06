@@ -46,11 +46,9 @@ Hello Blank!
 Hello <%= user.getNickname() %>!
 </c:when>
 <c:otherwise>
-Hello BLANK!
+Please login!
 </c:otherwise>
 </c:choose>
-<br/>
-${names}
 </body>
 
 </html>

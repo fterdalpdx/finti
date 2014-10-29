@@ -38,7 +38,7 @@ class PSUResourceProvider(ResourceProvider):
 		"""Return the request Authorization header. 
 		
 		:rtype: str """
-		print('get_authorization_header()')
+		print('get_authorization_header()' + str(request.headers))
 		return request.headers.get('Authorization') 
 	
 	def validate_access_token(self, access_token, authorization):

@@ -11,7 +11,7 @@ import json
 import os
 
 class Properties(object):
-	def __init__(self, key_file = 'uber.key'):
+	def __init__(self, key_file = 'finti.key'):
 		self.BLOCK_SIZE = 16
 		self.PADDING = '{'
 		#PROD_HOSTS = ['sagami', 'itabashi', 'ortus', 'kanagawa', 'hakone', 'shibuya', 'tokaido', 'yamate']
@@ -20,7 +20,7 @@ class Properties(object):
 		# First setup the cipher for common global properties, then later set the key for subclassed properties	
 		secret = ''
 		for path in sys.path:
-			keyTgt = path + '/' + 'uber.key'
+			keyTgt = path + '/' + 'finti.key'
 			if os.path.isfile(keyTgt):
 				with open(keyTgt, 'r') as key:
 					secret = key.read().strip()

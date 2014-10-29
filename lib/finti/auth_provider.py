@@ -11,7 +11,7 @@ import requests
 
 # This class will be defined later in this post 
 
-from lib.finti.provider import PSUAuthorizationProvider
+from provider import PSUAuthorizationProvider
 
 app = Flask(__name__)
 
@@ -80,4 +80,4 @@ def token():
 	return flask_res
 
 if __name__ == '__main__':
-	app.run(debug=True, port=5001)
+	app.run(debug=True, port=5000)

@@ -102,7 +102,8 @@ class PSUAuthorizationProvider(AuthorizationProvider):
 		print('validate_access() session: ' + str(session) )
 
 		try:
-			if session.user_id is not None:
+			#if session.user_id is not None:
+			if session.user is not None:
 				print('validate_access() success')
 				return True
 			else:

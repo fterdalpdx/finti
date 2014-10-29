@@ -1,8 +1,15 @@
+.egg
 .classpath
 .project
+.pydevproject
 .pyc
 .sqlite
+db/
 venv/
 .settings/
 eclipse-launch-profiles/
 target/
+/Finti.egg-info
+/nginx
+/var
+/etc/uwsgi.ini

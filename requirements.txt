@@ -1,0 +1,14 @@
+--index-url https://pypi.python.org/simple/
+Flask==0.10.1
+Flask-SQLAlchemy>=0.9.8
+google-api-python-client==1.2
+lockfile==0.9.1
+logstash-formatter==0.5.8
+pika==0.9.13
+pycrypto==2.6.1
+python-daemon==1.6
+redis==2.10.3
+SQLAlchemy==0.9.7
+uWSGI==2.0.8
+wsgiref==0.1.2
+-e .

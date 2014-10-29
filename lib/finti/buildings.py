@@ -17,7 +17,7 @@ import sys
 
 class Buildings():
 	'''
-		Provides a model for the PSU buildings web service.
+		Encapsulates a model for the PSU buildings web service.
 	'''
 
 	def __init__(self):
@@ -181,6 +181,10 @@ app = Flask(__name__)
 
 def init_db():
 	model.init_db()
+
+'''
+	The following functions handle routed web requests for Buildings
+'''	
 	
 @app.route(buildings.prop.buildings_uri_path, methods = ['GET'])
 def get_buildings():

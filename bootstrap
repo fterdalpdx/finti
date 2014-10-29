@@ -1,14 +1,52 @@
-Flask==0.10.1
-Flask-SQLAlchemy==2.0
-Jinja2==2.7.3
-MarkupSafe==0.23
-SQLAlchemy==0.9.7
-Werkzeug==0.9.6
-argparse==1.2.1
-ipython==2.2.0
-itsdangerous==0.24
-lockfile==0.10.2
-pycrypto==2.6.1
-python-daemon==1.6.1
-redis==2.10.3
-wsgiref==0.1.2
+#!/bin/sh
+
+BASE=`pwd`
+NGINX_VER="stable-1.6"
+
+# Base dependencies
+#
+# python-devel 
+# build-essential
+#
+
+# Setup a Virtual Python environment if it does not already exist
+
+if [ ! -d $BASE/venv ]; then
+    mkdir $BASE/venv
+    virtualenv -p python2.7 $BASE/venv
+fi
+
+# Activate environment and install dependencies
+. $BASE/venv/bin/activate
+pip install -r requirements.txt
+
+# Get nginx if not already installed:
+
+if [ ! -d $BASE/src ]; then mkdir $BASE/src; fi
+
+if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
+        cd $BASE/src
+        hg clone http://hg.nginx.org/nginx
+        cd nginx; hg co -r "$NGINX_VER"
+        cd nginx
+        ./auto/configure --prefix=$BASE/nginx
+        make
+        make install
+        cd $BASE
+fi
+
+if [ ! -d $BASE/var ]; then mkdir $BASE/var; fi
+
+if [ ! -d $BASE/var/log ]; then mkdir $BASE/var/log; fi
+
+if [ ! -d $BASE/var/log/uwsgi ]; then mkdir $BASE/var/log/uwsgi; fi
+
+# Generate uWSGI config file from template
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi-template.ini > $BASE/etc/uwsgi.ini
+
+# Generate NginX config file from template
+sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.conf
+
+# Add to our PYTHONPATH
+
+echo "PYTHONPATH=$BASE/lib:$HOME/etc; export PYTHONPATH" >> $BASE/venv/bin/activate

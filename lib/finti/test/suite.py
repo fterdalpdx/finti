@@ -5,7 +5,7 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-import buildings
+from finti import buildings
 import tempfile
 import os
 import json

@@ -59,6 +59,11 @@ class Buildings():
 			go to the database and retrieve the entry, and cache afterward.
 		'''
 		status = {'result': 'error', 'message': ''}
+		if not building_identifier.isalnum():
+			status = {'result': 'error', 'message': 'invalid building_identifier: identifier is not an alphanumeric'}
+			self.log.debug('get_building(): ' + status['message'])
+			return(status)
+			
 		self.log.debug('get_building(): looking up building_identifier: ' + building_identifier)
 		cached_get_building = self.redis.get(building_identifier)
 		if cached_get_building is not None:
@@ -176,6 +181,10 @@ class Buildings():
 			Delete an existing building and adjust the cache.
 		'''
 		status = {'result': 'error', 'message': ''}
+		if not building_identifier.isalnum():
+			status = {'result': 'error', 'message': 'invalid building_identifier: identifier is not an alphanumeric'}
+			self.log.debug('get_building(): ' + status['message'])
+			return(status)
 		
 		if model.remove_building(building_identifier) == True:
 			self.log.info('delete_builiding(): removed building from model: building_identifier: ' + building_identifier)

@@ -15,6 +15,7 @@ import json
 import traceback
 import sys
 from boto.ec2.instancestatus import Status
+import re
 
 class Buildings():
 	'''
@@ -80,7 +81,9 @@ class Buildings():
 		'''
 			Check if the provided building data is valid. At a minimum, check if all required fields are present
 		'''
+		self.log.debug('building_is_valid(): checking: ' + str(building_descriptor))
 		status = {'result': 'success', 'message': 'building descriptor is valid'}
+		alphanumspace_re = re.compile('[^a-zA-Z0-9-_., ]')
 		
 		try:
 			if type(building_descriptor) is not dict:		# Is the structure of the building descriptor the correct type
@@ -107,6 +110,14 @@ class Buildings():
 						status = {'result': 'error', 'message': 'field: ' + field + ' is longer than ' + str(constraint['max_len']) + ' characters'}
 						self.log.warn('building_is_valid(): ' + str(status))
 						return(status)
+					if len(building_descriptor[field]) < constraint['min_len']:		# Is the text field too long
+						status = {'result': 'error', 'message': 'field: ' + field + ' is shorter than ' + str(constraint['min_len']) + ' characters'}
+						self.log.warn('building_is_valid(): ' + str(status))
+						return(status)
+					if alphanumspace_re.search(building_descriptor[field]) is not None:		# Is the text field not alpha numeric
+						status = {'result': 'error', 'message': 'field: ' + field + ' contains non-alphanumeric/punctuation/white space characters ' + str(constraint['min_len']) + ' characters'}
+						self.log.warn('building_is_valid(): ' + str(status))
+						return(status)
 			if len(building_descriptor.keys()) <> len(self.prop.required_fields):	# Is there any extra data 
 				status = {'result': 'error', 'message': 'building_descriptor has extraneous fields'}
 				self.log.warn('building_is_valid(): ' + str(status))
@@ -131,10 +142,10 @@ class Buildings():
 				self.redis.delete(building['building_identifier'])	# Invalidate the cache entry for a specific building
 				status = {'result': 'success', 'message': 'successfully added a new building'}
 			else:
-				self.log.debug('create_building(): failed to add new building to database')
+				self.log.warn('create_building(): failed to add new building to database')
 				status = {'result': 'error', 'message': 'failed to add new building to database'}
 		else:
-			self.log.debug('create_building(): building data is not valid: ' + status['message'])
+			self.log.warn('create_building(): building data is not valid: ' + status['message'])
 		
 		return(status)
 
@@ -152,10 +163,10 @@ class Buildings():
 				self.redis.delete(building['building_identifier'])
 				status = {'result': 'success', 'message': 'successfully updated a building'}
 			else:
-				self.log.debug('update_building(): failed to updated building in database')
+				self.log.warn('update_building(): failed to updated building in database')
 				status = {'result': 'error', 'message': 'failed to update building in database'}
 		else:
-			self.log.debug('create_building(): building data is not valid')
+			self.log.warn('create_building(): building data is not valid')
 			status = {'result': 'error', 'message': 'building data is not valid'}
 		
 		return(status)

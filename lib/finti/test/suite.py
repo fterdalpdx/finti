@@ -112,6 +112,69 @@ class BuildingsTest(unittest.TestCase):
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 
+	def test_building_is_valid(self):
+		HEMB = {
+			"long_name": "High Energy Magic Building",
+			"geolocate_lat": 45.508593,
+			"geolocate_long": -122.682749, 
+			"rlis_lat": 45.508593,
+			"rlis_long": -122.682749, 
+			"centroid_lat": 45.508593,
+			"centroid_long": -122.682749, 
+			"short_name": "Magic Bldg",
+			"building_code": "HEMB",
+			"building_identifier": "B888888",
+			"state_code": "OR",
+			"city": "Ankh-Morpork",
+			"street_address": "2000 SW 5TH AVE",
+			"zipcode": "97888" }		
+
+		# Check well-formed case
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		self.assertTrue(HEMB_rv.status_code == 200)
+		
+		# Check additional field case
+		HEMB_PLUS = HEMB
+		HEMB_PLUS['another'] = 'field'
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
+		# Check missing field case
+		HEMB_MINUS = HEMB
+		del HEMB_MINUS['rlis_lat']
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
+		# Check type: non-numeric
+		HEMB_NON_NUM = HEMB
+		HEMB_NON_NUM["centroid_lat"] = 'abc'
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
+		# Check type: unicode
+		HEMB_ASCII = HEMB
+		HEMB_ASCII["city"] = 123
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
+		# Check null entries
+		HEMB_NULL = HEMB
+		HEMB_NULL["city"] = ''
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
+		# Check entries too long
+		HEMB_LONG = HEMB
+		HEMB_LONG["city"] = 'asoethaoetuhsatoehuatoestnahseutasoehusaoehusaohsuathoeuthasoehusoaehuatohenahoesuhaonehunaohestn'
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
+		# Check null entries too short
+		HEMB_SHORT = HEMB
+		HEMB_SHORT["city"] = ' '
+		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT), headers={'Content-type': 'application/json'} )
+		self.assertFalse(HEMB_rv.status_code == 200)
+		
 	def test_update_building(self):
 		# Test positive case of update to an existing building
 		HEMB = {
@@ -162,11 +225,11 @@ class BuildingsTest(unittest.TestCase):
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "888" }		
+			"zipcode": "88888" }		
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
-		self.assertTrue(HEMB_rv_data['zipcode'] == "888")
+		self.assertTrue(HEMB_rv_data['zipcode'] == "88888")
 
 		HEMB_rv = self.app.delete('/erp/gen/1.0/buildings/888')	# Delete the new building and check the result
 		self.assertTrue(HEMB_rv.status_code == 200)

@@ -41,7 +41,23 @@ class Properties(object):
 		self.buildings_uri_path = '/erp/gen/%s/buildings' % self.buildings_api_version
 		self.buildings_cache_redis_db = 10
 		self.buildings_cache_ttl = 3600		# Cache time-to-live in seconds
-		
+		self.required_fields = {
+			'long_name': 	{'max_len': 30, 'type': unicode, 'case': 'mixed' },
+			'short_name':	{'max_len': 30, 'type': unicode, 'case': 'mixed' },
+			'building_code': {'max_len': 30, 'type': unicode, 'case': 'upper'},
+			'building_identifier': {'max_len': 30, 'type': unicode, 'case': 'upper'},
+			'street_address': {'max_len': 30, 'type': unicode, 'case': 'upper'},
+			'city': {'max_len': 30, 'type': unicode, 'case': 'upper'},
+			'state_code': {'max_len': 30, 'type': unicode, 'case': 'upper'},
+			'zipcode': {'max_len': 30, 'type': unicode, 'case': 'upper'},
+			'centroid_lat': {'type': float},
+			'centroid_long': {'type': float},
+			'rlis_lat': {'type': float},
+			'rlis_long': {'type': float},
+			'geolocate_lat': {'type': float},
+			'geolocate_long': {'type': float}
+		}
+
 		# Properties above		
 
 		# Reset the cipher for subclassed Properties

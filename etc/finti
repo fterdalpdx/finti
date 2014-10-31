@@ -47,7 +47,7 @@ status_all(){
 	if [ $RETVAL -eq $FALSE ]; then
 		echo "finti is stopped"
 	else
-		echo "finti is not stopped"
+		echo "finti is running"
 	fi	
 	return $RETVAL
 }

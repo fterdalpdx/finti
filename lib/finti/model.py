@@ -31,8 +31,12 @@ class Building(db.Model):
 	city = db.Column(db.String(50), default='Portland')
 	state_code = db.Column(db.String(3), default='OR')
 	zipcode = db.Column(db.String(30))
-	longitude = db.Column(db.Float)
-	latitude = db.Column(db.Float)
+	rlis_lat = db.Column(db.Float)
+	rlis_long = db.Column(db.Float)
+	geolocate_lat = db.Column(db.Float)
+	geolocate_long = db.Column(db.Float)
+	centroid_lat = db.Column(db.Float)
+	centroid_long = db.Column(db.Float)
 	
 	def __repr__(self):
 		result = {	'building_identifier': self.building_identifier,
@@ -43,8 +47,13 @@ class Building(db.Model):
 			'city': self.city,
 			'state_code': self.state_code,
 			'zipcode': self.zipcode,
-			'longitude': self.longitude,
-			'latitude': self.latitude }
+			'rlis_lat': self.rlis_lat,
+			'rlis_long': self.rlis_long,
+			'geolocate_lat': self.geolocate_lat,
+			'geolocate_long': self.geolocate_long,
+			'centroid_lat': self.centroid_lat,
+			'centroid_long': self.centroid_long
+		}
 		#return '<Building %r>' % self.building_code
 		return str(result)
 	
@@ -57,8 +66,13 @@ def conv_building(bldg):
 			'city': bldg.city,
 			'state_code': bldg.state_code,
 			'zipcode': bldg.zipcode,
-			'longitude': bldg.longitude,
-			'latitude': bldg.latitude }
+			'rlis_lat': bldg.rlis_lat,
+			'rlis_long': bldg.rlis_long,
+			'geolocate_lat': bldg.geolocate_lat,
+			'geolocate_long': bldg.geolocate_long,
+			'centroid_lat': bldg.centroid_lat,
+			'centroid_long': bldg.centroid_long
+		}
 		#return '<Building %r>' % bldg.building_code
 		return result
 
@@ -70,7 +84,9 @@ def add_default_data(db):
 	db.create_all()
 	AB = Building(building_identifier='B0039A', long_name='Art Building', short_name='Art Bldg',
 				building_code='AB', street_address='2000 SW 5TH AVE', zipcode='97219',
-				longitude=-122.682749, latitude=45.508593)
+				rlis_lat=45.508593, rlis_long=-122.682749, 
+				geolocate_lat=45.508593, geolocate_long=-122.682749, 
+				centroid_lat=45.508593, centroid_long=-122.682749) 
 
 	EB = Building(	building_identifier='B0038',
 				long_name='Engineering Building',
@@ -78,8 +94,10 @@ def add_default_data(db):
 				building_code='EB',
 				street_address='1930 SW FOURTH AVENUE',
 				zipcode='97219',
-				longitude=-122.681008,
-				latitude=45.50898)
+				rlis_lat=45.50898, rlis_long=-122.681008,
+				geolocate_lat=45.50898, geolocate_long=-122.681008,
+				centroid_lat=45.50898, centroid_long=-122.681008)
+				
 	db.session.add_all([AB,EB])
 	db.session.commit()
 	

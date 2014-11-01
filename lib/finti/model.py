@@ -13,7 +13,7 @@ import logging.config
 
 prop = Properties()
 logging.config.dictConfig(prop.logging_conf_dict)
-log = logging.getLogger('buildings')
+log = logging.getLogger('model')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(prop.db_path, 'data.sqlite')

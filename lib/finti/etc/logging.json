@@ -2,20 +2,56 @@
     "loggers": {
         "buildings": {
             "handlers": [
-                "buildings", 
+                "buildings",
+                "buildings_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "model": {
+            "handlers": [
+                "model",
+                "model_logstash",
                 "console"
             ], 
             "level": "DEBUG"
         }
      },
      "handlers": {
-        "buildings": {
+		"buildings": {
             "backupCount": 5, 
             "level": "DEBUG", 
-            "filename": "/vol/d2l/var/log/buildings.log", 
+            "filename": "BASE/buildings.log", 
             "maxBytes": 10485760, 
             "mode": "a", 
             "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "buildings_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/buildings.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "model": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/model.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "model_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/model.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
             "class": "logging.handlers.RotatingFileHandler"
         }, 
         "console": {
@@ -31,6 +67,9 @@
         "default": {
             "datefmt": "%Y.%m.%dT%H:%M:%S", 
             "format": "%(asctime)s %(levelname)-8s %(name)-15s %(message)s"
+        }, 
+        "json": {
+            "()": "logstash_formatter.LogstashFormatter"
         }, 
         "dateTime": {
             "datefmt": "%Y.%m.%dT%H:%M:%S", 

@@ -32,11 +32,15 @@ class Properties(object):
 		# Setup common project paths to allow relative pathing for config properties	
 		self.base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..')
 		self.db_path = os.path.join(os.path.dirname(self.base_path), 'db')
-		#self.base_path = os.path.join(os.path.dirname(__file__), '../..')
 		self.etc_path = os.path.join(os.path.dirname(self.base_path), 'etc')
-		# Properties below
+		self.log_path = os.path.join(os.path.dirname(self.base_path), '../../var/log')
 
+		# Properties below
 		self.logging_conf_dict = json.load(open(os.path.join(self.etc_path, 'logging.json'),'r'))
+		for handler in self.logging_conf_dict['handlers'].values():
+			if 'filename' in handler:
+				handler['filename'] = handler['filename'].replace('BASE', self.log_path)
+				
 		self.buildings_api_version = '1.0'
 		self.buildings_uri_path = '/erp/gen/%s/buildings' % self.buildings_api_version
 		self.buildings_cache_redis_db = 10

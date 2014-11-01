@@ -86,7 +86,6 @@ class Buildings():
 		'''
 			Check if the provided building data is valid. At a minimum, check if all required fields are present
 		'''
-		self.log.debug('building_is_valid(): checking: ' + str(building_descriptor))
 		status = {'result': 'success', 'message': 'building descriptor is valid'}
 		alphanumspace_re = re.compile('[^a-zA-Z0-9-_., ]')
 		
@@ -119,7 +118,7 @@ class Buildings():
 						status = {'result': 'error', 'message': 'field: ' + field + ' is shorter than ' + str(constraint['min_len']) + ' characters'}
 						self.log.warn('building_is_valid(): ' + str(status))
 						return(status)
-					if alphanumspace_re.search(building_descriptor[field]) is not None:		# Is the text field not alpha numeric
+					if alphanumspace_re.search(building_descriptor[field]) is not None:		# Is the text field not alpha numeric with spaces and punctuation
 						status = {'result': 'error', 'message': 'field: ' + field + ' contains non-alphanumeric/punctuation/white space characters ' + str(constraint['min_len']) + ' characters'}
 						self.log.warn('building_is_valid(): ' + str(status))
 						return(status)
@@ -130,6 +129,8 @@ class Buildings():
 				
 		except Exception as ex:
 			status = {'result': 'error', 'message': str(ex)}
+
+		self.log.debug('building_is_valid(): status: ' + str(status))
 		
 		return(status)	
 		

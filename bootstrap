@@ -3,11 +3,14 @@
 BASE=`pwd`
 NGINX_VER="stable-1.6"
 
-# Base dependencies
+# Base system installed binary dependencies
 #
 # python-dev 
 # build-essential
 # Oracle instant client: http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
+# OpenSSL development libraries
+# ZLib development library - zilb1g-dev
+# PCRE development library - libpcre3-dev
 #
 
 # Setup a Virtual Python environment if it does not already exist

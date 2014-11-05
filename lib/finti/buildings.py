@@ -9,7 +9,6 @@ from config import Properties
 #from model import add_building, remove_building, list_buildings, update_building
 from optparse import OptionParser
 import daemon
-import redis
 from flask import Flask, jsonify, abort, make_response, request
 import json
 import traceback
@@ -26,7 +25,6 @@ class Buildings():
 		self.prop = Properties()
 		logging.config.dictConfig(self.prop.logging_conf_dict)
 		self.log = logging.getLogger('buildings')
-		self.redis = redis.StrictRedis(db=self.prop.buildings_cache_redis_db)
 		self.log.debug('__init__(): starting')
 	
 	def get_buildings(self):
@@ -36,20 +34,13 @@ class Buildings():
 		'''
 		status = {'result': 'error', 'message': ''}
 
-		cached_get_buildings = self.redis.get('get_buildings')
-		if cached_get_buildings is not None:
-			self.log.debug('get_buildings(): cache hit')
-			status = {'result': 'success', 'message': cached_get_buildings }
+		buildings = model.list_buildings()
+		if len(buildings) > 0:
+			buildings_json = json.dumps(buildings)
+			status = {'result': 'success', 'message': buildings_json}
 		else:
-			buildings = model.list_buildings()
-			if len(buildings) > 0:
-				self.log.debug('get_buildings(): cache miss')
-				buildings_json = json.dumps(buildings)
-				self.redis.set('get_buildings', buildings_json, ex=self.prop.buildings_cache_ttl)
-				status = {'result': 'success', 'message': buildings_json}
-			else:
-				self.log.error('get_buildings(): error: no buildings exist in model.')
-				status['message'] = 'Request failed'
+			self.log.error('get_buildings(): error: no buildings exist in model.')
+			status['message'] = 'Request failed'
 		return status
 			
 	# FIXME: Should use get parameters for input instead of requiring a JSON body
@@ -65,21 +56,16 @@ class Buildings():
 			return(status)
 			
 		self.log.debug('get_building(): looking up building_identifier: ' + building_identifier)
-		cached_get_building = self.redis.get(building_identifier)
-		if cached_get_building is not None:
-			self.log.debug('get_buildings(): cache hit')
-			status = {'result': 'success', 'message': cached_get_building }
+
+		self.log.debug('get_building(): looking-up from database: building_identifier: ' + building_identifier)
+		building = model.get_building(building_identifier)
+		if not building is None:
+			self.log.debug('get_building(): found in database, cache miss')
+			building_json = json.dumps(building)
+			status = {'result': 'success', 'message': building_json}
 		else:
-			self.log.debug('get_building(): looking-up from database: building_identifier: ' + building_identifier)
-			building = model.get_building(building_identifier)
-			if not building is None:
-				self.log.debug('get_building(): found in database, cache miss')
-				building_json = json.dumps(building)
-				self.redis.set(building_identifier, building_json, ex=self.prop.buildings_cache_ttl)
-				status = {'result': 'success', 'message': building_json}
-			else:
-				self.log.warn('get_building(): error: building not found for building_identifier: ' + building_identifier)
-				status = {'result': 'error', 'message': 'Building does not exist'}
+			self.log.warn('get_building(): error: building not found for building_identifier: ' + building_identifier)
+			status = {'result': 'error', 'message': 'Building does not exist'}
 		return status
 
 	def building_is_valid(self, building_descriptor):
@@ -144,8 +130,6 @@ class Buildings():
 		if status['result'] == 'success':
 			if model.add_building(building) == True:
 				self.log.debug('create_building(): successfully added a new building')
-				self.redis.delete('get_buildings')	# Invalidate the 'get_buldings' cache
-				self.redis.delete(building['building_identifier'])	# Invalidate the cache entry for a specific building
 				status = {'result': 'success', 'message': 'successfully added a new building'}
 			else:
 				self.log.warn('create_building(): failed to add new building to database')
@@ -165,8 +149,6 @@ class Buildings():
 		if status['result'] == 'success':
 			if model.update_building(building) == True:
 				self.log.debug('update_building(): successfully updated building: ' + str(building))
-				self.redis.delete('get_buildings')	# Invalidate the 'get_buldings' cache
-				self.redis.delete(building['building_identifier'])
 				status = {'result': 'success', 'message': 'successfully updated a building'}
 			else:
 				self.log.warn('update_building(): failed to updated building in database')
@@ -189,8 +171,6 @@ class Buildings():
 		
 		if model.remove_building(building_identifier) == True:
 			self.log.info('delete_builiding(): removed building from model: building_identifier: ' + building_identifier)
-			self.redis.delete('get_buildings')	# Invalidate the 'get_buldings' cache
-			self.redis.delete(building_identifier)
 			status = {'result': 'success', 'message': 'successfully deleted a building'}
 		else:
 			self.log.info('delete_builiding(): failed to remove building from model: building_identifier: ' + building_identifier)

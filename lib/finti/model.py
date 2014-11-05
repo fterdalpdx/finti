@@ -10,10 +10,15 @@ import os
 import pprint
 from config import Properties
 import logging.config
+import redis
+from beaver.transports.base_transport import json
 
 prop = Properties()
 logging.config.dictConfig(prop.logging_conf_dict)
 log = logging.getLogger('model')
+
+if prop.buildings_cache_enabled == True:
+	redis = redis.StrictRedis(db=prop.buildings_cache_redis_db)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(prop.db_path, 'data.sqlite')
@@ -101,12 +106,18 @@ def add_default_data(db):
 	db.session.add_all([AB,EB])
 	db.session.commit()
 	
+	
 def add_building(building):
 	status = False
 	try:
 		bldg = Building(**building)
 		db.session.add(bldg)
 		db.session.commit()
+		if prop.buildings_cache_enabled == True:
+			building_json = json.dumps(building)
+			building_id = building['building_identifier']
+			redis.set(building_id, building_json, ex=prop.buildings_cache_ttl)
+			#redis.del('buildings')	# invalidate the buildings collection cache entry
 		status = True
 	except Exception as ex:
 		db.session.rollback()
@@ -120,6 +131,9 @@ def remove_building(building_identifier):
 		bldg = Building.query.filter_by(building_identifier = building_identifier).all()[0]
 		db.session.delete(bldg)
 		db.session.commit()
+		if prop.buildings_cache_enabled == True:
+			redis.delete(building_identifier)
+			redis.delete('buildings')
 		status = True
 	except Exception as ex:
 		db.session.rollback()
@@ -134,6 +148,11 @@ def update_building(building):
 			setattr(bldg, k, v)
 		db.session.add(bldg)
 		db.session.commit()
+		if prop.buildings_cache_enabled == True:
+			building_json = json.dumps(building)
+			building_id = building['building_identifier']
+			redis.set(building_id, building_json, ex=prop.buildings_cache_ttl)
+			redis.delete('buildings')	# invalidate the buildings collection cache entry
 		status = True
 	except Exception as ex:
 		db.session.rollback()
@@ -142,24 +161,45 @@ def update_building(building):
 	return(status)
 
 def get_building(building_identifier):
-	bldg = None
+	building = None
 	try:
+		if prop.buildings_cache_enabled == True:
+			building_json = redis.get(building_identifier)
+			if building_json is not None:
+				building = json.loads(building_json)
+				return building
+
 		bldg_res = Building.query.filter_by(building_identifier = building_identifier).all()
+		
 		if bldg_res > 0:
-			bldg = conv_building(bldg_res[0])
+			building = conv_building(bldg_res[0])
+			if prop.buildings_cache_enabled == True:
+				building_json = json.dumps(building)
+				redis.set(building_identifier, building_json, ex=prop.buildings_cache_ttl)
 		else:
-			bldg = None
+			building = None
 	except Exception as ex:
 		log.debug('get_building(): error: ' + str(ex))
 
-	return(bldg)
+	return(building)
 
 def list_buildings():
 	bldgs = []
 	try:
+		if prop.buildings_cache_enabled == True:
+			buildings_json = redis.get('buildings')
+			if buildings_json is not None:
+				buildings = json.loads(buildings_json)
+				return buildings
+
 		bldg_list = Building.query.all()
 		for bldg in bldg_list:
 			bldgs.append(conv_building(bldg))
+
+		if prop.buildings_cache_enabled == True:
+			buildings_json = json.dumps(buildings)
+			redis.set('buildings', buildings_json, ex=prop.buildings_cache_ttl)
+
 	except Exception as ex:
 		log.debug('list_building(): error: ' + str(ex))
 

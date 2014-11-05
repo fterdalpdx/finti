@@ -54,3 +54,7 @@ sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.co
 # Add to our PYTHONPATH
 
 echo "PYTHONPATH=$BASE/lib:$HOME/etc; export PYTHONPATH" >> $BASE/venv/bin/activate
+
+# Create the dir for a SQLite Db for testing
+
+if [ ! -d $BASE/db ]; then mkdir $BASE/db; fi

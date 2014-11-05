@@ -31,7 +31,7 @@ class Properties(object):
 
 		# Setup common project paths to allow relative pathing for config properties	
 		self.base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..')
-		self.db_path = os.path.join(os.path.dirname(self.base_path), 'db')
+		self.db_path = os.path.join(os.path.dirname(self.base_path), '../../db')
 		self.etc_path = os.path.join(os.path.dirname(self.base_path), 'etc')
 		self.log_path = os.path.join(os.path.dirname(self.base_path), '../../var/log')
 
@@ -43,6 +43,7 @@ class Properties(object):
 				
 		self.buildings_api_version = '1.0'
 		self.buildings_uri_path = '/erp/gen/%s/buildings' % self.buildings_api_version
+		self.buildings_cache_enabled = False
 		self.buildings_cache_redis_db = 10
 		self.buildings_cache_ttl = 3600		# Cache time-to-live in seconds
 		self.required_fields = {
@@ -75,10 +76,7 @@ class Properties(object):
 				break
 		
 		if not secret == '':
-			#self.cipher = AES.new(secret.decode('hex'))
-			#self.cipher = AES.new( bytes.fromhex(secret))
 			self.cipher = AES.new(binascii.a2b_hex(secret)) 
-
 
 	def _gen_secret(self):
 		return os.urandom(self.BLOCK_SIZE)

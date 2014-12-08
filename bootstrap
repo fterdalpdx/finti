@@ -53,7 +53,33 @@ sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.co
 
 # Add to our PYTHONPATH
 
+if grep -q '^PYTHONPATH' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^PYTHONPATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
 echo "PYTHONPATH=$BASE/lib:$HOME/etc; export PYTHONPATH" >> $BASE/venv/bin/activate
+
+if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^RELEASE_LEVEL' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+
+if [ -z "$1" ]; then
+	RELEASE_LEVEL='develop'
+else
+	if [ "$1" = "test" -o "$1" = "develop" -o "$1" = "production" ]; then
+		RELEASE_LEVEL=$1
+	else
+		echo "Allowed release levels: 'develop', 'test', or 'production'. Argument: $1 not understood."
+		RELEASE_LEVEL='develop'
+	fi
+fi
+echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
+echo "=== RELEASE LEVEL set to $RELEASE_LEVEL"
+
+
+
+
 
 # Create the dir for a SQLite Db for testing
 

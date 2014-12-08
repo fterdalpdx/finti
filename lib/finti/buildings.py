@@ -74,6 +74,7 @@ class Buildings():
 		'''
 		status = {'result': 'success', 'message': 'building descriptor is valid'}
 		alphanumspace_re = re.compile('[^a-zA-Z0-9-_., ]')
+		self.log.debug('building_is_valid(): building_descriptor: ' + str(building_descriptor))
 		
 		try:
 			if type(building_descriptor) is not dict:		# Is the structure of the building descriptor the correct type
@@ -240,7 +241,7 @@ def get_building(building_identifier):
 def create_building():
 	global buildings
 	if request.json:
-		buildings.log.info('create_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
+		buildings.log.info('create_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', body: ' + str(request.json))
 		building_descriptor = request.json
 
 		status = buildings.create_building(building_descriptor)

@@ -9,6 +9,7 @@ import os, sys
 import binascii
 import json
 import os
+from Crypto.SelfTest import SelfTestError
 
 class Properties(object):
 	def __init__(self, key_file = 'finti.key'):
@@ -29,6 +30,15 @@ class Properties(object):
 		if not secret == '':
 			self.cipher = AES.new(binascii.a2b_hex(secret)) 
 
+		if 'RELEASE' in os.environ:
+			release = os.environ['RELEASE']
+			if release in ['DEV', 'STAGE', 'PROD']:
+				self.release = release
+			else:
+				self.release = 'DEV'
+		else:
+			self.release = 'DEV'
+			
 		# Setup common project paths to allow relative pathing for config properties	
 		self.base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..')
 		self.db_path = os.path.join(os.path.dirname(self.base_path), '../../db')
@@ -40,7 +50,25 @@ class Properties(object):
 		for handler in self.logging_conf_dict['handlers'].values():
 			if 'filename' in handler:
 				handler['filename'] = handler['filename'].replace('BASE', self.log_path)
-				
+
+		self.lms_password = self.decode('e370c14f0909ae58e60f67784ee7138a')
+		self.lms_login = 'bbce6'
+
+		if self.release == 'DEV':
+			self.database_host = 'devl.banner.pdx.edu'
+			self.database_instance = 'DEVL'
+		if self.release == 'STAGE':
+			self.database_instance = 'TEST'
+			self.database_host = 'devl.banner.pdx.edu'
+		if self.release == 'PROD':
+			self.database_host = 'oprd.banner.pdx.edu'
+			self.database_instance = 'OPRD'
+
+		self.database_port = '1526'
+
+		self.database_dsn = (self.database_host, self.database_port, self.database_instance)
+			
+							
 		self.buildings_api_version = '1.0'
 		self.buildings_uri_path = '/erp/gen/%s/buildings' % self.buildings_api_version
 		self.buildings_cache_enabled = False

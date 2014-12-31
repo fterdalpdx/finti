@@ -5,8 +5,11 @@ from distutils.command.install import install
 class FintiInstall(install):
 	def run(self):
 		install.run(self)
-		setup_dir = os.path.dirname(os.path.realpath(__file__))
 		
+		self.nginx_conf()
+		
+	def nginx_conf(self):
+		setup_dir = os.path.dirname(os.path.realpath(__file__))
 		nginx_template = open(setup_dir + '/src/main/resources/nginx.conf')
 		nginx_conf = open(setup_dir + '/nginx/conf/nginx.conf', 'w')
 		print('filtering: src: ' + setup_dir + '/src/main/resources/nginx.conf' + ', to: ' + setup_dir + '/nginx/conf/nginx.conf')

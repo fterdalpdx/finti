@@ -3,7 +3,7 @@ Created on Sep 23, 2014
 
 @author: dennis
 '''
-import model
+from lib.finti import null_model as model
 import logging.config
 from config import Properties
 #from model import add_building, remove_building, list_buildings, update_building
@@ -15,6 +15,7 @@ import traceback
 import sys
 from boto.ec2.instancestatus import Status
 import re
+import cx_Oracle
 
 class Buildings():
 	'''
@@ -178,6 +179,26 @@ class Buildings():
 			status = {'result': 'error', 'message': 'failed to delete a building: ' + building_identifier}
 		return status
 
+	def connect_oracle(self):
+		try:
+			dsn_info = self.database_dsn
+			dsn = cx_Oracle.makedsn(*dsn_info)
+			db = cx_Oracle.connect(self.lms_login, self.lms_password, dsn)
+			cursor = db.cursor()
+
+			return_list = cursor.arrayvar(cx_Oracle.STRING, 14)
+			self.log.debug('connect_oracle(): getting buildings')
+			res = cursor.callfunc('zgd_building.f_getBuildings', return_list)
+
+			for r in res:
+				self.log.debug('connect_oracle(): row: ' + str(r))
+			db.close()
+		except Exception as ex:
+			exc_type, exc_value, exc_traceback = sys.exc_info()
+			self.log.error("process_pass(): exception encountered while processing change: " + str(ex)
+						+ repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+			self.log.error('process_pass(): accompanying call result: ' + str(ex))
+		
 app = Flask(__name__)
 
 '''
@@ -205,7 +226,7 @@ def init_db():
 	
 @app.route(buildings.prop.buildings_uri_path, methods = ['GET'])
 def get_buildings():
-	global buildings
+	global buildings, request
 
 	if request.args and 'building_identifier' in request.args:
 		buildings.log.info('get_building(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
@@ -239,7 +260,7 @@ def get_building(building_identifier):
 
 @app.route(buildings.prop.buildings_uri_path, methods = ['POST'])
 def create_building():
-	global buildings
+	global buildings, request
 	if request.json:
 		buildings.log.info('create_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', body: ' + str(request.json))
 		building_descriptor = request.json
@@ -275,7 +296,7 @@ def delete_building(building_identifier):
 		
 @app.route(buildings.prop.buildings_uri_path, methods = ['PUT'])
 def update_building():
-	global buildings
+	global buildings, request
 	if request.json:
 		buildings.log.info('update_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 		building_descriptor = request.json

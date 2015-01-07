@@ -3,9 +3,9 @@ Created on Sep 23, 2014
 
 @author: dennis
 '''
-from lib.finti import null_model as model
+from app import null_model as model
 import logging.config
-from config import Properties
+from config import config
 #from model import add_building, remove_building, list_buildings, update_building
 from optparse import OptionParser
 import daemon
@@ -23,8 +23,7 @@ class Buildings():
 	'''
 
 	def __init__(self):
-		self.prop = Properties()
-		logging.config.dictConfig(self.prop.logging_conf_dict)
+		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('buildings')
 		self.log.debug('__init__(): starting')
 	
@@ -83,7 +82,7 @@ class Buildings():
 				self.log.warn('building_is_valid(): ' + str(status))
 				return(status)
 
-			for field, constraint in self.prop.required_fields.items():
+			for field, constraint in config.required_fields.items():
 				if not field in building_descriptor:		# Is there a missing required field
 					status =  {'result': 'error', 'message': 'building_descriptor missing required field: ' + field}
 					self.log.warn('building_is_valid(): ' + str(status))
@@ -110,7 +109,7 @@ class Buildings():
 						status = {'result': 'error', 'message': 'field: ' + field + ' contains non-alphanumeric/punctuation/white space characters ' + str(constraint['min_len']) + ' characters'}
 						self.log.warn('building_is_valid(): ' + str(status))
 						return(status)
-			if len(building_descriptor.keys()) <> len(self.prop.required_fields):	# Is there any extra data 
+			if len(building_descriptor.keys()) <> len(config.required_fields):	# Is there any extra data 
 				status = {'result': 'error', 'message': 'building_descriptor has extraneous fields'}
 				self.log.warn('building_is_valid(): ' + str(status))
 				return(status)
@@ -224,7 +223,7 @@ def init_db():
 	The following functions handle routed web requests for Buildings
 '''	
 	
-@app.route(buildings.prop.buildings_uri_path, methods = ['GET'])
+@app.route(config.buildings_uri_path, methods = ['GET'])
 def get_buildings():
 	global buildings, request
 
@@ -246,7 +245,7 @@ def get_buildings():
 		else:
 			abort(400, status['message'])
 
-@app.route(buildings.prop.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
+@app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
 def get_building(building_identifier):
 	global buildings
 	
@@ -258,7 +257,7 @@ def get_building(building_identifier):
 
 	
 
-@app.route(buildings.prop.buildings_uri_path, methods = ['POST'])
+@app.route(config.buildings_uri_path, methods = ['POST'])
 def create_building():
 	global buildings, request
 	if request.json:
@@ -281,7 +280,7 @@ def create_building():
 	else:
 		abort(404, 'Building descriptor not valid.')
 		
-@app.route(buildings.prop.buildings_uri_path + '/<building_identifier>', methods = ['DELETE'])
+@app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['DELETE'])
 def delete_building(building_identifier):
 	global buildings
 
@@ -294,7 +293,7 @@ def delete_building(building_identifier):
 		buildings.log.info('delete_building() handler: failed to delete building: ' + status['message'])
 		abort(404, status['message'])
 		
-@app.route(buildings.prop.buildings_uri_path, methods = ['PUT'])
+@app.route(config.buildings_uri_path, methods = ['PUT'])
 def update_building():
 	global buildings, request
 	if request.json:

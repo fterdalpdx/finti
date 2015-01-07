@@ -1,5 +1,6 @@
 /build
 /lib/finti/lepture/
+/bones
 /src/nginx
 .classpath
 db/

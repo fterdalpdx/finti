@@ -65,12 +65,14 @@ if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
 fi
 
 if [ -z "$1" ]; then
-	RELEASE_LEVEL='develop'
+	RELEASE_LEVEL='development'
+	echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
+	echo "Defaulting to release level: 'development' unless rerun with argument specifying otherwise."
 else
 	if [ "$1" = "test" -o "$1" = "develop" -o "$1" = "production" ]; then
 		RELEASE_LEVEL=$1
 	else
-		echo "Allowed release levels: 'develop', 'test', or 'production'. Argument: $1 not understood."
+		echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
 		RELEASE_LEVEL='develop'
 	fi
 fi

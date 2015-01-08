@@ -37,15 +37,19 @@ class Config(object):
 		self.log_path = os.path.join(self.base_path, 'var/log')
 
 		# Properties below
+		
 		self.logging_conf_dict = json.load(open(os.path.join(self.etc_path, 'logging.json'),'r'))
 		for handler in self.logging_conf_dict['handlers'].values():
 			if 'filename' in handler:
 				handler['filename'] = handler['filename'].replace('BASE', self.log_path)
 
+
+		# D A T A B A S E
+		
 		self.lms_password = self.decode('e370c14f0909ae58e60f67784ee7138a')
 		self.lms_login = 'bbce6'
-
 		self.database_port = '1526'
+
 
 		# B U I L D I N G S
 
@@ -55,6 +59,14 @@ class Config(object):
 		self.buildings_cache_redis_db = 10
 		self.buildings_cache_ttl = 3600		# Cache time-to-live in seconds
 
+		# L D A P
+		
+		self.ldap_dn = 'uid=finti,ou=service,dc=pdx,dc=edu'
+		self.ldap_password = self.decode('811ab624272946c5b0eef331279985a01952861af321f5d9820ea452fe24a8a8')
+		
+		# A C T I V E   D I R E C T O R Y
+		
+		
 		# V A L I D A T I O N
 		
 		self.required_fields = {
@@ -71,7 +83,9 @@ class Config(object):
 			'rlis_lat': {'type': float},
 			'rlis_long': {'type': float},
 			'geolocate_lat': {'type': float},
-			'geolocate_long': {'type': float}
+			'geolocate_long': {'type': float},
+			'from_date': {'max_len': 10, 'min_len': 10, 'type': unicode, 'case': 'upper'},
+			'to_date': {'max_len': 10, 'min_len': 10, 'type': unicode, 'case': 'upper'},
 		}
 
 		# Properties above		
@@ -106,13 +120,17 @@ class Config(object):
 class DevelopmentConfig(Config):
 	database_host = 'devl.banner.pdx.edu'
 	database_instance = 'DEVL'
+	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
+	
 	def __init__(self):
 		super(DevelopmentConfig, self).__init__()
 		self.database_dsn = (self.database_host, self.database_port, self.database_instance)
 		
 class TestingConfig(Config):
-	database_instance = 'TEST'
 	database_host = 'devl.banner.pdx.edu'
+	database_instance = 'TEST'
+	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
+	
 	def __init__(self):
 		super(TestingConfig, self).__init__()
 		self.database_dsn = (self.database_host, self.database_port, self.database_instance)
@@ -120,6 +138,8 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
 	database_host = 'oprd.banner.pdx.edu'
 	database_instance = 'OPRD'
+	ldap_url = 'ldaps://ldap-bulk.oit.pdx.edu:636/'
+	
 	def __init__(self):
 		super(ProductionConfig, self).__init__()
 		self.database_dsn = (self.database_host, self.database_port, self.database_instance)

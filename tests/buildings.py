@@ -5,51 +5,58 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-from finti import buildings
-import tempfile
-import os
+from app import buildings
 import json
+from config import config
 
 class BuildingsTest(unittest.TestCase):
 	def setUp(self):
-		self.db_fd, buildings.app.config['DATABASE'] = tempfile.mkstemp()
-		buildings.app.config['TESTING'] = True
+		#self.db_fd, buildings.app.config['DATABASE'] = tempfile.mkstemp()
+		#buildings.app.config['TESTING'] = True
 		self.app = buildings.app.test_client()
-		buildings.init_db()
+		#buildings.init_db()
 
 
 	def tearDown(self):
-		os.close(self.db_fd)
-		os.unlink(buildings.app.config['DATABASE'])
+		#os.close(self.db_fd)
+		#os.unlink(buildings.app.config['DATABASE'])
+		pass
 
+	#@unittest.skip('schpork')
 	def test_get_buildings(self):
 		buildings_json = self.app.get('/erp/gen/1.0/buildings').data
 		buildings = json.loads(buildings_json)
-		self.assertTrue(len(buildings) == 2)
+		self.assertTrue(len(buildings) > 50)
+		self.assertTrue('city' in buildings[0])
+		self.assertTrue('long_name' in buildings[42])
+		self.assertTrue('short_name' in buildings[17])
+		self.assertTrue('building_identifier' in buildings[11])
 
 	def test_get_building(self):
-		
+
 		# Test the positive case of finding an expected building via URI path
 		EB_rv = self.app.get('/erp/gen/1.0/buildings/B0038')
 		EB = json.loads(EB_rv.data)
 		self.assertTrue(EB['street_address'] == '1930 SW FOURTH AVENUE')
 		self.assertTrue(EB_rv.status_code == 200)
-		
+
 		# Test the positive case of finding an expected building via query string
 		EB_rv = self.app.get('/erp/gen/1.0/buildings', query_string=dict(building_identifier='B0038'))
-		print('EB_rv: ' + str(EB_rv.data))
+		#print('EB_rv: ' + str(EB_rv.data))
 		EB = json.loads(EB_rv.data)
 		self.assertTrue(EB['street_address'] == '1930 SW FOURTH AVENUE')
 		self.assertTrue(EB_rv.status_code == 200)
-		
+
 		# Test the case of not finding a building via URI path
 		EB_rv = self.app.get('/erp/gen/1.0/buildings/0000038')
 		self.assertTrue(EB_rv.status_code == 404)
-		
+
 		# Test the case of not finding a building via query string
 		EB_rv = self.app.get('/erp/gen/1.0/buildings', query_string=dict(building_identifier='0000038'))
 		self.assertTrue(EB_rv.status_code == 404)
-		
+
+	@unittest.skip('schpork')
+	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_add_building(self):
 		# Test of complete and correctly formated building data add
 		HEMB = {
@@ -66,7 +73,10 @@ class BuildingsTest(unittest.TestCase):
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "97888" }		
+			"zipcode": "97888",
+			"from_date": "2010-01-01",
+			"to_date": "2016-01-01"
+		 }		
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
@@ -87,7 +97,10 @@ class BuildingsTest(unittest.TestCase):
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "97888" }		
+			"zipcode": "97888",
+			"from_date": "2010-01-01",
+			"to_date": "2016-01-01"
+		}		
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
@@ -107,11 +120,15 @@ class BuildingsTest(unittest.TestCase):
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "97888" }		
+			"zipcode": "97888", 
+			"from_date": "2010-01-01",
+			"to_date": "2016-01-01"
+		}		
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 
+	@unittest.skip('schpork')
 	def test_building_is_valid(self):
 		HEMB = {
 			"long_name": "High Energy Magic Building",
@@ -127,7 +144,10 @@ class BuildingsTest(unittest.TestCase):
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "97888" }		
+			"zipcode": "97888", 
+			"from_date": "2010-01-01",
+			"to_date": "2016-01-01"
+		}		
 
 		# Check well-formed case
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
@@ -175,6 +195,9 @@ class BuildingsTest(unittest.TestCase):
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT), headers={'Content-type': 'application/json'} )
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
+		
+	#@unittest.skip('schpork')
+	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# Test positive case of update to an existing building
 		HEMB = {
@@ -207,7 +230,9 @@ class BuildingsTest(unittest.TestCase):
 		HEMB['building_identifier'] = '42'
 		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 404)
-		
+
+	@unittest.skip('schpork')
+	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_delete_building(self):
 		# Test the deletion of an existing building
 		

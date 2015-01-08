@@ -3,7 +3,6 @@ Created on Sep 23, 2014
 
 @author: dennis
 '''
-from app import null_model as model
 import logging.config
 from config import config
 #from model import add_building, remove_building, list_buildings, update_building
@@ -16,6 +15,7 @@ import sys
 from boto.ec2.instancestatus import Status
 import re
 import cx_Oracle
+from app.oracle_model import model
 
 class Buildings():
 	'''
@@ -55,8 +55,6 @@ class Buildings():
 			self.log.debug('get_building(): ' + status['message'])
 			return(status)
 			
-		self.log.debug('get_building(): looking up building_identifier: ' + building_identifier)
-
 		self.log.debug('get_building(): looking-up from database: building_identifier: ' + building_identifier)
 		building = model.get_building(building_identifier)
 		if not building is None:
@@ -121,22 +119,22 @@ class Buildings():
 		
 		return(status)	
 		
-	def create_building(self, building):
+	def add_building(self, building):
 		'''
-			Create a single building and add to the list of PSU buildings in the backing database. 
+			Add a building definition to the list of PSU buildings in the backing database. 
 			Invalidate the cache of all buildings if there is an existing entry.  
 		'''
 		status = self.building_is_valid(building)
 
 		if status['result'] == 'success':
 			if model.add_building(building) == True:
-				self.log.debug('create_building(): successfully added a new building')
+				self.log.debug('add_building(): successfully added a new building')
 				status = {'result': 'success', 'message': 'successfully added a new building'}
 			else:
-				self.log.warn('create_building(): failed to add new building to database')
+				self.log.warn('add_building(): failed to add new building to database')
 				status = {'result': 'error', 'message': 'failed to add new building to database'}
 		else:
-			self.log.warn('create_building(): building data is not valid: ' + status['message'])
+			self.log.warn('add_building(): building data is not valid: ' + status['message'])
 		
 		return(status)
 
@@ -155,7 +153,7 @@ class Buildings():
 				self.log.warn('update_building(): failed to updated building in database')
 				status = {'result': 'error', 'message': 'failed to update building in database'}
 		else:
-			self.log.warn('create_building(): building data is not valid')
+			self.log.warn('update_building(): building data is not valid')
 			status = {'result': 'error', 'message': 'building data is not valid'}
 		
 		return(status)
@@ -178,26 +176,6 @@ class Buildings():
 			status = {'result': 'error', 'message': 'failed to delete a building: ' + building_identifier}
 		return status
 
-	def connect_oracle(self):
-		try:
-			dsn_info = self.database_dsn
-			dsn = cx_Oracle.makedsn(*dsn_info)
-			db = cx_Oracle.connect(self.lms_login, self.lms_password, dsn)
-			cursor = db.cursor()
-
-			return_list = cursor.arrayvar(cx_Oracle.STRING, 14)
-			self.log.debug('connect_oracle(): getting buildings')
-			res = cursor.callfunc('zgd_building.f_getBuildings', return_list)
-
-			for r in res:
-				self.log.debug('connect_oracle(): row: ' + str(r))
-			db.close()
-		except Exception as ex:
-			exc_type, exc_value, exc_traceback = sys.exc_info()
-			self.log.error("process_pass(): exception encountered while processing change: " + str(ex)
-						+ repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
-			self.log.error('process_pass(): accompanying call result: ' + str(ex))
-		
 app = Flask(__name__)
 
 '''
@@ -217,8 +195,8 @@ buildings = Buildings()
 app = Flask(__name__)
 
 def init_db():
-	model.init_db()
-
+	#model.init_db()
+	pass
 '''
 	The following functions handle routed web requests for Buildings
 '''	
@@ -258,21 +236,21 @@ def get_building(building_identifier):
 	
 
 @app.route(config.buildings_uri_path, methods = ['POST'])
-def create_building():
+def add_building():
 	global buildings, request
 	if request.json:
-		buildings.log.info('create_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', body: ' + str(request.json))
+		buildings.log.info('add_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', body: ' + str(request.json))
 		building_descriptor = request.json
 
-		status = buildings.create_building(building_descriptor)
+		status = buildings.add_building(building_descriptor)
 		if status['result'] <> 'success':
-			buildings.log.info('create_building() handler: failed to create building: ' + status['message'])
+			buildings.log.info('add_building() handler: failed to add building: ' + status['message'])
 			abort(404, status['message'])
 			
 		if status['result'] == 'success':
-			buildings.log.info('create_building() handler: successfully created building: ' + status['message'])
+			buildings.log.info('add_building() handler: successfully added building: ' + status['message'])
 			get_result = buildings.get_building(building_descriptor['building_identifier'])
-			buildings.log.info('create_building() handler: looked-up created building: ' + str(get_result))
+			buildings.log.info('add_building() handler: looked-up added building: ' + str(get_result))
 			if get_result['result'] == 'success':
 				return(make_response((get_result['message'], 200, {'Content-Type': 'application/json'})))
 			else:

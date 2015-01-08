@@ -7,7 +7,6 @@ Created on Sep 22, 2014
 #from flask.ext.sqlalchemy import SQLAlchemy
 from flask import Flask
 import os
-#import pprint
 from config import config
 import logging.config
 import redis
@@ -38,22 +37,22 @@ class Buildings():
 			self.buildings_cache[building['building_identifier']] = building
 			
 	def conv_building(self, bldg):
-		result = {	'building_identifier': bldg['ZGOBBLDG_BLDG_ID'],
-			'long_name': bldg['ZGTVBLDG_LONG_DESC'],
-			'short_name': bldg['ZGTVBLDG_SHORT_DESC'],
-			'building_code': bldg['ZGTVBLDG_CODE'],
-			'street_address': bldg['ZGOBBLDG_STREET_LINE1'],
-			'city': bldg['ZGOBBLDG_CITY'],
-			'state_code': bldg['ZGOBBLDG_STATE_CODE'],
-			'zipcode': bldg['ZGOBBLDG_ZIP'],
-			'rlis_lat': bldg['ZGOBBLDG_RLIS_LAT'],
-			'rlis_long': bldg['ZGOBBLDG_RLIS_LONG'],
-			'geolocate_lat': bldg['ZGOBBLDG_GEOLOCATE_LAT'],
-			'geolocate_long': bldg['ZGOBBLDG_GEOLOCATE_LONG'],
-			'centroid_lat': bldg['ZGOBBLDG_CENTROID_LAT'],
-			'centroid_long': bldg['ZGOBBLDG_CENTROID_LONG'],
-			'from_date': bldg['ZGTVBLDG_FROM_DATE'],
-			'to_date': bldg['ZGTVBLDG_TO_DATE'],
+		result = {	'building_identifier': bldg['ZGTVBLDG_ID'],
+			'long_name': bldg['ZGTVBLDG_LONG_NAME'],
+			'short_name': bldg['ZGTVBLDG_SHORT_NAME'],
+			'building_code': bldg['ZGTVBLDG_BLDG_CODE'],
+			'street_address': bldg['ZGTVBLDG_STREET_LINE1'],
+			'city': bldg['ZGTVBLDG_CITY'],
+			'state_code': bldg['ZGTVBLDG_STATE_CODE'],
+			'zipcode': bldg['ZGTVBLDG_ZIP'],
+			'rlis_lat': bldg['ZGTVBLDG_RLIS_LAT'],
+			'rlis_long': bldg['ZGTVBLDG_RLIS_LONG'],
+			'geolocate_lat': bldg['ZGTVBLDG_GEOLOCATE_LAT'],
+			'geolocate_long': bldg['ZGTVBLDG_GEOLOCATE_LONG'],
+			'centroid_lat': bldg['ZGTVBLDG_CENTROID_LAT'],
+			'centroid_long': bldg['ZGTVBLDG_CENTROID_LONG'],
+			'from_date': bldg['ZGTVBLDG_EFFECTIVE_DATE'],
+			'to_date': bldg['ZGTVBLDG_END_DATE'],
 		}
 		#if bldg['ZGOBBLDG_BLDG_ID'] == 'B0001':
 		#	print('conv_building(): raw building info: ' + str(bldg))
@@ -109,6 +108,7 @@ class Buildings():
 			
 			for building_raw in list(call_cursor.getvalue()):
 				building_json = building_raw[0]
+				#self.log.debug('list_buildings(): raw JSON data: ' + str(building_json))
 				building = json.loads(building_json)
 				buildings.append(self.conv_building(building))
 			
@@ -139,16 +139,22 @@ class Buildings():
 			@rtype dict
 			@return Dictionary containing building descriptor data
 		'''
-
+		
+		self.log.info('get_building(): looking-up building with building_identifier: ' + building_identifier)
 		building = []
 		if building_identifier in self.buildings_cache:
-			self.log.info('get_building(): cache miss')
+			self.log.info('get_building(): cache hit')
 			building = self.buildings_cache[building_identifier]
 		else:
 			# Get the buildings list with the side-effect of setting the buildings cache
+			self.log.info('get_building(): cache miss')
 			self.list_buildings(force_cache_refresh=True)
-			building = self.buildings_cache[building_identifier]
-			self.log.info('get_building(): found building')
+			if building_identifier in self.buildings_cache:
+				self.log.info('get_building(): found building with building_identifier: ' + building_identifier)
+				building = self.buildings_cache[building_identifier]
+			else:
+				self.log.info('get_building(): building does not exist. building_identifier: ' + building_identifier)
+				building = None
 
 		return building
 		
@@ -166,7 +172,7 @@ class Buildings():
 		'''
 		history = []
 		try:
-			self.log.debug('get_building_history(): start')
+			self.log.debug('get_building_history(): fetching history for building: ' + building_id)
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
@@ -195,9 +201,10 @@ class Buildings():
 			@rtype dict
 			@return Dictionary containing building descriptor data
 		'''
-
+		is_success = False
+		
 		try:
-			self.log.debug('update_building(): start')
+			self.log.debug('add_building(): building_descriptor to add: ' + str(building))
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
@@ -211,26 +218,27 @@ class Buildings():
 						building['city'],
 						building['state_code'],
 						building['zipcode'],
-						building['centroid_lat'],
-						building['centroid_long'],
-						building['rlis_lat'],
-						building['rlis_long'],
-						building['geolocate_lat'],
-						building['geolocate_long'],
+						str(building['centroid_lat']),
+						str(building['centroid_long']),
+						str(building['rlis_lat']),
+						str(building['rlis_long']),
+						str(building['geolocate_lat']),
+						str(building['geolocate_long']),
 						building['building_identifier'],
 						building['from_date'],
 						building['to_date'],
 				])
 
 			cursor.callproc('zgd_building.p_insBldg', [building_desc])
+			self.log.info('add_building(): added building: ' + str(building))
 
 			# Update the building caches
 			self.list_buildings(force_cache_refresh=True)
-								
+			is_success = True
 		except Exception as ex:
-			self.log.error('update_building(): error: ' + str(ex))
+			self.log.error('add_building(): error: ' + str(ex))
 	
-		self.log.info('update_building(): updated building: ' + str(building))
+		return is_success
 		
 	def remove_building(self, building_identifier):
 		'''
@@ -242,8 +250,9 @@ class Buildings():
 			@return Nothing is returned
 		'''
 		# Update the to_date for the building to now.
-			
-	def create_building(self, building_descriptor):
+	
+		
+	def removeme_create_building(self, building_descriptor):
 		'''
 			Create a building and add to the set of all PSU buildings
 		
@@ -254,7 +263,9 @@ class Buildings():
 		'''
 
 		try:
-			self.log.debug('create_building(): start')
+			return self.add_building(building_descriptor)
+		
+			self.log.debug('create_building(): t')
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
@@ -266,7 +277,7 @@ class Buildings():
 
 			# Following produces: error: ORA-06550: line 1, column 7: PLS-00306: wrong number or types of arguments in call to 'P_INSBLDG
 			cursor.callproc('zgd_building.p_insBldg', [building_array])
-			''' # Following produces: PLS-00306: wrong number or types of arguments in call to 'P_INSBLDG', ORA-06550: line 1, column 7: PL/SQL: Statement ignored
+			# Following produces: PLS-00306: wrong number or types of arguments in call to 'P_INSBLDG', ORA-06550: line 1, column 7: PL/SQL: Statement ignored
 			cursor.callproc('zgd_building.p_insBldg', [
 						building_descriptor['long_name'],
 						building_descriptor['short_name'],
@@ -285,7 +296,7 @@ class Buildings():
 						building_descriptor['from_date'],
 						building_descriptor['to_date'],
 				])
-			'''
+
 			# Update the building caches
 			self.list_buildings(force_cache_refresh=True)
 								
@@ -308,7 +319,7 @@ class Buildings():
 		'''
 
 		try:
-			self.log.debug('update_building(): start')
+			self.log.debug('update_building(): updating building: ' + building_descriptor['building_identifier'])
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
@@ -344,3 +355,5 @@ class Buildings():
 			db.close()
 	
 		self.log.info('update_building(): updated building: ' + str(building_descriptor))
+
+model = Buildings()

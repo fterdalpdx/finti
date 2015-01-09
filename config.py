@@ -118,7 +118,8 @@ class Config(object):
 
 
 class DevelopmentConfig(Config):
-	database_host = 'devl.banner.pdx.edu'
+	#database_host = 'devl.banner.pdx.edu'
+	database_host = 'localhost'
 	database_instance = 'DEVL'
 	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
 	

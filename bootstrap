@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BASE=`pwd`
-NGINX_VER="stable-1.6"
+NGINX_VER="nginx-1.7"
 
 # Base system installed binary dependencies
 #
@@ -30,10 +30,9 @@ if [ ! -d $BASE/src ]; then mkdir $BASE/src; fi
 
 if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
         cd $BASE/src
-        hg clone http://hg.nginx.org/nginx
-        cd nginx; hg co -r "$NGINX_VER"
-        cd nginx
-        ./auto/configure --prefix=$BASE/nginx
+        git clone https://github.com/nginx/nginx.git
+        cd nginx; git checkout "$NGINX_VER"
+        ./configure --prefix=$BASE/nginx --without-http_rewrite_module
         make
         make install
         cd $BASE

@@ -127,8 +127,10 @@ class DevelopmentConfig(Config):
 		self.database_dsn = (self.database_host, self.database_port, self.database_instance)
 		
 class TestingConfig(Config):
-	database_host = 'devl.banner.pdx.edu'
-	database_instance = 'TEST'
+	#database_host = 'devl.banner.pdx.edu'
+	database_host = 'localhost'
+	#database_instance = 'TEST'
+	database_instance = 'DEVL'
 	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
 	
 	def __init__(self):
@@ -136,8 +138,10 @@ class TestingConfig(Config):
 		self.database_dsn = (self.database_host, self.database_port, self.database_instance)
 
 class ProductionConfig(Config):
-	database_host = 'oprd.banner.pdx.edu'
-	database_instance = 'OPRD'
+	#database_host = 'oprd.banner.pdx.edu'
+	database_host = 'localhost'
+	#database_instance = 'OPRD'
+	database_instance = 'DEVL'
 	ldap_url = 'ldaps://ldap-bulk.oit.pdx.edu:636/'
 	
 	def __init__(self):

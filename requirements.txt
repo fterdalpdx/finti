@@ -13,4 +13,5 @@ uWSGI==2.0.8
 wsgiref==0.1.2
 cx-Oracle>=5.1.2
 ipython=2.3.1
+Beaver>=33.0
 -e .

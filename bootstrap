@@ -92,11 +92,11 @@ if [ -z "$1" ]; then
 	echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
 	echo "Defaulting to release level: 'development' unless rerun with argument specifying otherwise."
 else
-	if [ "$1" = "test" -o "$1" = "develop" -o "$1" = "production" ]; then
+	if [ "$1" = "testing" -o "$1" = "development" -o "$1" = "production" ]; then
 		RELEASE_LEVEL=$1
 	else
 		echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
-		RELEASE_LEVEL='develop'
+		RELEASE_LEVEL='development'
 	fi
 fi
 echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate

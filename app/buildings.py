@@ -6,15 +6,15 @@ Created on Sep 23, 2014
 import logging.config
 from config import config
 #from model import add_building, remove_building, list_buildings, update_building
-from optparse import OptionParser
-import daemon
+#from optparse import OptionParser
+#import daemon
 from flask import Flask, jsonify, abort, make_response, request
 import json
-import traceback
-import sys
-from boto.ec2.instancestatus import Status
+#import traceback
+#import sys
+#from boto.ec2.instancestatus import Status
 import re
-import cx_Oracle
+#import cx_Oracle
 from app.oracle_model import model
 
 class Buildings():

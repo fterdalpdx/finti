@@ -200,21 +200,26 @@ class BuildingsTest(unittest.TestCase):
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# Test positive case of update to an existing building
+
 		HEMB = {
-			"long_name": "High Energy Magic Building",
-			"geolocate_lat": 45.508593,
-			"geolocate_long": -122.682749, 
-			"rlis_lat": 45.508593,
-			"rlis_long": -122.682749, 
-			"centroid_lat": 45.508593,
-			"centroid_long": -122.682749, 
-			"short_name": "Magic Bldg",
-			"building_code": "HEMB",
-			"building_identifier": "B888888",
-			"state_code": "OR",
-			"city": "Ankh-Morpork",
-			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "97888" }		
+		   "geolocate_long" : -122.682755,
+		   "zipcode" : "97225",
+		   "building_code" : "XEH",
+		   "to_date" : "2016-12-01",
+		   "from_date" : "1888-12-02",
+		   "rlis_lat" : 45.508556,
+		   "rlis_long" : -122.682755,
+		   "city" : "Ahnk-Morpork",
+		   "centroid_lat" : 45.508556,
+		   "geolocate_lat" : 45.508556,
+		   "street_address" : "8888 Broadway",
+		   "long_name" : "High Energy Magic Building (TEST)",
+		   "centroid_long" : -122.682755,
+		   "state_code" : "OR",
+		   "short_name" : "Magic Building",
+		   "building_identifier" : "TEST88"
+		}
+
 		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)

@@ -213,7 +213,7 @@ class BuildingsTest(unittest.TestCase):
 		   "centroid_lat" : 45.508556,
 		   "geolocate_lat" : 45.508556,
 		   "street_address" : "8888 Broadway",
-		   "long_name" : "High Energy Magic Building (TEST)",
+		   "long_name" : "High Energy Magic Building TEST",
 		   "centroid_long" : -122.682755,
 		   "state_code" : "OR",
 		   "short_name" : "Magic Building",

@@ -5,6 +5,7 @@
 .classpath
 db/
 eclipse-launch-profiles/
+*.key
 *.egg
 *.egg-info
 /etc/uwsgi.ini

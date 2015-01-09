@@ -11,5 +11,6 @@ redis==2.10.3
 SQLAlchemy==0.9.7
 uWSGI==2.0.8
 wsgiref==0.1.2
-cx-Oracle==5.1.2
+cx-Oracle>=5.1.2
+ipython=2.3.1
 -e .

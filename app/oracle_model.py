@@ -318,6 +318,8 @@ class Buildings():
 			@return Dictionary containing building descriptor data
 		'''
 
+		is_success = False
+		
 		try:
 			self.log.debug('update_building(): updating building: ' + building_descriptor['building_identifier'])
 					
@@ -348,12 +350,14 @@ class Buildings():
 
 			# Update the building caches
 			self.list_buildings(force_cache_refresh=True)
-								
+			is_success = True
 		except Exception as ex:
 			self.log.error('update_building(): error: ' + str(ex))
 		finally:
 			db.close()
 	
 		self.log.info('update_building(): updated building: ' + str(building_descriptor))
-
+		return(is_success)
+	
+	
 model = Buildings()

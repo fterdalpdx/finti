@@ -185,7 +185,7 @@ class Buildings():
 				building_json = building_raw[0]
 				building = json.loads(building_json)
 				history.append(self.conv_building(building))
-					
+			
 		except Exception as ex:
 			self.log.error('get_building_history(): error: ' + str(ex))
 	

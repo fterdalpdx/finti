@@ -43,6 +43,22 @@ class Buildings():
 			status['message'] = 'Request failed'
 		return status
 			
+	def get_building_history(self, building_identifier):
+		'''
+			Get the history of the specified building. 
+		'''
+		status = {'result': 'error', 'message': ''}
+
+		history = model.get_building_history(building_identifier)
+		if len(history) > 0:
+			history_json = json.dumps(history)
+			status = {'result': 'success', 'message': history_json}
+			self.log.debug('get_building_history(): successfully looked-up building history for: ' + building_identifier)
+		else:
+			self.log.error('get_building_history(): error: no history exists for building: ' + building_identifier)
+			status['message'] = 'Request failed'
+		return status
+			
 	# FIXME: Should use get parameters for input instead of requiring a JSON body
 	def get_building(self, building_identifier):
 		'''
@@ -223,10 +239,23 @@ def get_buildings():
 		else:
 			abort(400, status['message'])
 
+@app.route(config.buildings_uri_path + '/<building_identifier>/history', methods = ['GET'])
+def get_building_history(building_identifier):
+	global buildings, request
+
+	buildings.log.info('get_building_history(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', with building_identifier: ' + building_identifier)
+
+	status = buildings.get_building_history(building_identifier)
+	if status['result'] <> 'success':
+		abort(404, status['message'])
+	else:
+		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
+
 @app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
 def get_building(building_identifier):
 	global buildings
 	
+	buildings.log.info('get_building(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 	status = buildings.get_building(building_identifier)
 	if status['result'] == 'success':
 		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))

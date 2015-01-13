@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
 	def test_get_building_history(self):
 
 		history = model.get_building_history('TEST88')
-		#print('HEX history: ' + repr(history))
+		print('HEX history: ' + repr(history))
 		self.assertTrue(len(history) >= 2)
 	
 	#@unittest.skip('')

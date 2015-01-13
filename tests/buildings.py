@@ -22,7 +22,7 @@ class BuildingsTest(unittest.TestCase):
 		#os.unlink(buildings.app.config['DATABASE'])
 		pass
 
-	#@unittest.skip('schpork')
+	#@unittest.skip('weatherwax')
 	def test_get_buildings(self):
 		buildings_json = self.app.get('/erp/gen/1.0/buildings').data
 		buildings = json.loads(buildings_json)
@@ -32,6 +32,13 @@ class BuildingsTest(unittest.TestCase):
 		self.assertTrue('short_name' in buildings[17])
 		self.assertTrue('building_identifier' in buildings[11])
 
+	#@unittest.skip('back-end not ready yet')
+	def test_get_building_history(self):
+		building_history_json = self.app.get('/erp/gen/1.0/buildings/TEST88/history').data
+		history = json.loads(building_history_json)
+		self.assertTrue(len(history) > 1)
+		
+	#@unittest.skip('weatherwax')
 	def test_get_building(self):
 
 		# Test the positive case of finding an expected building via URI path
@@ -55,7 +62,7 @@ class BuildingsTest(unittest.TestCase):
 		EB_rv = self.app.get('/erp/gen/1.0/buildings', query_string=dict(building_identifier='0000038'))
 		self.assertTrue(EB_rv.status_code == 404)
 
-	@unittest.skip('schpork')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_add_building(self):
 		# Test of complete and correctly formated building data add
@@ -128,7 +135,7 @@ class BuildingsTest(unittest.TestCase):
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 
-	@unittest.skip('schpork')
+	@unittest.skip('weatherwax')
 	def test_building_is_valid(self):
 		HEMB = {
 			"long_name": "High Energy Magic Building",
@@ -196,7 +203,7 @@ class BuildingsTest(unittest.TestCase):
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		
-	#@unittest.skip('schpork')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# Test positive case of update to an existing building
@@ -236,7 +243,7 @@ class BuildingsTest(unittest.TestCase):
 		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 404)
 
-	@unittest.skip('schpork')
+	@unittest.skip('weatherwax')http://ieee.pdx.edu/store.html
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_delete_building(self):
 		# Test the deletion of an existing building

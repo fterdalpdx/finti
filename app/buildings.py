@@ -3,19 +3,14 @@ Created on Sep 23, 2014
 
 @author: dennis
 '''
+
 import logging.config
 from config import config
-#from model import add_building, remove_building, list_buildings, update_building
-#from optparse import OptionParser
-#import daemon
-from flask import Flask, jsonify, abort, make_response, request
+from flask import Flask, jsonify, abort, make_response, request, Response
 import json
-#import traceback
-#import sys
-#from boto.ec2.instancestatus import Status
 import re
-#import cx_Oracle
 from app.oracle_model import model
+import auth
 
 class Buildings():
 	'''
@@ -192,8 +187,6 @@ class Buildings():
 			status = {'result': 'error', 'message': 'failed to delete a building: ' + building_identifier}
 		return status
 
-app = Flask(__name__)
-
 '''
 if __name__ == '__main__':	
 	parser = OptionParser()
@@ -213,11 +206,33 @@ app = Flask(__name__)
 def init_db():
 	#model.init_db()
 	pass
+
+@app.route(config.token_uri_path + '/<log_index>', methods = ['GET'])
+#@auth.require_auth(scope='token_manage')
+def token_update(log_index):
+	"""
+		Observe token updates. Wait for call from the User Token Management Service.
+		The most recent change log index is pass in. This service then fetches and applies changes starting
+		from the last locally saved log index position.
+	"""
+	global request, buildings
+	
+	if request.args and 'log_index' in request.args:
+		buildings.log.info('token_update(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
+		log_index = request.args['log_index']
+		buildings.log.error('token_update(): log_index: ' + str(log_index))
+	else:
+		buildings.log.error('token_update(): missing log_index')
+	
+	
+	
+	
 '''
 	The following functions handle routed web requests for Buildings
 '''	
 	
 @app.route(config.buildings_uri_path, methods = ['GET'])
+@auth.requires_auth(scope='general')
 def get_buildings():
 	global buildings, request
 
@@ -240,6 +255,7 @@ def get_buildings():
 			abort(400, status['message'])
 
 @app.route(config.buildings_uri_path + '/<building_identifier>/history', methods = ['GET'])
+@auth.requires_auth(scope='general')
 def get_building_history(building_identifier):
 	global buildings, request
 
@@ -252,6 +268,7 @@ def get_building_history(building_identifier):
 		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
 
 @app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
+@auth.requires_auth(scope='general')
 def get_building(building_identifier):
 	global buildings
 	
@@ -265,6 +282,7 @@ def get_building(building_identifier):
 	
 
 @app.route(config.buildings_uri_path, methods = ['POST'])
+@auth.requires_auth(scope='manage_buildings')
 def add_building():
 	global buildings, request
 	if request.json:
@@ -288,6 +306,7 @@ def add_building():
 		abort(404, 'Building descriptor not valid.')
 		
 @app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['DELETE'])
+@auth.requires_auth(scope='manage_buildings')
 def delete_building(building_identifier):
 	global buildings
 
@@ -301,6 +320,7 @@ def delete_building(building_identifier):
 		abort(404, status['message'])
 		
 @app.route(config.buildings_uri_path, methods = ['PUT'])
+@auth.requires_auth(scope='manage_buildings')
 def update_building():
 	global buildings, request
 	if request.json:

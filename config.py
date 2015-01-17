@@ -59,6 +59,13 @@ class Config(object):
 		self.buildings_cache_redis_db = 10
 		self.buildings_cache_ttl = 3600		# Cache time-to-live in seconds
 
+		# T O K E N S
+		
+		self.token_api_version = '1.0'
+		self.token_uri_path = '/erp/gen/%s/token' % self.token_api_version
+		self.token_cache_redis_db = 7
+		
+		
 		# L D A P
 		
 		self.ldap_dn = 'uid=finti,ou=service,dc=pdx,dc=edu'

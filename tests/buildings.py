@@ -8,11 +8,12 @@ import unittest
 from app import buildings
 import json
 from config import config
+from requests.auth import HTTPBasicAuth
 
 class BuildingsTest(unittest.TestCase):
 	def setUp(self):
 		#self.db_fd, buildings.app.config['DATABASE'] = tempfile.mkstemp()
-		#buildings.app.config['TESTING'] = True
+		buildings.app.config['TESTING'] = True
 		self.app = buildings.app.test_client()
 		#buildings.init_db()
 
@@ -243,7 +244,7 @@ class BuildingsTest(unittest.TestCase):
 		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 404)
 
-	@unittest.skip('weatherwax')http://ieee.pdx.edu/store.html
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_delete_building(self):
 		# Test the deletion of an existing building

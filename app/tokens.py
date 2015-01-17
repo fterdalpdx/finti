@@ -6,11 +6,11 @@ Created on Sep 23, 2014
 
 import logging.config
 from config import config
-from flask import Flask, jsonify, abort, make_response
+from flask import Flask, jsonify, abort, make_response, request
 #import auth
 from redis import StrictRedis
 
-class Token():
+class Tokens():
 	'''
 		Provide the token management service
 	'''
@@ -26,8 +26,8 @@ class Token():
 		'''
 		
 		status = {'result': 'error', 'message': ''}
-		token_cache = StrictRedis(db=config.token_cache_redis_db)
-		last_log_index = token_cache.get('token_index')
+		tokens_cache = StrictRedis(db=config.tokens_cache_redis_db)
+		last_log_index = tokens_cache.get('token_index')
 		self.log.info("event_accept(): last log_index: " + str(last_log_index))
 
 		self.log.info("event_accept(): log_index: " + str(log_index))
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 	#	with context:
 '''
 
-token = Token()
+tokens = Tokens()
 
 app = Flask(__name__)
 
@@ -65,7 +65,7 @@ def init_db():
 	pass
 
 #@auth.require_auth(scope='token_manage')
-@app.route(config.token_uri_path + '/<log_index>', methods = ['GET'])
+@app.route(config.tokens_uri_path + '/<log_index>', methods = ['GET'])
 def event_accept(log_index):
 	"""
 		Observe token updates. Wait for call from the User Token Management Service.
@@ -74,11 +74,13 @@ def event_accept(log_index):
 	"""
 	global request, token
 
-	token.log.info('token_update(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-	status = token.event_accept(log_index)
+	tokens.log.info('token_update(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
+	status = tokens.event_accept(log_index)
 
 	if status['result'] <> 'success':
 		abort(404, status['message'])
+	else:
+		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
 		
 @app.errorhandler(400)
 def custom_400(error):
@@ -89,12 +91,5 @@ def custom_400(error):
 def custom_404(error):
 	token.log.info('custom_404(): error: ' + str(error))
 	return make_response(jsonify( {'message': error.description}), 404)
-
-
-
-
-#app.run(host='0.0.0.0', debug = True)
-
-
 
 		

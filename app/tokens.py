@@ -20,19 +20,20 @@ class Tokens():
 		self.log = logging.getLogger('token')
 		self.log.debug('__init__(): starting')
 	
-	def event_accept(self, log_index):
+	def notify(self, log_index):
 		'''
-			Receive notification of a user token change event.
+			Receive notification of a user token change event. The notify method corresponds
+			to the Observer design pattern 'notify' which is called by the 'subject'
 		'''
 		
 		status = {'result': 'error', 'message': ''}
 		tokens_cache = StrictRedis(db=config.tokens_cache_redis_db)
 		last_log_index = tokens_cache.get('token_index')
-		self.log.info("event_accept(): last log_index: " + str(last_log_index))
+		self.log.info("notify(): last log_index: " + str(last_log_index))
 
-		self.log.info("event_accept(): log_index: " + str(log_index))
+		self.log.info("notify(): log_index: " + str(log_index))
 		if log_index == '0':
-			self.log.info('event_accept(): unit-test case data detected')
+			self.log.info('notify(): unit-test case data detected')
 			status = {'result': 'success', 'message': "unit-test triggered"}
 		else:
 			pass
@@ -66,7 +67,7 @@ def init_db():
 
 #@auth.require_auth(scope='token_manage')
 @app.route(config.tokens_uri_path + '/<log_index>', methods = ['GET'])
-def event_accept(log_index):
+def notify(log_index):
 	"""
 		Observe token updates. Wait for call from the User Token Management Service.
 		The most recent change log index is pass in. This service then fetches and applies changes starting
@@ -74,8 +75,8 @@ def event_accept(log_index):
 	"""
 	global request, token
 
-	tokens.log.info('token_update(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-	status = tokens.event_accept(log_index)
+	tokens.log.info('notify(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
+	status = tokens.notify(log_index)
 
 	if status['result'] <> 'success':
 		abort(404, status['message'])

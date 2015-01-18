@@ -6,6 +6,9 @@
 . ../venv/bin/activate
 
 SERVICE=`basename $0`.py
+RED='\033[41m\033[30m'
+GREEN='\033[42m\033[30m'
+ATT_RESET='\033[0m'
 
 TRUE=0
 FALSE=1
@@ -21,7 +24,7 @@ status_nginx(){
 
 status_uwsgi(){
 	RETVAL=$FALSE
-    if pgrep -f "uwsgi --ini uwsgi.ini" > /dev/null; then
+    if pgrep -f "uwsgi --ini uwsgi/emperor.ini" > /dev/null; then
 		RETVAL=$TRUE
 	fi
     return $RETVAL
@@ -31,23 +34,23 @@ status_all(){
 	RETVAL=$FALSE
 	
 	if status_nginx; then
-		echo "nginx is running"
+		echo "nginx:		${GREEN}running${ATT_RESET}"
 		RETVAL=$TRUE
 	else		
-		echo "nginx is not running"
+		echo "nginx:		${RED}not running${ATT_RESET}"
 	fi
 
 	if status_uwsgi; then
-		echo "uwsgi is running"
+		echo "uwsgi emperor:	${GREEN}running${ATT_RESET}"
 	else
-		echo "uwsgi is not running"
+		echo "uwsgi emperor:	${RED}not running${ATT_RESET}"
 		RETVAL=$FALSE
 	fi
 
 	if [ $RETVAL -eq $FALSE ]; then
-		echo "finti is stopped"
+		echo "finti:		${RED}not running${ATT_RESET}"
 	else
-		echo "finti is running"
+		echo "finti:		${GREEN}running${ATT_RESET}"
 	fi	
 	return $RETVAL
 }
@@ -57,25 +60,25 @@ start() {
 	RETVAL=$FALSE
 
 	if status_nginx; then 
-		echo nginx was already running
+		echo "nginx was already ${GREEN}running${ATT_RESET}"
     else
 		../nginx/sbin/nginx -c ../nginx/conf/nginx.conf
 		if status_nginx; then
-	    	echo "nginx has been started"
+	    	echo "${GREEN}nginx has been started${ATT_RESET}"
 	    	RETVAL=$TRUE
 		else
-			echo "nginx failed to start .. check the logs."
+			echo "${RED}nginx failed to start .. check the logs.${ATT_RESET}"
 		fi
 	fi
 	
 	if status_uwsgi; then 
-		echo uwsgi was already running
+		echo "uwsgi was already ${GREEN}running${ATT_RESET}"
     else
-		uwsgi --ini uwsgi.ini
+		uwsgi --ini uwsgi/emperor.ini
 		if status_uwsgi; then
-	    	echo uwsgi has been started
+	    	echo "uwsgi emperor has been ${GREEN}started${ATT_RESET}"
 		else
-			echo "uwsgi failed to start .. check the logs."
+			echo "${RED}uwsgi emperor failed to start .. check the logs.${ATT_RESET}"
 			RETVAL=$FALSE
 		fi
 	fi
@@ -83,41 +86,42 @@ start() {
 }
 
 stop(){
-	RETVAL=$FALSE
+	STATUS=$FALSE
 
 	if status_nginx; then 
 		../nginx/sbin/nginx -s stop
 		if status_nginx; then
-			echo "nginx failed to stop .. check the logs."
-	    		    	echo nginx has been started
+			echo "${RED}nginx failed to stop .. check the logs.${ATT_RESET}"
 		else
-			echo "nginx has been stopped"
-	    	RETVAL=$TRUE
+			echo "nginx has been ${GREEN}stopped${ATT_RESET}"
+	    	STATUS=$TRUE
 		fi
     else
-		echo nginx was not running
-		RETVAL=$TRUE
+		echo "nginx:		${GREEN}not running${ATT_RESET}"
+		STATUS=$TRUE
 	fi
-	
+
 	if status_uwsgi; then 
-		uwsgi --stop ../var/uwsgi.pid
+		uwsgi --stop ../var/uwsgi_emperor.pid
+		echo "waiting five seconds for the vassals to stop.."
+		sleep 5
 		if status_uwsgi; then
-			echo "uwsgi failed to stop .. check the logs."
-			RETVAL=$FALSE
+			echo "${RED}uwsgi emperor failed to stop .. check the logs.${ATT_RESET}"
+			STATUS=$FALSE
 		else
-			echo "uwsgi has been stopped"
+			echo "uwsgi emperor:	${GREEN}stopped${ATT_RESET}"
 		fi
     else
-		echo 'uwsgi was not running'
+		echo "uwsgi emperor:	${GREEN}not running${ATT_RESET}"
 	fi
 	
-	if [ $RETVAL -eq $TRUE ]; then
-		echo 'finti has been stopped'
+	if [ $STATUS -eq $TRUE ]; then
+		echo "finti:		${GREEN}stopped${ATT_RESET}"
 	else
-		echo 'finti has been stopped'
+		echo "finti has failed to ${RED}stop${ATT_RESET}"
 	fi
 			
-	return $RETVAL
+	return $STATUS
 }	
 
 case "$1" in

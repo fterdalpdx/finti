@@ -62,7 +62,7 @@ class Config(object):
 		# T O K E N S
 		
 		self.tokens_api_version = '1.0'
-		self.tokens_uri_path = '/erp/gen/%s/token' % self.tokens_api_version
+		self.tokens_uri_path = '/erp/gen/%s/tokens' % self.tokens_api_version
 		self.tokens_cache_redis_db = 7
 		
 		

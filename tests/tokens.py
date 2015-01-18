@@ -19,7 +19,7 @@ class TokensTest(unittest.TestCase):
 		pass
 
 	#@unittest.skip('weatherwax')
-	def test_event_accept(self):
+	def test_notify(self):
 		rv = self.app.get('/erp/gen/1.0/token/0')
 		self.assertTrue(rv.status_code == 200)
 

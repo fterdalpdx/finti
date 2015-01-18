@@ -17,7 +17,7 @@ class Tokens():
 
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
-		self.log = logging.getLogger('token')
+		self.log = logging.getLogger('tokens')
 		self.log.debug('__init__(): starting')
 	
 	def notify(self, log_index):

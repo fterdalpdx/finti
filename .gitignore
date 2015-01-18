@@ -3,6 +3,7 @@
 /bones
 /src/nginx
 /etc/nginx/vassals/*.ini
+/etc/uwsgi/emperor.ini
 .classpath
 db/
 eclipse-launch-profiles/

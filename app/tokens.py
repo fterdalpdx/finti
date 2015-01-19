@@ -88,7 +88,7 @@ class Tokens():
 			client = gdata.spreadsheet.service.SpreadsheetsService()
 			client.ClientLogin(config.tokens_google_client_login, config.tokens_google_client_password)
 			query = gdata.spreadsheet.service.CellQuery()
-			query.min_row = str(log_prev_index + 1)
+			query.min_row = str(int(log_prev_index) + 1)
 			query.max_row = str(log_update_index)
 			cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=config.tokens_worksheet_id, query=query).entry
 			self.log.info('fetch_delta(): spreadsheet list of changes')

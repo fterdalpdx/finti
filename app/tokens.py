@@ -91,7 +91,7 @@ class Tokens():
 			self.log.info('fetch_delta(): spreadsheet list of changes')
 			
 			updates = []
-			rows = log_update_index - log_prev_index + 1
+			rows = int(log_update_index) - int(log_prev_index) + 1
 			self.log.info('fetch_delta(): fetching number of rows: ' + str(rows))
 			for row in range(0,rows):
 				(user, token, date, action) = [cell.content.text for cell in cells[row * cols : (row + 1) * cols]]

@@ -18,8 +18,10 @@ def check_auth(login, password, required_scope):
 	hash_raw = hashlib.sha256(login)
 	login_hash = base64.encodestring( hash_raw.digest()).strip()
 	
-	cache = StrictRedis()	# TODO: Should be at application scope instead of request scope
-	return not cache.get(required_scope + login_hash) is None
+	cache = StrictRedis(db=7)	# TODO: Should be at application scope instead of request scope
+	user = cache.get(required_scope + login_hash)	# lookup our person
+	
+	return not (user is None)
 
 def authenticate():
 	"""Sends a 401 response that enables basic auth"""

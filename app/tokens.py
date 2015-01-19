@@ -94,7 +94,7 @@ class Tokens():
 			rows = int(log_update_index) - int(log_prev_index) + 1
 			self.log.info('fetch_delta(): fetching number of rows: ' + str(rows))
 			for row in range(0,rows):
-				(user, token, date, action) = [cell.content.text for cell in cells[row * cols : (row + 1) * cols]]
+				(user, token, date, action) = [str(cell.content.text) for cell in cells[row * cols : (row + 1) * cols]]
 				self.log.info('fetch_delta() updating user: ' + user + ', on date: ' + date + ', with action: ' + action)
 				if not action in ('add', 'delete', 'update'):
 					self.log.critical('fetch_delta() invalid action detected')

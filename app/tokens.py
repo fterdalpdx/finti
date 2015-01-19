@@ -28,8 +28,6 @@ class Tokens():
 		'''
 		
 		status = {'result': 'error', 'message': ''}
-		tokens_cache = StrictRedis(db=config.tokens_cache_redis_db)
-		last_log_index = tokens_cache.get('token_index')
 		self.log.info("notify(): last log_index: " + str(last_log_index))
 
 		self.log.info("notify(): log_index: " + str(log_index))
@@ -72,32 +70,42 @@ class Tokens():
 			else:
 				self.log.critical('post_updates(): unexpected change type: ' + action)
 
-		cache.set('token_index', log_index)
+		if len(updates) > 0:	# don't set if there is nothing to do and also don't set if there are errors
+			cache.set('token_index', log_index)
 		
 	def fetch_updates(self, log_update_index):
-		log_prev_index = 1
+		tokens_cache = StrictRedis(db=config.tokens_cache_redis_db)
+		log_prev_index = tokens_cache.get('token_index')
 		cols = 4
-		
-		self.log.info('fetch_delta(): connecting to Google spreadsheet')
-		client = gdata.spreadsheet.service.SpreadsheetsService()
-		client.ClientLogin(config.tokens_google_client_login, config.tokens_google_client_password)
-		query = gdata.spreadsheet.service.CellQuery()
-		query.min_row = str(log_prev_index)
-		query.max_row = str(log_update_index)
-		cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=config.tokens_worksheet_id, query=query).entry
-		self.log.info('fetch_delta(): spreadsheet list of changes')
-		
 		updates = []
-		rows = log_update_index - log_prev_index + 1
-		for row in range(0,rows):
-			(user, token, date, action) = [cell.content.text for cell in cells[row * cols : (row + 1) * cols]]
-			self.log.info('fetch_delta() updating user: ' + user + ', on date: ' + date + ', with action: ' + action)
-			if not action in ('add', 'delete', 'update'):
-				self.log.critical('fetch_delta() invalid action detected')
-			else:
-				updates.append((user, token, date, action))
 
-		self.log.info('fetch_delta(): returning update count: ' + str(len(updates)))
+		try:
+			self.log.info('fetch_delta(): connecting to Google spreadsheet')
+			client = gdata.spreadsheet.service.SpreadsheetsService()
+			client.ClientLogin(config.tokens_google_client_login, config.tokens_google_client_password)
+			query = gdata.spreadsheet.service.CellQuery()
+			query.min_row = str(log_prev_index)
+			query.max_row = str(log_update_index)
+			cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=config.tokens_worksheet_id, query=query).entry
+			self.log.info('fetch_delta(): spreadsheet list of changes')
+			
+			updates = []
+			rows = log_update_index - log_prev_index + 1
+			self.log.info('fetch_delta(): fetching number of rows: ' + str(rows))
+			for row in range(0,rows):
+				(user, token, date, action) = [cell.content.text for cell in cells[row * cols : (row + 1) * cols]]
+				self.log.info('fetch_delta() updating user: ' + user + ', on date: ' + date + ', with action: ' + action)
+				if not action in ('add', 'delete', 'update'):
+					self.log.critical('fetch_delta() invalid action detected')
+					updates = []
+					break
+				else:
+					updates.append((user, token, date, action))
+	
+			self.log.info('fetch_delta(): returning update count: ' + str(len(updates)))
+		except Exception as ex:
+			self.log.error('fetch_delta(): exception: ' + str(ex))
+			
 		return updates
 			
 		

@@ -55,11 +55,11 @@ class Tokens():
 				cache.set(token, user)	# user-by-token -- really just existence of a token
 				cache.set(user, token)	# token-by-user: allow lookup of previous token on token changes
 				self.log.info('post_updates(): added token for user: ' + user)
-			if action == 'delete':
+			elif action == 'delete':
 				cache.delete(token)	# disables the ability to authenticate
 				cache.delete(user)	# removes history of token
 				self.log.info('post_updates(): deleted token for user: ' + user)
-			if action == 'update':
+			elif action == 'update':
 				prev_token = cache.get(user)
 				cache.delete(prev_token)	# disables the ability to authenticate with previous token
 				cache.set(token, user)		# set the new token for the user

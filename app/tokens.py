@@ -9,6 +9,7 @@ from config import config
 from flask import Flask, jsonify, abort, make_response, request
 #import auth
 from redis import StrictRedis
+import gdata.spreadsheet.service
 
 class Tokens():
 	'''
@@ -36,14 +37,72 @@ class Tokens():
 			self.log.info('notify(): unit-test case data detected')
 			status = {'result': 'success', 'message': "unit-test triggered"}
 		else:
-			pass
+			# This activity should run asynchronously 
+			updates = self.fetch_updates(log_index)
+			self.post_updates(updates, log_index)
 			# Update the local tokens from the source
 			
 		status = {'result': 'success', 'message': "index up-to-date"}
 		
 		return status
 		
+	def post_updates(self, updates, log_index):
+		'''
+			Update the cache with CRUD changes
+		'''
+		cache = StrictRedis()
 		
+		self.log.info('post_updates(): posting updates to local storage')
+		for update in updates:
+			(user, token, date, action) = update
+			if action == 'add':
+				cache.set(token, user)	# user-by-token -- really just existence of a token
+				cache.set(user, token)	# token-by-user: allow lookup of previous token on token changes
+				self.log.info('post_updates(): added token for user: ' + user)
+			if action == 'delete':
+				cache.delete(token)	# disables the ability to authenticate
+				cache.delete(user)	# removes history of token
+				self.log.info('post_updates(): deleted token for user: ' + user)
+			if action == 'update':
+				prev_token = cache.get(user)
+				cache.delete(prev_token)	# disables the ability to authenticate with previous token
+				cache.set(token, user)		# set the new token for the user
+				cache.set(user, token)		# set the user as possessing the new token
+				self.log.info('post_updates(): updated token for user: ' + user)
+			else:
+				self.log.critical('post_updates(): unexpected change type: ' + action)
+
+		cache.set('token_index', log_index)
+		
+	def fetch_updates(self, log_update_index):
+		log_prev_index = 1
+		cols = 4
+		
+		self.log.info('fetch_delta(): connecting to Google spreadsheet')
+		client = gdata.spreadsheet.service.SpreadsheetsService()
+		client.ClientLogin(config.tokens_google_client_login, config.tokens_google_client_password)
+		query = gdata.spreadsheet.service.CellQuery()
+		query.min_row = str(log_prev_index)
+		query.max_row = str(log_update_index)
+		cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=config.tokens_worksheet_id, query=query).entry
+		self.log.info('fetch_delta(): spreadsheet list of changes')
+		
+		updates = []
+		rows = log_update_index - log_prev_index + 1
+		for row in range(0,rows):
+			(user, token, date, action) = [cell.content.text for cell in cells[row * cols : (row + 1) * cols]]
+			self.log.info('fetch_delta() updating user: ' + user + ', on date: ' + date + ', with action: ' + action)
+			if not action in ('add', 'delete', 'update'):
+				self.log.critical('fetch_delta() invalid action detected')
+			else:
+				updates.append((user, token, date, action))
+
+		self.log.info('fetch_delta(): returning update count: ' + str(len(updates)))
+		return updates
+			
+		
+		
+
 		
 '''
 if __name__ == '__main__':	

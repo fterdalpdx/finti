@@ -88,13 +88,13 @@ class Tokens():
 			client = gdata.spreadsheet.service.SpreadsheetsService()
 			client.ClientLogin(config.tokens_google_client_login, config.tokens_google_client_password)
 			query = gdata.spreadsheet.service.CellQuery()
-			query.min_row = str(log_prev_index)
+			query.min_row = str(log_prev_index + 1)
 			query.max_row = str(log_update_index)
 			cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=config.tokens_worksheet_id, query=query).entry
 			self.log.info('fetch_delta(): spreadsheet list of changes')
 			
 			updates = []
-			rows = int(log_update_index) - int(log_prev_index) + 1
+			rows = int(log_update_index) - int(log_prev_index)
 			self.log.info('fetch_delta(): fetching number of rows: ' + str(rows))
 			for row in range(0,rows):
 				(user, token, date, action) = [str(cell.content.text) for cell in cells[row * cols : (row + 1) * cols]]

@@ -6,14 +6,20 @@ Created on Jan 15, 2015
 from flask import Response, request
 from functools import wraps
 from redis import StrictRedis
+import hashlib
+import base64
 
 def check_auth(login, password, required_scope):
 	"""This function is called to check if a login /
 	password combination is valid.
 	"""
 	
-	cache = StrictRedis()
-	return not cache.get(required_scope + "_" + login) is None
+	# Hash the login, the password is ignored
+	hash_raw = hashlib.sha256(login)
+	login_hash = base64.encodestring( hash_raw.digest()).strip()
+	
+	cache = StrictRedis()	# TODO: Should be at application scope instead of request scope
+	return not cache.get(required_scope + login_hash) is None
 
 def authenticate():
 	"""Sends a 401 response that enables basic auth"""

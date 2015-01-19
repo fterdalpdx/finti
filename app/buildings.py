@@ -233,7 +233,7 @@ def token_update(log_index):
 '''	
 	
 @app.route(config.buildings_uri_path, methods = ['GET'])
-@auth.requires_auth(scope='general')
+@auth.requires_auth(scope='')
 def get_buildings():
 	global buildings, request
 
@@ -256,7 +256,7 @@ def get_buildings():
 			abort(400, status['message'])
 
 @app.route(config.buildings_uri_path + '/<building_identifier>/history', methods = ['GET'])
-@auth.requires_auth(scope='general')
+@auth.requires_auth(scope='')
 def get_building_history(building_identifier):
 	global buildings, request
 
@@ -269,7 +269,7 @@ def get_building_history(building_identifier):
 		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
 
 @app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
-@auth.requires_auth(scope='general')
+@auth.requires_auth(scope='')
 def get_building(building_identifier):
 	global buildings
 	

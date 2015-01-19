@@ -28,7 +28,6 @@ class Tokens():
 		'''
 		
 		status = {'result': 'error', 'message': ''}
-		self.log.info("notify(): last log_index: " + str(last_log_index))
 
 		self.log.info("notify(): log_index: " + str(log_index))
 		if log_index == '0':
@@ -39,8 +38,7 @@ class Tokens():
 			updates = self.fetch_updates(log_index)
 			self.post_updates(updates, log_index)
 			# Update the local tokens from the source
-			
-		status = {'result': 'success', 'message': "index up-to-date"}
+			status = {'result': 'success', 'message': "index up-to-date"}
 		
 		return status
 		
@@ -71,11 +69,14 @@ class Tokens():
 				self.log.critical('post_updates(): unexpected change type: ' + action)
 
 		if len(updates) > 0:	# don't set if there is nothing to do and also don't set if there are errors
-			cache.set('token_index', log_index)
+			cache.set('log_index', log_index)
 		
 	def fetch_updates(self, log_update_index):
 		tokens_cache = StrictRedis(db=config.tokens_cache_redis_db)
-		log_prev_index = tokens_cache.get('token_index')
+		log_prev_index = tokens_cache.get('log_index')
+		if log_prev_index is None:
+			log_prev_index = 1
+			
 		cols = 4
 		updates = []
 

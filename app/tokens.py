@@ -46,7 +46,7 @@ class Tokens():
 		'''
 			Update the cache with CRUD changes
 		'''
-		cache = StrictRedis()
+		cache = StrictRedis(db=config.tokens_cache_redis_db)
 		
 		self.log.info('post_updates(): posting updates to local storage')
 		for update in updates:
@@ -72,10 +72,13 @@ class Tokens():
 			cache.set('log_index', log_index)
 		
 	def fetch_updates(self, log_update_index):
-		tokens_cache = StrictRedis(db=config.tokens_cache_redis_db)
-		log_prev_index = tokens_cache.get('log_index')
+		cache = StrictRedis(db=config.tokens_cache_redis_db)
+		log_prev_index = cache.get('log_index')
+		
 		if log_prev_index is None:
 			log_prev_index = 1
+
+		self.log.info('fetch_delta(): log_prev_index: ' + str(log_prev_index))
 			
 		cols = 4
 		updates = []

@@ -139,7 +139,7 @@ class DevelopmentConfig(Config):
 		self.database_dsn = (self.database_host, self.database_port, self.database_instance)
 		
 class TestingConfig(Config):
-	database_host = 'devl.banner.pdx.edu'
+	database_host = 'test.banner.pdx.edu'
 	database_instance = 'TEST'
 	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
 	

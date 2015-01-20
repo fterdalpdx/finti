@@ -8,6 +8,7 @@ from functools import wraps
 from redis import StrictRedis
 import hashlib
 import base64
+from config import config
 
 def check_auth(login, password, required_scope):
 	"""This function is called to check if a login /
@@ -18,7 +19,7 @@ def check_auth(login, password, required_scope):
 	hash_raw = hashlib.sha256(login)
 	login_hash = base64.encodestring( hash_raw.digest()).strip()
 	
-	cache = StrictRedis(db=7)	# TODO: Should be at application scope instead of request scope
+	cache = StrictRedis(db=config.tokens_cache_redis_db)	# TODO: Should be at application scope instead of request scope
 	user = cache.get(required_scope + login_hash)	# lookup our person
 	
 	return not (user is None)

@@ -3,6 +3,7 @@ Flask==0.10.1
 Flask-Auth==0.85
 Flask-SQLAlchemy>=0.9.8
 google-api-python-client==1.2
+gdata==2.0.18
 lockfile==0.9.1
 logstash-formatter==0.5.8
 pika==0.9.13

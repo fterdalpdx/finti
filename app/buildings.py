@@ -207,6 +207,7 @@ def init_db():
 	#model.init_db()
 	pass
 
+'''
 @app.route(config.token_uri_path + '/<log_index>', methods = ['GET'])
 #@auth.require_auth(scope='token_manage')
 def token_update(log_index):
@@ -225,7 +226,7 @@ def token_update(log_index):
 		buildings.log.error('token_update(): missing log_index')
 	
 	
-	
+'''	
 	
 '''
 	The following functions handle routed web requests for Buildings

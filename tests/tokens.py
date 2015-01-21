@@ -5,13 +5,13 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-from app import token
+from app import tokens
 from config import config
 
-class TokenTest(unittest.TestCase):
+class TokensTest(unittest.TestCase):
 	def setUp(self):
-		token.app.config['TESTING'] = True
-		self.app = token.app.test_client()
+		tokens.app.config['TESTING'] = True
+		self.app = tokens.app.test_client()
 
 	def tearDown(self):
 		#os.close(self.db_fd)
@@ -19,7 +19,7 @@ class TokenTest(unittest.TestCase):
 		pass
 
 	#@unittest.skip('weatherwax')
-	def test_event_accept(self):
+	def test_notify(self):
 		rv = self.app.get('/erp/gen/1.0/token/0')
 		self.assertTrue(rv.status_code == 200)
 

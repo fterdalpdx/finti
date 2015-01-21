@@ -39,9 +39,9 @@ class Test(unittest.TestCase):
 	#@unittest.expectedFailure
 	def test_get_building_history(self):
 
-		history = model.get_building_history('TEST88')
-		print('HEX history: ' + repr(history))
-		self.assertTrue(len(history) >= 2)
+		history = model.get_building_history('B0001')
+		print('LH history: ' + repr(history))
+		self.assertTrue(len(history) >= 1)
 	
 	#@unittest.skip('')
 	#@unittest.expectedFailure
@@ -59,17 +59,17 @@ class Test(unittest.TestCase):
 	#@unittest.skip('not ready to update now')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
-		building = model.get_building('TEST88')
+		building = model.get_building('B0001')
 		#self.assertTrue(building['building_code'] == 'HEX', 'HEM building better have a code of HEX')
 
-		building['building_code'] = 'XEH'
+		building['building_code'] = 'HL'
 		model.update_building(building)
-		building = model.get_building('TEST88')
-		self.assertTrue(building['building_code'] == 'XEH', 'HEM building better have a code of XEH')
-		building['building_code'] = 'HEX'
+		building = model.get_building('B0001')
+		self.assertTrue(building['building_code'] == 'HL', 'LH building better have a changed code of HL')
+		building['building_code'] = 'LH'
 		model.update_building(building)
-		building = model.get_building('TEST88')
-		self.assertTrue(building['building_code'] == 'HEX', 'HEM building better have a code of HEX again')
+		building = model.get_building('B0001')
+		self.assertTrue(building['building_code'] == 'LH', 'LH building better have a code of LH again')
 
 	@unittest.skip('not ready to update now')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')

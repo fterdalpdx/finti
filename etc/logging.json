@@ -16,10 +16,10 @@
             ], 
             "level": "DEBUG"
         },
-        "token": {
+        "tokens": {
             "handlers": [
-                "token",
-                "token_logstash",
+                "tokens",
+                "tokens_logstash",
                 "console"
             ], 
             "level": "DEBUG"
@@ -62,19 +62,19 @@
             "formatter": "json", 
             "class": "logging.handlers.RotatingFileHandler"
         }, 
-        "token": {
+        "tokens": {
             "backupCount": 5, 
             "level": "DEBUG", 
-            "filename": "BASE/token.log", 
+            "filename": "BASE/tokens.log", 
             "maxBytes": 10485760, 
             "mode": "a", 
             "formatter": "default", 
             "class": "logging.handlers.RotatingFileHandler"
         }, 
-	    "token_logstash": {
+	    "tokens_logstash": {
             "backupCount": 2, 
             "level": "DEBUG", 
-            "filename": "BASE/token.json", 
+            "filename": "BASE/tokens.json", 
             "maxBytes": 10485760, 
             "mode": "a", 
             "formatter": "json", 

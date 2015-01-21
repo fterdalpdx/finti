@@ -1,2 +1,2 @@
 from buildings import Buildings
-from token import Token
+from app.tokens import Tokens

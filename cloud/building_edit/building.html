@@ -1,0 +1,228 @@
+<!-- jQuery -->
+<link type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" rel="Stylesheet" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.9.1/jquery-ui.min.js"></script>
+
+<!-- Bootstrap -->
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<!-- end bootstrap -->
+
+<!-- PSU Styles -->
+<?!= include('Stylesheet'); ?>
+
+<!-- Page and building data -->
+<?
+    var base_url = getScriptUrl();
+    var nocreate = 0;
+    if(data == "new"){
+        var bldg = makeEmptyBuilding();
+        var mthd = "post";
+    }
+    else{
+        var json_string = getBuildingHistory(data);
+        var mthd = "put";
+    }
+?>
+
+<div class="container" id="bldg-content" style="max-width:700px;">
+    <!-- building information form  -->
+    <form name="f1">
+    
+    <div style="display:inline;float:left;">
+        <h1 class="page-header"> Building Detail</h1>    
+    </div>
+
+    <!-- Effective dates -->
+    <div style="display:inline;float:right;">
+        <div style="display:inline;float:right;margin-left:15px;">
+            <label>
+                <input type="text" name="todate" id="to_date" maxlength="12" size="12" class="no-edit" /><br />
+                End Date
+            </label>
+        </div>
+        <div style="display:inline;float:right;margin-left:15px;">
+            <label>
+                <input type="text" name="fromdate" id="from_date" maxlength="12" size="12" class="no-edit" /><br />
+                Effective Date
+            </label>
+        </div><br style="clear:both;" />
+
+        <!-- History Navigation -->
+        <? if(data != "new"){ ?>
+        <div style="display:inline;float:right;margin-left:15px;" id="past-nav" class="post-disable">
+            <em style="color:Blue;cursor:pointer;font-size:9pt;">Older Revision &gt;&gt;</em>
+            <label class="sr-only">Go to older revision</label>
+        </div>
+        <div style="display:inline;float:left;" id="future-nav" class="post-disable">
+            <em style="color:Blue;cursor:pointer;font-size:9pt;">&lt;&lt; Newer Revision</em>
+            <label class="sr-only">Go to newer revision</label>
+        </div>
+        <? } ?>
+    </div>
+    <br style="clear:both;" />
+    
+    
+        
+    <!-- id, code, and names  -->
+    <div class="column" style="width:315px;">
+        <div class="column" style="margin-right:15px;">
+            <label>
+                <input type="text" name="id" id="building_identifier" maxlength="6" size="10" class="no-edit" /><br />
+                Building ID
+            </label>
+        </div>
+        <div class="column">
+            <label>
+                <input type="text" name="code" id="building_code" maxlength="6" size="10" /><br />
+                Building Code
+            </label>
+        </div>
+        <br style="clear:both;" />
+        <div>
+            <label>
+                <input type="text" name="shortname" id="short_name" maxlength="30" size="30" /><br />
+                Short Name
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="text" name="longname" id="long_name" maxlength="60" size="60" style="width:100%" /><br />
+                Long Name
+            </label>
+        </div>
+    </div>
+    
+    <!-- Address -->
+    <div class="column" style="max-width:320px;">
+        <div class="column">
+            <label>
+                <input type="text" name="street" id="street_address" maxlength="75" size="35" style="width:100%;" /><br />
+                Street
+            </label>
+        </div><br style="clear:both;" />
+        <div class="column">
+            <label>
+                <input type="text" name="city" id="city" maxlength="50" size="20" /><br />
+                City
+            </label>
+        </div>
+        <div class="column">
+            <label>
+                <input type="text" name="state" id="state_code" maxlength="3" size="3" /><br />
+                State
+            </label>
+        </div>
+        <div class="column">
+            <label>
+                <input type="text" name="zip" id="zipcode" maxlength="10" size="10" /><br />
+                Zip
+            </label>
+        </div>
+    </div>
+    <br style="clear:both;" />
+    <br style="clear:both;" />
+    
+    
+    <!-- Lat/Lon  -->
+    <div style="max-width:300px;margin: 0px auto;">
+        <table id="lat-lon">
+        <!-- Heading -->
+        <tr>
+            <td>&nbsp;</td>
+            <th style="text-align:center;"><label>Latitude</label></th>
+            <th style="text-align:center;border-left:1px dotted #6A7F10;"><label>Longitude</label></th>
+        </tr>
+        <!-- Centroid -->
+        <tr style="background-color:inherit;">
+            <td style="text-align:right;"><label>Centroid</label></td>
+            <td><input type="text" name="centlat" id="centroid_lat" maxlength="12" size="12" /><label class="sr-only">Centroid Latitude</label></td>
+            <td style="border-left:1px dotted #6A7F10;"><input type="text" name="centlong" id="centroid_long" maxlength="12" size="12" /><label class="sr-only">Centroid Longitude</label></td>
+        </tr>
+        <!-- Rlis -->
+        <tr style="background-color:inherit;">
+            <td style="text-align:right;"><label>Rlis</label></td>
+            <td><input type="text" name="rlislat" id="rlis_lat" maxlength="12" size="12" /><label class="sr-only">Rlis Latitude</label></td>
+            <td style="border-left:1px dotted #6A7F10;"><input type="text" name="rlislong" id="rlis_long" maxlength="12" size="12" /><label class="sr-only">Rlis Longitude</label></td>
+        </tr>
+        <!-- Geolocate -->
+        <tr style="background-color:inherit;">
+            <td style="text-align:right;"><label>Geolocate</label></td>
+            <td><input type="text" name="geolat" id="geolocate_lat" maxlength="12" size="12" /><label class="sr-only">Geolocate Latitude</label></td>
+            <td style="border-left:1px dotted #6A7F10;"><input type="text" name="geolong" id="geolocate_long" maxlength="12" size="12" /><label class="sr-only">Geolocate Longitude</label></td>
+        </tr>
+        </table>
+    </div>
+    <br style="clear:both;" />
+    <br />
+
+     
+    <div style="display:inline;float:left;">
+        <a href='<?=base_url?>'>&lt;&lt; Return to Building List</a>
+    </div>
+    <div style="display:inline;float:right;margin-left:15px;" class="current-rec future-rec post-disable">
+        <button onclick="console.log('Submit form=<?= mthd ?>');formSubmit('<?= mthd ?>', this);">Save Changes</button>
+    </div>
+    <? if(data != "new"){ ?>
+    <div style="display:inline;float:right;margin-left:15px;" class="current-rec post-disable">
+        <button onclick="formSubmit('delete', this);">Deactivate</button>
+    </div>
+    <div style="display:inline;float:right;margin-left:15px;" class="current-rec post-disable">
+        <u style="cursor:pointer;color:Blue;size:8pt;" onclick="initiateFuture();">Create a future change record</u>
+    </div>
+
+    <div style="display:inline;float:right;margin-left:15px;" class="hidden post-enable">
+        <em>You must reload the page to make additional changes</em>
+    </div>
+    <? } ?>
+    <br/>
+
+    </form>
+</div>
+
+<textarea id="debug-console" style="width:300px;margin-top:50px;" rows="10">Debug:</textarea>
+
+
+<?!= include('Javascript'); ?>
+
+
+<? if(data != "new"){ ?>
+    <!-- Put building data into JS arrays -->
+    <script type="text/javascript">
+        console.log("Prepare history records");
+        var history = "<?= json_string ?>";
+        var historyArray = jQuery.parseJSON(history);
+    
+        //Sort buildings by effective date
+        console.log("Sort history array");
+        historyArray.sort(function(a, b) {
+           var keyA = new Date(a.from_date);
+           var keyB = new Date(b.from_date);
+    
+           if(keyA > keyB) return -1;
+           if(keyA < keyB) return 1;
+           return 0;
+        });
+    
+        /** Display the first building **/
+        console.log('Populate First Building Record');
+        populateBuildingForm(0)
+
+
+        console.log("Debugging info");
+        $.each(historyArray, function( index, bldg ) {
+            //$("#debugarea").val($("#debug-console").val() + "\n");
+            $.each(bldg, function( label, value ) {
+              if(label == "from_date")
+                $("#debugarea").val($("#debug-console").val() + "\n\t" + label + ": " + value);
+            });
+        });
+
+        console.log("Page loaded");
+    </script>
+<? } ?>
+

@@ -1,0 +1,182 @@
+<script type="text/javascript">
+    console.log("Importing javascript");
+
+    $(function(){
+        $("table tr:nth-child(even)").addClass("striped");
+    });
+
+    console.log("populateBuildingForm()");
+    function populateBuildingForm(historyIndex){
+        var buildingObject = historyArray[historyIndex];
+
+        //Populate data into textfields
+        $.each(buildingObject, function(index, value) {
+            $("#"+index).val(value);
+        });
+
+        //Is this a current or future record?
+        var now = new Date();
+        var recStart = new Date(buildingObject.from_date);
+        var recEnd = new Date(buildingObject.to_date);
+        var isCurrent;
+        if(recStart <= now && now < recEnd ){ isCurrent = true; }
+        else{ isCurrent = false; }
+        var isFuture;
+        if(recStart > now){ isFuture = true; }
+        else{ isFuture = false; }
+
+        //If newer revisions exist (show/hide navigation)
+        if(historyIndex > 0){
+            $("#future-nav").removeClass("hidden");
+            $("#future-nav").click(function(){populateBuildingForm(historyIndex-1);});
+        }
+        else{
+            $("#future-nav").addClass("hidden");
+        }
+
+        //If previous revisions exist (show/hide navigation)
+        if(historyArray[historyIndex+1]){
+            $("#past-nav").removeClass("hidden");
+            $("#past-nav").click(function(){populateBuildingForm(historyIndex+1);});
+        }
+        else{
+            $("#past-nav").addClass("hidden");
+        }
+
+        //Only current and future records can be modified
+        if(isCurrent || isFuture){ $(":text").prop("readonly", false); }
+        else{ $(":text").prop("readonly", true); }
+        
+        //Some elements are only visible on current records
+        if(isCurrent){ $(".current-rec").removeClass("hidden"); }
+        else{ $(".current-rec").addClass("hidden"); }
+            
+        //Some elements are displayed for future records
+        if(isFuture){ $(".future-rec").removeClass("hidden"); }
+        //Do not hide these (hidden if needed by isCurrent condition above)
+        
+        //Some fields are never editable
+        $(":text").filter(".no-edit").prop("readonly", true);
+
+    }
+
+    console.log("initiateFuture()");
+    function initiateFuture(){
+        var futureDate;
+        var futureDateTxt = prompt("What date should the change take effect?\n\n(Date format: YYYY-MM-DD)");
+        try{
+            futureDate = new Date(futureDateTxt);
+            futureDateTxt = futureDate.toISOString().slice(0, 10);
+        }
+        catch(e){
+            alert("That is not a valid date. Try again.");
+            return false;
+        }
+
+        var now = new Date();
+        if(futureDate <= now){
+            alert('That is not a future date.\nTo make a change effective immediately, edit this record and click "Save Changes"');
+            return false;
+        }
+
+        //Set the effective date field, and allow edit as usual
+        $("#from_date").val( futureDateTxt );
+        $(".current-rec").addClass("hidden");
+        $(".future-rec").removeClass("hidden");
+        return true;
+    }
+
+    console.log("formValidation()");
+    function formValidation(){
+        var error_msg = "";
+        $(":text").removeClass("error");
+
+        //If end date is empty, set to end of time
+        if($("#to_date").val() == ""){
+            console.log("Defaulting end date to end-of-time");
+            $("#to_date").val("2099-12-31");
+        }
+
+        //If effective date is empty, set to today
+        if($("#from_date").val() == ""){
+            var now = new Date()
+            console.log("Defaulting effective date to today");
+            $("#from_date").val( now.toISOString().slice(0, 10) );
+        }
+
+        //Validate dates
+        try{
+            var eff_date = new Date($("#from_date").val());
+            $("#from_date").val( eff_date.toISOString().slice(0, 10) );
+        }
+        catch(e){
+            console.log("Invalid effective date");
+            error_msg += "Invalid 'Effective Date'\n";
+            $("#from_date").addClass("error");
+        }
+        try{
+            var end_date = new Date($("#to_date").val());
+            $("#to_date").val( end_date.toISOString().slice(0, 10) );
+        }
+        catch(e){
+            console.log("Invalid end date");
+            error_msg += "Invalid 'End Date'\n";
+            $("#to_date").addClass("error");
+        }
+
+        var requiredFields = ['building_identifier', 'building_code', 'short_name', 'long_name', 'city'];
+        $.each(requiredFields, function(index, html_id) {
+            if( $("#"+html_id).val() == "" ){
+                error_msg += html_id + " is required.\n";
+                $("#"+html_id).addClass("error");
+            }
+        });
+
+        if(error_msg != ""){
+            alert(error_msg);
+            return false;
+        }
+
+        return true;
+    }
+
+    console.log("formSubmit()");
+    function formSubmit(anhttp, button) {
+        if(!formValidation()){
+            return false;
+        }
+        console.log("Submit form: "+anhttp);
+        var failureRunner = google.script.run.withFailureHandler(onFailure);
+        if (anhttp == "post"){
+              console.log("Posting...");
+              failureRunner.withSuccessHandler(onSuccess).withUserObject(button).postBuilding(document.forms[0]);
+        }
+        else if (anhttp == "put"){
+              console.log("Putting...");
+              failureRunner.withSuccessHandler(onSuccess).withUserObject(button).putBuilding(document.forms[0]);
+        }
+        else if (anhttp == "delete"){
+              console.log("Deleting...");
+              failureRunner.withSuccessHandler(onSuccess).withUserObject(button).deleteBuilding(document.forms[0]);
+        }
+    }
+
+    /** opID is string combining operation (create, deactivate, update) and building ID **/
+    function onSuccess(opID, button) {
+         $(".post-disable").addClass("hidden");
+         $(".post-enable").removeClass("hidden");
+         $(":text").prop("readonly", true);
+         var words = opID.split("|");
+         alert('Successful ' + words[0] + ' of building ' + words[1]);
+         if (button) button.disabled = true;
+    }
+
+    function onFailure(error) {
+        alert('Failure: ' + error.message);
+    }
+
+    function disableButton(button) {
+        button.disabled = true;
+    }
+    console.log("Done importing javascript");
+</script>

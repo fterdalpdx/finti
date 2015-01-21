@@ -47,27 +47,23 @@ class Tokens():
 			Update the cache with CRUD changes
 		'''
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		pipe = cache.pipline()
 		
 		self.log.info('post_updates(): posting updates to local storage')
-		for update in updates:			# Done: could use the Redis "Pipelines" feature to combine Redis requests for better performance
+		for update in updates:			# TODO: could re-add the Redis "Pipelines" feature to combine Redis requests for better performance when available
 			(user, token, date, action) = update
 			if action == 'add':
-				pipe.cache.hset('general', token, user)	# user-by-token -- really just existence of a token
-				pipe.cache.hset('users', user, token)	# token-by-user: allow lookup of previous token on token changes
-				pipe.execute()
+				cache.hset('general', token, user)	# user-by-token -- really just existence of a token
+				cache.hset('users', user, token)	# token-by-user: allow lookup of previous token on token changes
 				self.log.info('post_updates(): added token for user: ' + user)
 			elif action == 'delete':
-				pipe.cache.hdel('general', token)	# disables the ability to authenticate
-				pipe.cache.hdel('users', user)	# removes history of token
-				pipe.execute()
+				cache.hdel('general', token)	# disables the ability to authenticate
+				cache.hdel('users', user)	# removes history of token
 				self.log.info('post_updates(): deleted token for user: ' + user)
 			elif action == 'update':
 				prev_token = cache.hget('users', user)
-				pipe.cache.hdel('general', prev_token)	# disables the ability to authenticate with previous token
-				pipe.cache.hset('general', token, user)		# set the new token for the user
-				pipe.cache.hset('users', user, token)		# set the user as possessing the new token
-				pipe.execute()
+				cache.hdel('general', prev_token)	# disables the ability to authenticate with previous token
+				cache.hset('general', token, user)		# set the new token for the user
+				cache.hset('users', user, token)		# set the user as possessing the new token
 				self.log.info('post_updates(): updated token for user: ' + user)
 			else:
 				self.log.critical('post_updates(): unexpected change type: ' + action)

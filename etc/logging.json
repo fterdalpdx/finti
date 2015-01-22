@@ -16,6 +16,14 @@
             ], 
             "level": "DEBUG"
         },
+        "health": {
+            "handlers": [
+                "health",
+                "health_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
         "tokens": {
             "handlers": [
                 "tokens",
@@ -57,6 +65,24 @@
             "backupCount": 2, 
             "level": "DEBUG", 
             "filename": "BASE/model.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "health": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/health.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "health_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/health.json", 
             "maxBytes": 10485760, 
             "mode": "a", 
             "formatter": "json", 

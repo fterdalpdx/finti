@@ -76,6 +76,9 @@ class Config(object):
 		
 		# A C T I V E   D I R E C T O R Y
 		
+		# H E A L T H   C H E C K
+		
+		self.health_uri_path = '/status'
 		
 		# V A L I D A T I O N
 		

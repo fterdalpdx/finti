@@ -1,6 +1,7 @@
 --index-url https://pypi.python.org/simple/
 Flask==0.10.1
 Flask-Auth==0.85
+Flask-Script==2.0.5
 Flask-SQLAlchemy>=0.9.8
 google-api-python-client==1.2
 gdata==2.0.18

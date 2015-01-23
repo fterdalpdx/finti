@@ -168,7 +168,8 @@ function postBuilding(form) {
     "headers": {
       "Accept-Encoding": "*",
       "Authorization": "Basic " + Utilities.base64Encode(user_token + ':')
-    }
+    },
+    "validateHttpsCertificates": false
   };
 
   var response = UrlFetchApp.fetch(url, options);
@@ -209,7 +210,8 @@ function putBuilding(form) {
       "Accept-Encoding": "*",
       "Authorization": "Basic " + Utilities.base64Encode(user_token + ':')
     }, 
-    "muteHttpExceptions": true
+    "muteHttpExceptions": true,
+    "validateHttpsCertificates": false
   };
   
 //  var request = UrlFetchApp.getRequest(url, options);
@@ -237,7 +239,10 @@ function deleteBuilding(form) {
   var ws_url = PropertiesService.getScriptProperties().getProperty("ws_url");
   var url = ws_url + "/erp/gen/1.0/buildings/" + form.id;
   Logger.log('url:' + url);
-  var options = {"method": "delete"};
+  var options = {
+    "method": "delete",
+    "validateHttpsCertificates": false
+  };
   var response = UrlFetchApp.fetch(url, options);
   Logger.log('response after fetch');
   Logger.log(response);
@@ -258,7 +263,8 @@ function genFetchURLparams(verb) {
   
   var params = {
     "method": verb,
-    "headers": headers
+    "headers": headers,
+    "validateHttpsCertificates": false
   };
   return params;
 }

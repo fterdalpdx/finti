@@ -26,9 +26,15 @@ class Health():
 		status = {'result': 'error', 'message': 'failure'}
 
 		self.log.info("check_health_status(): starting health check")
+
+		# Check Redis. Fail right-away if Redis is down - verifies infrastructure
 		
-		# The per component health checks go here
+		# Do a web request for a single building - verifies data quality
 		
+		# Check db -- if down set flag to not expire data. Do not fail if db is down
+		
+		# Check if down for maintenance 
+
 		status = {'result': 'success', 'message': "success"}
 		
 		return status

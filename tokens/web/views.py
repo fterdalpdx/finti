@@ -1,7 +1,7 @@
-from flask import make_response, abort
+from flask import make_response, abort, request
 from . import web
 from config import config
-from ..tokens import tokens
+from tokens.tokens import tokens
 
 #@auth.require_auth(scope='token_manage')
 @web.route(config.tokens_uri_path + '/<update_id>', methods = ['GET'])
@@ -11,7 +11,7 @@ def notify(update_id):
 		The most recent change log index is pass in. This service then fetches and applies changes starting
 		from the last locally saved log index position.
 	"""
-	global request, token
+	global request, tokens
 
 	tokens.log.info('notify(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 	status = tokens.notify(update_id)

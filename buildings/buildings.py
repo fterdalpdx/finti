@@ -6,11 +6,10 @@ Created on Sep 23, 2014
 
 import logging.config
 from config import config
-from flask import Flask, jsonify, abort, make_response, request, Response
 import json
 import re
-from app.oracle_model import model
-import auth
+from buildings.oracle_model import model
+from optparse import OptionParser
 
 class Buildings():
 	'''
@@ -187,7 +186,8 @@ class Buildings():
 			status = {'result': 'error', 'message': 'failed to delete a building: ' + building_identifier}
 		return status
 
-'''
+buildings = Buildings()
+
 if __name__ == '__main__':	
 	parser = OptionParser()
 	parser.add_option("-D", "--debug", dest="debug", action='store_true', default=False, help="Run in debug mode")
@@ -195,170 +195,10 @@ if __name__ == '__main__':
 	(options, args) = parser.parse_args()
 	
 	if not options.debug:
+		pass
 	#	context = daemon.DaemonContext(umask=0o002)
 	#	with context:
-'''
 
-buildings = Buildings()
-
-app = Flask(__name__)
-
-def init_db():
-	#model.init_db()
-	pass
-
-'''
-@app.route(config.token_uri_path + '/<log_index>', methods = ['GET'])
-#@auth.require_auth(scope='token_manage')
-def token_update(log_index):
-	"""
-		Observe token updates. Wait for call from the User Token Management Service.
-		The most recent change log index is pass in. This service then fetches and applies changes starting
-		from the last locally saved log index position.
-	"""
-	global request, buildings
-	
-	if request.args and 'log_index' in request.args:
-		buildings.log.info('token_update(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-		log_index = request.args['log_index']
-		buildings.log.error('token_update(): log_index: ' + str(log_index))
-	else:
-		buildings.log.error('token_update(): missing log_index')
-	
-	
-'''	
-	
-'''
-	The following functions handle routed web requests for Buildings
-'''	
-	
-@app.route(config.buildings_uri_path, methods = ['GET'])
-@auth.requires_auth(scope='general')
-def get_buildings():
-	global buildings, request
-
-	if request.args and 'building_identifier' in request.args:
-		buildings.log.info('get_building(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-		building_identifier = request.args['building_identifier']
-
-		status = buildings.get_building(building_identifier)
-		if status['result'] <> 'success':
-			abort(404, status['message'])
-		else:
-			return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
-
-	else:
-		buildings.log.info('get_buildings(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-		status = buildings.get_buildings()
-		if status['result'] == 'success':
-			return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
-		else:
-			abort(400, status['message'])
-
-@app.route(config.buildings_uri_path + '/<building_identifier>/history', methods = ['GET'])
-@auth.requires_auth(scope='general')
-def get_building_history(building_identifier):
-	global buildings, request
-
-	buildings.log.info('get_building_history(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', with building_identifier: ' + building_identifier)
-
-	status = buildings.get_building_history(building_identifier)
-	if status['result'] <> 'success':
-		abort(404, status['message'])
-	else:
-		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
-
-@app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
-@auth.requires_auth(scope='general')
-def get_building(building_identifier):
-	global buildings
-	
-	buildings.log.info('get_building(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-	status = buildings.get_building(building_identifier)
-	if status['result'] == 'success':
-		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
-	else:
-		abort(404, status['message'])
-
-	
-
-@app.route(config.buildings_uri_path, methods = ['POST'])
-@auth.requires_auth(scope='manage_buildings')
-def add_building():
-	global buildings, request
-	if request.json:
-		buildings.log.info('add_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', body: ' + str(request.json))
-		building_descriptor = request.json
-
-		status = buildings.add_building(building_descriptor)
-		if status['result'] <> 'success':
-			buildings.log.info('add_building() handler: failed to add building: ' + status['message'])
-			abort(404, status['message'])
-			
-		if status['result'] == 'success':
-			buildings.log.info('add_building() handler: successfully added building: ' + status['message'])
-			get_result = buildings.get_building(building_descriptor['building_identifier'])
-			buildings.log.info('add_building() handler: looked-up added building: ' + str(get_result))
-			if get_result['result'] == 'success':
-				return(make_response((get_result['message'], 200, {'Content-Type': 'application/json'})))
-			else:
-				abort(400, 'Building inconsistency error.')
-	else:
-		abort(404, 'Building descriptor not valid.')
-		
-@app.route(config.buildings_uri_path + '/<building_identifier>', methods = ['DELETE'])
-@auth.requires_auth(scope='manage_buildings')
-def delete_building(building_identifier):
-	global buildings
-
-	buildings.log.info('delete_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-
-	status = buildings.delete_building(building_identifier)
-	if status['result'] == 'success':
-		return('building removed')
-	else:
-		buildings.log.info('delete_building() handler: failed to delete building: ' + status['message'])
-		abort(404, status['message'])
-		
-@app.route(config.buildings_uri_path, methods = ['PUT'])
-@auth.requires_auth(scope='manage_buildings')
-def update_building():
-	global buildings, request
-	if request.json:
-		buildings.log.info('update_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-		building_descriptor = request.json
-
-		status = buildings.update_building(building_descriptor)
-		if status['result'] <> 'success':
-			buildings.log.info('update_building() handler: failed to update building: ' + status['message'])
-			abort(404, status['message'])
-			
-		if status['result'] == 'success':
-			buildings.log.info('update_building() handler: successfully updated building: ' + status['message'])
-			get_result = buildings.get_building(building_descriptor['building_identifier'])
-			buildings.log.info('update_building() handler: looked-up updated building: ' + str(get_result))
-			if get_result['result'] == 'success':
-				return(make_response((get_result['message'], 200, {'Content-Type': 'application/json'})))
-			else:
-				abort(404, 'Building inconsistency error.')
-	else:
-		abort(404, 'Building descriptor not valid.')
-		
-
-@app.errorhandler(400)
-def custom_400(error):
-	buildings.log.info('custom_400(): error: ' + str(error))
-	return make_response(jsonify( {'message': error.description}), 400)
-
-@app.errorhandler(404)
-def custom_404(error):
-	buildings.log.info('custom_404(): error: ' + str(error))
-	return make_response(jsonify( {'message': error.description}), 404)
-
-
-
-
-#app.run(host='0.0.0.0', debug = True)
 
 
 

@@ -1,7 +1,7 @@
 from flask import make_response, abort, request
 from . import web
 from config import config
-from buildings.buildings import buildings
+from buildings_app.buildings import buildings
 import auth
 		
 '''

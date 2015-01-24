@@ -5,10 +5,10 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-from buidings_app.get_instance import app
+from buildings_app.get_instance import app
 import json
 from config import config
-from requests.auth import HTTPBasicAuth
+#from requests.auth import HTTPBasicAuth
 
 class BuildingsTest(unittest.TestCase):
 	def setUp(self):

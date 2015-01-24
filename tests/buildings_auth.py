@@ -1,7 +1,7 @@
 from flask.ext.testing import TestCase
 from werkzeug.test import Client
 from werkzeug.datastructures import Headers
-from app import buildings
+from buildings_app.buildings import buildings
 import unittest
 import base64
 
@@ -11,7 +11,8 @@ class BuildingsAuthTest(TestCase):
 		#if os.path.exists(views.DATABASE):
 		#	os.unlink(views.DATABASE)
 		#query_db(self.CREATE_TABLE)
-		return buildings.app
+		#return buildings.app
+		pass
 	
 	
 	def test_admin_page_is_locked(self):

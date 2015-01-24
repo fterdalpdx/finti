@@ -26,7 +26,7 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
 class Building(db.Model):
-	__tablename__ = 'buildings_app'
+	__tablename__ = 'buildings'
 	building_identifier = db.Column(db.String(6), primary_key=True)
 	long_name = db.Column(db.String(60), nullable=False)
 	short_name = db.Column(db.String(30), nullable=False)
@@ -116,7 +116,7 @@ def add_building(building):
 			building_json = json.dumps(building)
 			building_id = building['building_identifier']
 			redis.set(building_id, building_json, ex=config.buildings_cache_ttl)
-			#redis.del('buildings_app')	# invalidate the buildings_app collection cache entry
+			#redis.del('buildings')	# invalidate the buildings collection cache entry
 		status = True
 	except Exception as ex:
 		db.session.rollback()
@@ -132,7 +132,7 @@ def remove_building(building_identifier):
 		db.session.commit()
 		if config.buildings_cache_enabled == True:
 			redis.delete(building_identifier)
-			redis.delete('buildings_app')
+			redis.delete('buildings')
 		status = True
 	except Exception as ex:
 		db.session.rollback()
@@ -151,7 +151,7 @@ def update_building(building):
 			building_json = json.dumps(building)
 			building_id = building['building_identifier']
 			redis.set(building_id, building_json, ex=config.buildings_cache_ttl)
-			redis.delete('buildings_app')	# invalidate the buildings_app collection cache entry
+			redis.delete('buildings')	# invalidate the buildings collection cache entry
 		status = True
 	except Exception as ex:
 		db.session.rollback()
@@ -186,7 +186,7 @@ def list_buildings():
 	bldgs = []
 	try:
 		if config.buildings_cache_enabled == True:
-			buildings_json = redis.get('buildings_app')
+			buildings_json = redis.get('buildings')
 			if buildings_json is not None:
 				buildings = json.loads(buildings_json)
 				return buildings
@@ -197,7 +197,7 @@ def list_buildings():
 
 		if config.buildings_cache_enabled == True:
 			buildings_json = json.dumps(buildings)
-			redis.set('buildings_app', buildings_json, ex=config.buildings_cache_ttl)
+			redis.set('buildings', buildings_json, ex=config.buildings_cache_ttl)
 
 	except Exception as ex:
 		log.debug('list_building(): error: ' + str(ex))

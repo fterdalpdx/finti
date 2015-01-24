@@ -5,13 +5,13 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-from app import tokens
+from tokens_app.get_instance import app
 from config import config
 
 class TokensTest(unittest.TestCase):
 	def setUp(self):
-		tokens.app.config['TESTING'] = True
-		self.app = tokens.app.test_client()
+		app.config['TESTING'] = True
+		self.app = app.test_client()
 
 	def tearDown(self):
 		#os.close(self.db_fd)

@@ -5,13 +5,13 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-from app import health_check
+from health_app.get_instance import app
 from config import config
 
 class HealthCheckTest(unittest.TestCase):
 	def setUp(self):
-		health_check.app.config['TESTING'] = True
-		self.app = health_check.app.test_client()
+		app.config['TESTING'] = True
+		self.app = app.test_client()
 
 	def tearDown(self):
 		#os.close(self.db_fd)

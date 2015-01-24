@@ -4,7 +4,7 @@ Created on Dec 31, 2014
 @author: dennis
 '''
 import unittest
-from app.oracle_model import model
+from buildings_app.oracle_model import model
 from config import config
 
 class Test(unittest.TestCase):

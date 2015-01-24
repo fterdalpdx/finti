@@ -7,7 +7,7 @@ from health_app.health import health
 @web.route(config.health_uri_path, methods = ['GET'])
 def health_check_status():
 	"""
-		route and handle health_app check request
+		route and handle health check request
 	"""
 
 	health.log.info('health_check_status(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))

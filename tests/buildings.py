@@ -5,7 +5,7 @@ Created on Sep 29, 2014
 '''
 import unittest
 
-from app import buildings
+from buidings_app.get_instance import app
 import json
 from config import config
 from requests.auth import HTTPBasicAuth
@@ -13,8 +13,8 @@ from requests.auth import HTTPBasicAuth
 class BuildingsTest(unittest.TestCase):
 	def setUp(self):
 		#self.db_fd, buildings.app.config['DATABASE'] = tempfile.mkstemp()
-		buildings.app.config['TESTING'] = True
-		self.app = buildings.app.test_client()
+		app.config['TESTING'] = True
+		self.app = app.test_client()
 		#buildings.init_db()
 
 

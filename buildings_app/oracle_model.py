@@ -32,7 +32,7 @@ class Buildings():
 
 	def cache_buildings(self, buildings):
 		self.buildings_cache = {}
-		self.log.debug('cache_buildings(): updating local cache of all buildings_app')
+		self.log.debug('cache_buildings(): updating local cache of all buildings')
 		
 		for building in buildings:
 			self.buildings_cache[building['building_identifier']] = building
@@ -81,7 +81,7 @@ class Buildings():
 	
 	def list_buildings(self, force_cache_refresh = False):
 		'''
-			List all current PSU buildings_app. Does not contain the building histories
+			List all current PSU buildings. Does not contain the building histories
 		
 			@type	force_cache_refresh: boolean 
 			@param  force_cache_refresh: Optional parameter to force and cache a reload of all building data
@@ -92,7 +92,7 @@ class Buildings():
 		try:
 			if config.buildings_cache_enabled == True and force_cache_refresh == False:
 				self.log.debug('list_buildings(): global caching enabled')
-				buildings_json = redis.get('buildings_app')
+				buildings_json = redis.get('buildings')
 				if buildings_json is not None:
 					buildings = json.loads(buildings_json)
 					self.log.info('list_buildings(): global cache hit')
@@ -113,12 +113,12 @@ class Buildings():
 				building = json.loads(building_json)
 				buildings.append(self.conv_building(building))
 			
-			# Set the local cache for buildings_app
+			# Set the local cache for buildings
 			self.cache_buildings(buildings)
 					
 			if config.buildings_cache_enabled == True:
 				buildings_json = json.dumps(buildings)
-				redis.set('buildings_app', buildings_json, ex=config.buildings_cache_ttl)
+				redis.set('buildings', buildings_json, ex=config.buildings_cache_ttl)
 				self.log.info('list_buildings(): set global cache')
 	
 		except Exception as ex:
@@ -126,12 +126,12 @@ class Buildings():
 		finally:
 			db.close()
 	
-		self.log.info('list_buildings(): returning list of buildings_app with length: ' + str(len(buildings)))
+		self.log.info('list_buildings(): returning list of buildings with length: ' + str(len(buildings)))
 		return(buildings)
 
 	def get_building(self, building_identifier):
 		'''
-			Lookup a current (active) building from the set of all PSU buildings_app. Does not provide the building history of changes
+			Lookup a current (active) building from the set of all PSU buildings. Does not provide the building history of changes
 			
 			TODO: This function should call the db proc function for the specific building, but until the oracle date issue is resolved, the results are indeterminate
 
@@ -147,7 +147,7 @@ class Buildings():
 			self.log.info('get_building(): cache hit')
 			building = self.buildings_cache[building_identifier]
 		else:
-			# Get the buildings_app list with the side-effect of setting the buildings_app cache
+			# Get the buildings list with the side-effect of setting the buildings cache
 			self.log.info('get_building(): cache miss')
 			self.list_buildings(force_cache_refresh=True)
 			if building_identifier in self.buildings_cache:
@@ -161,7 +161,7 @@ class Buildings():
 		
 	def get_building_history(self, building_id):
 		'''
-			Retrieve the change history for a specific building in the set of all PSU buildings_app
+			Retrieve the change history for a specific building in the set of all PSU buildings
 			The results of this call are not cached.
 		
 			@type	building_identifier: string
@@ -195,7 +195,7 @@ class Buildings():
 	
 	def add_building(self, building):
 		'''
-			Add a new building to the set of all PSU buildings_app
+			Add a new building to the set of all PSU buildings
 		
 			@type	building: dict
 			@param  building: Dictionary containing building descriptor data
@@ -243,7 +243,7 @@ class Buildings():
 		
 	def remove_building(self, building_identifier):
 		'''
-			Remove (deactivate) a building from the set of all PSU buildings_app
+			Remove (deactivate) a building from the set of all PSU buildings
 		
 			@type	building_identifier: string
 			@param  building_identifier: Identity of the building to remove
@@ -255,7 +255,7 @@ class Buildings():
 		
 	def removeme_create_building(self, building_descriptor):
 		'''
-			Create a building and add to the set of all PSU buildings_app
+			Create a building and add to the set of all PSU buildings
 		
 			@type	building_descriptor: dict
 			@param  building_descriptor: Information describing the building to create
@@ -311,7 +311,7 @@ class Buildings():
 			
 	def update_building(self, building_descriptor):
 		'''
-			Update a current building in the set of all PSU buildings_app
+			Update a current building in the set of all PSU buildings
 		
 			@type	building_descriptor: dict
 			@param  building_descriptor: Identity of the building to update

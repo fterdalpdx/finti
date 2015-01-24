@@ -28,9 +28,6 @@ class Tokens():
 		for host in config.tokens_pub_to:
 			self.cache[host] = StrictRedis(host=host)
 			self.pubsub[host] = self.cache[host].pubsub()
-
-	def init_app(self, app):
-		app.tokens = self	
 		
 	def notify(self, log_index):
 		'''

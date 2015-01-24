@@ -21,7 +21,7 @@ class Tokens():
 
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
-		self.log = logging.getLogger('tokens_app')
+		self.log = logging.getLogger('tokens')
 		self.log.debug('__init__(): starting')
 		self.pubsub = {}
 		self.cache = {}
@@ -45,7 +45,7 @@ class Tokens():
 			# This activity should run asynchronously 
 			updates = self.fetch_updates(log_index)
 			self.post_updates(updates, log_index)
-			# Update the local tokens_app from the source
+			# Update the local tokens from the source
 			status = {'result': 'success', 'message': "index up-to-date"}
 		
 		return status
@@ -122,7 +122,7 @@ class Tokens():
 	
 	def sync_cache(self):
 		'''
-			Erase the local cache of tokens_app and scopes, and reload from cloud storage
+			Erase the local cache of tokens and scopes, and reload from cloud storage
 		'''
 		
 		# Collect Token management info from the cloud
@@ -141,19 +141,19 @@ class Tokens():
 		# Fetch token list
 		query = gdata.spreadsheet.service.CellQuery()
 		query.min_row = '1'
-		cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=worksheet_ids['tokens_app'], query=query).entry
+		cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=worksheet_ids['tokens'], query=query).entry
 		cols = 3
 		rows = len(cells) / cols
 		tokens = []
 		for row in range(0, rows):
 			tokens.append([str(cell.content.text) for cell in cells[row * cols : (row + 1) * cols]])
-		self.log.debug('sync_cache() fetched tokens_app from cloud: ' + str(rows))
+		self.log.debug('sync_cache() fetched tokens from cloud: ' + str(rows))
 		
 		# Fetch scopes
 		scopes = {}
 		
 		for worksheet_title in worksheet_ids.keys():
-			if worksheet_title not in ['tokens_app', 'change log']:	# must then be a scope list
+			if worksheet_title not in ['tokens', 'change log']:	# must then be a scope list
 				self.log.debug('sync_cache() fetching scope: ' + str(worksheet_title))
 				scopes[worksheet_title] = []
 				cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=worksheet_ids[worksheet_title], query=query).entry
@@ -165,7 +165,7 @@ class Tokens():
 		for token_ent in tokens:
 			(user, token, datetime) = token_ent
 			cache.set(token, user)
-		self.log.debug('sync_cache() added tokens_app, count: ' + str(len(tokens)))
+		self.log.debug('sync_cache() added tokens, count: ' + str(len(tokens)))
 		
 		# Build scopes
 		for (scope_name, scope_list) in scopes.items():

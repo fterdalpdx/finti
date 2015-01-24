@@ -15,7 +15,7 @@ class Health():
 
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
-		self.log = logging.getLogger('health_app')
+		self.log = logging.getLogger('health')
 		self.log.debug('__init__(): starting')
 	
 	def check_health_status(self):
@@ -25,7 +25,7 @@ class Health():
 		
 		status = {'result': 'error', 'message': 'failure'}
 
-		self.log.info("check_health_status(): starting health_app check")
+		self.log.info("check_health_status(): starting health check")
 
 		# Check Redis. Fail right-away if Redis is down - verifies infrastructure
 		

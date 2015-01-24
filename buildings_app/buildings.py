@@ -13,17 +13,17 @@ from optparse import OptionParser
 
 class Buildings():
 	'''
-		Encapsulates a model for the PSU buildings_app web service.
+		Encapsulates a model for the PSU buildings web service.
 	'''
 
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
-		self.log = logging.getLogger('buildings_app')
+		self.log = logging.getLogger('buildings')
 		self.log.debug('__init__(): starting')
 	
 	def get_buildings(self):
 		'''
-			Get the listing of all buildings_app. First check the cache for a fresh copy, otherwise 
+			Get the listing of all buildings. First check the cache for a fresh copy, otherwise 
 			go to the database and retrieve the listing, and cache afterward.
 		'''
 		status = {'result': 'error', 'message': ''}
@@ -33,7 +33,7 @@ class Buildings():
 			buildings_json = json.dumps(buildings)
 			status = {'result': 'success', 'message': buildings_json}
 		else:
-			self.log.error('get_buildings(): error: no buildings_app exist in model.')
+			self.log.error('get_buildings(): error: no buildings exist in model.')
 			status['message'] = 'Request failed'
 		return status
 			
@@ -131,8 +131,8 @@ class Buildings():
 		
 	def add_building(self, building):
 		'''
-			Add a building definition to the list of PSU buildings_app in the backing database. 
-			Invalidate the cache of all buildings_app if there is an existing entry.  
+			Add a building definition to the list of PSU buildings in the backing database. 
+			Invalidate the cache of all buildings if there is an existing entry.  
 		'''
 		status = self.building_is_valid(building)
 
@@ -150,8 +150,8 @@ class Buildings():
 
 	def update_building(self, building):
 		'''
-			Update a single building in the list of PSU buildings_app from the backing database. 
-			Invalidate the cache of all buildings_app and also the specific building cache if there is an existing entry.  
+			Update a single building in the list of PSU buildings from the backing database. 
+			Invalidate the cache of all buildings and also the specific building cache if there is an existing entry.  
 		'''
 		status = self.building_is_valid(building)
 

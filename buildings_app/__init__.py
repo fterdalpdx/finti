@@ -1,5 +1,4 @@
 from flask import Flask
-#from flask.ext.bootstrap import Bootstrap
 from config import config
 
 def create_app():

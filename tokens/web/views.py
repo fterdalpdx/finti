@@ -11,7 +11,7 @@ def notify(update_id):
 		The most recent change log index is pass in. This service then fetches and applies changes starting
 		from the last locally saved log index position.
 	"""
-	global request, tokens
+	#global request, tokens
 
 	tokens.log.info('notify(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 	status = tokens.notify(update_id)

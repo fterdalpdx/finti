@@ -11,7 +11,7 @@ import auth
 @web.route(config.buildings_uri_path, methods = ['GET'])
 @auth.requires_auth(scope='general')
 def get_buildings():
-	global buildings, request
+	global request
 
 	if request.args and 'building_identifier' in request.args:
 		buildings.log.info('get_building(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
@@ -34,7 +34,7 @@ def get_buildings():
 @web.route(config.buildings_uri_path + '/<building_identifier>/history', methods = ['GET'])
 @auth.requires_auth(scope='general')
 def get_building_history(building_identifier):
-	global buildings, request
+	global request
 
 	buildings.log.info('get_building_history(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', with building_identifier: ' + building_identifier)
 
@@ -47,7 +47,6 @@ def get_building_history(building_identifier):
 @web.route(config.buildings_uri_path + '/<building_identifier>', methods = ['GET'])
 @auth.requires_auth(scope='general')
 def get_building(building_identifier):
-	global buildings
 	
 	buildings.log.info('get_building(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 	status = buildings.get_building(building_identifier)
@@ -61,7 +60,8 @@ def get_building(building_identifier):
 @web.route(config.buildings_uri_path, methods = ['POST'])
 @auth.requires_auth(scope='manage_buildings')
 def add_building():
-	global buildings, request
+	global request
+	
 	if request.json:
 		buildings.log.info('add_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint) + ', body: ' + str(request.json))
 		building_descriptor = request.json
@@ -85,7 +85,6 @@ def add_building():
 @web.route(config.buildings_uri_path + '/<building_identifier>', methods = ['DELETE'])
 @auth.requires_auth(scope='manage_buildings')
 def delete_building(building_identifier):
-	global buildings
 
 	buildings.log.info('delete_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 
@@ -99,7 +98,7 @@ def delete_building(building_identifier):
 @web.route(config.buildings_uri_path, methods = ['PUT'])
 @auth.requires_auth(scope='manage_buildings')
 def update_building():
-	global buildings, request
+	global request
 	if request.json:
 		buildings.log.info('update_building() handler: called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 		building_descriptor = request.json

@@ -1,7 +1,7 @@
 from flask import make_response, abort, request
 from . import web
 from config import config
-from buildings.buildings import buildings
+from health.health import health
 
 
 @web.route(config.health_uri_path, methods = ['GET'])
@@ -9,7 +9,6 @@ def health_check_status():
 	"""
 		route and handle health check request
 	"""
-	global request, health
 
 	health.log.info('health_check_status(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
 	status = health.check_health_status()

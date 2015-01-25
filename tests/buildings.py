@@ -333,12 +333,13 @@ class BuildingsTest(TestCase):
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
-	'''
+
 	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
+		# test_building_is_valid test covers this test
 		# Test positive case of update to an existing building
-
+		'''
 		HEMB = {
 		   "geolocate_long" : -122.682755,
 		   "zipcode" : "97225",
@@ -355,10 +356,15 @@ class BuildingsTest(TestCase):
 		   "centroid_long" : -122.682755,
 		   "state_code" : "OR",
 		   "short_name" : "Magic Building",
-		   "building_identifier" : "TEST88"
+		   "building_identifier" : "B88888"
 		}
 
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['zipcode'] == "97888")
@@ -373,12 +379,13 @@ class BuildingsTest(TestCase):
 		HEMB['building_identifier'] = '42'
 		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 404)
-
+		'''
 	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_delete_building(self):
 		# Test the deletion of an existing building
-		
+		# This test is no longer valid
+		'''
 		HEMB = {
 			"long_name": "High Energy Magic Building",
 			"geolocate_lat": 45.508593,
@@ -411,11 +418,7 @@ class BuildingsTest(TestCase):
 		HEMB_rv = self.app.delete('/erp/gen/1.0/buildings/080808')	# Delete the new building and check the result
 		self.assertTrue(HEMB_rv.status_code == 404)
 		
-	'''
-	
-		
-		
-
+		'''
 
 if __name__ == "__main__":
 	#import sys;sys.argv = ['', 'Test.testName']

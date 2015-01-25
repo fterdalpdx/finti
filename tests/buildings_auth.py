@@ -32,7 +32,7 @@ class BuildingsAuthTest(TestCase):
 	
 	def test_admin_page_allows_valid_login(self):
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		token = '2144402c-586e-44fc-bd0c-62b31e98394d'
+		token = config.test_token
 		token_hash = auth.calc_hash(token)
 		cache.set(token_hash, 'test@test')
 		h = Headers()

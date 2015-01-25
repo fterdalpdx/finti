@@ -27,7 +27,7 @@ class BuildingsTest(TestCase):
 		app.config['TESTING'] = True
 		self.app = app.test_client()
 		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
-		self.token = '2144402c-586e-44fc-bd0c-62b31e98394d'
+		self.token = config.test_token
 		self.token_hash = auth.calc_hash(self.token)
 		self.cache.set(self.token_hash, 'test@test')
 
@@ -43,20 +43,28 @@ class BuildingsTest(TestCase):
 		rv = Client.get(self.client, path='/erp/gen/1.0/buildings',
 						 headers=h)
 		self.assert_200(rv)
-		buildings_json = rv.data #self.app.get('/erp/gen/1.0/buildings').data
+		
+		buildings_json = rv.data
 		buildings = json.loads(buildings_json)
+		
 		self.assertTrue(len(buildings) > 50)
 		self.assertTrue('city' in buildings[0])
 		self.assertTrue('long_name' in buildings[42])
 		self.assertTrue('short_name' in buildings[17])
 		self.assertTrue('building_identifier' in buildings[11])
-	'''
+
 	#@unittest.skip('back-end not ready yet')
 	def test_get_building_history(self):
-		building_history_json = self.app.get('/erp/gen/1.0/buildings/TEST88/history').data
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		rv = Client.get(self.client, path='/erp/gen/1.0/buildings/B0038/history',
+						 headers=h)
+		building_history_json = rv.data
 		history = json.loads(building_history_json)
-		self.assertTrue(len(history) > 1)
-		
+		self.assertTrue(len(history) > 0)
+
+	'''		
 	#@unittest.skip('weatherwax')
 	def test_get_building(self):
 

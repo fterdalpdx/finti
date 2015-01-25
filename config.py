@@ -81,6 +81,10 @@ class Config(object):
 		
 		self.health_uri_path = '/status'
 		
+		# T E S T I N G
+		
+		self.test_token = self.decode('4d5142f10a8903f7e1eb36690133a9970c55497726426d72e7d8b26d8d4c6cdc7cc5c2d9194b9a1aca5c547ee9fbe3bd')
+		
 		# V A L I D A T I O N
 		
 		self.required_fields = {

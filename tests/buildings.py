@@ -205,7 +205,7 @@ class BuildingsTest(TestCase):
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
-
+	'''
 	@unittest.skip('weatherwax')
 	def test_building_is_valid(self):
 		HEMB = {

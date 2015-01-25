@@ -8,6 +8,11 @@ import logging.config
 from config import config
 from flask import Flask, jsonify, abort, make_response, request
 from redis import StrictRedis
+from werkzeug.test import Client
+from werkzeug.datastructures import Headers
+import auth
+import base64
+import json
 
 class Health():
 	'''
@@ -48,6 +53,27 @@ class Health():
 			return {'result': 'error', 'message': 'system is down for maintenance'}
 
 		# Do a web request for a single building - verifies data quality
+		
+		try:
+			cache = StrictRedis(db=config.tokens_cache_redis_db)
+			token = config.test_token
+			token_hash = auth.calc_hash(token)
+			cache.set(token_hash, 'test@test')
+			h = Headers()
+			h.add('Authorization',
+				  'Basic ' + base64.b64encode(token + ':'))
+			rv = Client.open(self.client, path='/erp/gen/1.0/buildings',
+							 headers=h)
+			buildings_json = rv.data
+			buildings = json.loads(buildings_json)
+			
+			if len(buildings) < 60:
+				self.log.critical("check_health_status(): building data failure")
+				return {'result': 'error', 'message': 'building data failure'}
+			cache.delete(token_hash)
+		except Exception as ex:
+			self.log.critical("check_health_status(): building data failure")
+			return {'result': 'error', 'message': 'building data failure'}
 		
 		# Check db -- if down set flag to not expire data. Do not fail if db is down
 		

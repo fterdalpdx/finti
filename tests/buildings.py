@@ -143,8 +143,8 @@ class BuildingsTest(TestCase):
 		# This will succeed the first time only
 		#self.assertTrue(HEMB_rv.status_code == 200)
 		self.assertFalse(HEMB_rv.status_code == 200)
-		HEMB_rv_data = json.loads(HEMB_rv.data)
-		self.assertTrue(HEMB_rv_data['long_name'] == "High Energy Magic Building")
+		#HEMB_rv_data = json.loads(HEMB_rv.data)
+		#self.assertTrue(HEMB_rv_data['long_name'] == "High Energy Magic Building")
 		
 		# Test of duplicate data add
 		HEMB = {
@@ -238,6 +238,7 @@ class BuildingsTest(TestCase):
 		
 		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
 						 headers=h)
+		print('PUT result: ', HEMB_rv.data)
 		self.assertTrue(HEMB_rv.status_code == 200)
 		
 		# Check additional field case

@@ -17,9 +17,7 @@ def check_auth(login, password, required_scope):
 	"""
 	
 	# Hash the login, the password is ignored
-	hash_raw = hashlib.sha256(login)
-	#login_hash = base64.encodestring( hash_raw.digest()).strip()
-	login_hash = binascii.hexlify(hash_raw.digest())
+	login_hash = calc_hash(login)
 	cache = StrictRedis(db=config.tokens_cache_redis_db)	# TODO: Should be at application scope instead of request scope
 	user = cache.get(login_hash)	# lookup our person
 	if (user is None):				# if the user has a valid token
@@ -30,7 +28,11 @@ def check_auth(login, password, required_scope):
 		return False				# but the user does not have the required scope
 	else:
 		return True					# and the user has the required scope
-		
+
+def calc_hash(token):
+	hash_raw = hashlib.sha256(token)
+	return(binascii.hexlify(hash_raw.digest()))
+			
 def authenticate():
 	"""Sends a 401 response that enables basic auth"""
 	return Response(

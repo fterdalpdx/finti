@@ -53,7 +53,6 @@ class BuildingsTest(TestCase):
 		self.assertTrue('short_name' in buildings[17])
 		self.assertTrue('building_identifier' in buildings[11])
 
-	#@unittest.skip('back-end not ready yet')
 	def test_get_building_history(self):
 		h = Headers()
 		h.add('Authorization',
@@ -205,8 +204,9 @@ class BuildingsTest(TestCase):
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
-	'''
-	@unittest.skip('weatherwax')
+	
+	#@unittest.skip('weatherwax')
+	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_building_is_valid(self):
 		HEMB = {
 			"long_name": "High Energy Magic Building",
@@ -228,52 +228,109 @@ class BuildingsTest(TestCase):
 		}		
 
 		# Check well-formed case
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 200)
 		
 		# Check additional field case
 		HEMB_PLUS = HEMB
 		HEMB_PLUS['another'] = 'field'
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check missing field case
 		HEMB_MINUS = HEMB
 		del HEMB_MINUS['rlis_lat']
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS), headers={'Content-type': 'application/json'} )
+		
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check type: non-numeric
 		HEMB_NON_NUM = HEMB
 		HEMB_NON_NUM["centroid_lat"] = 'abc'
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check type: unicode
 		HEMB_ASCII = HEMB
 		HEMB_ASCII["city"] = 123
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check null entries
 		HEMB_NULL = HEMB
 		HEMB_NULL["city"] = ''
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check entries too long
 		HEMB_LONG = HEMB
 		HEMB_LONG["city"] = 'asoethaoetuhsatoehuatoestnahseutasoehusaoehusaohsuathoeuthasoehusoaehuatohenahoesuhaonehunaohestn'
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG), headers={'Content-type': 'application/json'} )
+#		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check null entries too short
 		HEMB_SHORT = HEMB
 		HEMB_SHORT["city"] = ' '
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT),
+						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
-		
+	'''
 	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):

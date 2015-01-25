@@ -138,7 +138,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		
 		self.assertTrue(HEMB_rv.status_code == 200)
@@ -171,7 +171,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
@@ -201,7 +201,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)

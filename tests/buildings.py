@@ -220,7 +220,7 @@ class BuildingsTest(TestCase):
 			"centroid_long": -122.682749, 
 			"short_name": "Magic Bldg",
 			"building_code": "HEMB",
-			"building_identifier": "B888888",
+			"building_identifier": "B88888",
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",

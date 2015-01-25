@@ -63,7 +63,7 @@ class Health():
 			r = requests.get('http://localhost:8888/erp/gen/1.0/buildings', auth=(token, ''))
 			buildings = r.json()
 			
-			if len(buildings) < 70 or len(buildings) > 90:
+			if len(buildings) < 65 or len(buildings) > 90:
 				self.log.critical("check_health_status(): building data failure")
 				return {'result': 'error', 'message': 'building data failure'}
 			

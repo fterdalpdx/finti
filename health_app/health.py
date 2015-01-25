@@ -65,15 +65,16 @@ class Health():
 			rv = Client.open(self.client, path='/erp/gen/1.0/buildings',
 							 headers=h)
 			buildings_json = rv.data
+			self.log.debug('check_health_status(): buildings_json')
 			buildings = json.loads(buildings_json)
 			
-			if len(buildings) < 60:
+			if len(buildings) < 70:
 				self.log.critical("check_health_status(): building data failure")
 				return {'result': 'error', 'message': 'building data failure'}
 			cache.delete(token_hash)
 		except Exception as ex:
-			self.log.critical("check_health_status(): building data failure")
-			return {'result': 'error', 'message': 'building data failure'}
+			self.log.critical("check_health_status(): building data failure: " + str(ex))
+			return {'result': 'error', 'message': 'building data failure: ' + str(ex)}
 		
 		# Check db -- if down set flag to not expire data. Do not fail if db is down
 		

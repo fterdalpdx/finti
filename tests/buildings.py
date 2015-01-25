@@ -42,12 +42,8 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		rv = Client.get(self.client, path='/erp/gen/1.0/buildings',
 						 headers=h)
-		print('rv: ' + str(rv))
 		self.assert_200(rv)
-
-		
-		
-		buildings_json = self.app.get('/erp/gen/1.0/buildings').data
+		buildings_json = rv.data #self.app.get('/erp/gen/1.0/buildings').data
 		buildings = json.loads(buildings_json)
 		self.assertTrue(len(buildings) > 50)
 		self.assertTrue('city' in buildings[0])

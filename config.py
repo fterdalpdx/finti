@@ -80,6 +80,7 @@ class Config(object):
 		# H E A L T H   C H E C K
 		
 		self.health_uri_path = '/status'
+		self.health_cache_redis_db = 5
 		
 		# T E S T I N G
 		

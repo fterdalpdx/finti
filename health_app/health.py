@@ -7,6 +7,7 @@ Created on Sep 23, 2014
 import logging.config
 from config import config
 from flask import Flask, jsonify, abort, make_response, request
+from redis import StrictRedis
 
 class Health():
 	'''
@@ -29,11 +30,27 @@ class Health():
 
 		# Check Redis. Fail right-away if Redis is down - verifies infrastructure
 		
+		try:
+			cache = StrictRedis(db=config.health_cache_redis_db)
+			cache.set('test', 'test')
+			rv = cache.get('test')
+			if rv <> 'test':
+				return {'result': 'error', 'message': 'redis is not responding correctly'}
+		except Exception as ex:
+			self.log.critical("check_health_status() redis is not responding: " + str(ex))
+			return {'result': 'error', 'message': 'redis is not responding'}
+			
+		# Check if down for maintenance
+		
+		cache = StrictRedis(db=config.health_cache_redis_db)
+		is_maintenance = cache.get('is_maintenance')
+		if is_maintenance == 'true':
+			return {'result': 'error', 'message': 'system is down for maintenance'}
+
 		# Do a web request for a single building - verifies data quality
 		
 		# Check db -- if down set flag to not expire data. Do not fail if db is down
 		
-		# Check if down for maintenance 
 
 		status = {'result': 'success', 'message': "success"}
 		

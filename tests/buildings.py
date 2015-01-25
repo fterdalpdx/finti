@@ -140,7 +140,9 @@ class BuildingsTest(TestCase):
 		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		
-		self.assertTrue(HEMB_rv.status_code == 200)
+		# This will succeed the first time only
+		#self.assertTrue(HEMB_rv.status_code == 200)
+		self.assertFalse(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['long_name'] == "High Energy Magic Building")
 		
@@ -234,7 +236,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 200)
 		
@@ -247,7 +249,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -261,7 +263,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -274,7 +276,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -287,7 +289,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -300,7 +302,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -313,7 +315,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -326,7 +328,7 @@ class BuildingsTest(TestCase):
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT),
+		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		

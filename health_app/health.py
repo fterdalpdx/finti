@@ -61,10 +61,9 @@ class Health():
 			token_hash = auth.calc_hash(token)
 			cache.set(token_hash, 'test@test')
 			r = requests.get('http://localhost:8888/erp/gen/1.0/buildings', auth=(token, ''))
-			buildings_json = r.json()
-			buildings = json.loads(buildings_json)
+			buildings = r.json()
 			
-			if len(buildings) < 70:
+			if len(buildings) < 70 or len(buildings) > 90:
 				self.log.critical("check_health_status(): building data failure")
 				return {'result': 'error', 'message': 'building data failure'}
 			

@@ -108,9 +108,8 @@ class BuildingsTest(TestCase):
 						 headers=h, query_string=dict(building_identifier='0000038'))
 		self.assertTrue(EB_rv.status_code == 404)
 
-	'''		
 	
-	@unittest.skip('weatherwax')
+	#@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_add_building(self):
 		# Test of complete and correctly formated building data add
@@ -132,7 +131,16 @@ class BuildingsTest(TestCase):
 			"from_date": "2010-01-01",
 			"to_date": "2016-01-01"
 		 }		
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+						 headers=h)
+		
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['long_name'] == "High Energy Magic Building")
@@ -155,8 +163,16 @@ class BuildingsTest(TestCase):
 			"zipcode": "97888",
 			"from_date": "2010-01-01",
 			"to_date": "2016-01-01"
-		}		
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		}
+			
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		
@@ -179,7 +195,14 @@ class BuildingsTest(TestCase):
 			"from_date": "2010-01-01",
 			"to_date": "2016-01-01"
 		}		
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		h.add('Content-type', 'application/json')
+		
+		HEMB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 

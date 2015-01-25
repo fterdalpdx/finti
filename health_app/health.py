@@ -8,11 +8,12 @@ import logging.config
 from config import config
 from flask import Flask, jsonify, abort, make_response, request
 from redis import StrictRedis
-from werkzeug.test import Client
-from werkzeug.datastructures import Headers
+#from werkzeug.test import Client
+#from werkzeug.datastructures import Headers
 import auth
 import base64
 import json
+import requests
 
 class Health():
 	'''
@@ -59,12 +60,16 @@ class Health():
 			token = config.test_token
 			token_hash = auth.calc_hash(token)
 			cache.set(token_hash, 'test@test')
+			r = requests.get('http://localhost:8888/erp/gen/1.0/buildings', auth(token, ''))
+			'''
 			h = Headers()
 			h.add('Authorization',
 				  'Basic ' + base64.b64encode(token + ':'))
 			rv = Client.open(self.client, path='/erp/gen/1.0/buildings',
 							 headers=h)
 			buildings_json = rv.data
+			'''
+			buildings_json = r.json()
 			self.log.debug('check_health_status(): buildings_json')
 			buildings = json.loads(buildings_json)
 			

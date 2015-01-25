@@ -1,0 +1,55 @@
+<?
+    var base_url = getScriptUrl();
+?>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<div class="container-fluid header">
+    <div class="row">
+        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 psuBrand vcenter"> <a href="http://www.pdx.edu/">PSU</a></div>
+        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 navtext vcenter"> <a href="#home">API</a></div>
+        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 navtext vcenter"> <a href="#home">HELP</a></div>
+        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 navtext vcenter"> <a href="#home">BLOG</a></div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+    <div class="access-token">
+         <h2>Access Token</h2>
+<p>Your <i>Access Token</i> grants access to the University as you. Don't share this lightly.</p>
+                <form method="POST" action="<?=base_url?>" class="form-inline" role="form">  
+                    <div class="form-group col-xs-12">
+                        <div class="input-group col-xs-12 col-md-8 col-lg-6">
+                            <input type="text" size="24" class="form-control" readonly="readonly" name="token" value="<?= data ?>"> <span class="input-group-btn">
+                            <button type="submit" class="btn btn-default btn-custom">Generate</button></span>
+                       </div>
+                     </div>
+                 </form>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+    <div class="delete">
+         <h2>Delete Access Token</h2>
+         <form class="form-inline" method="POST" action="<?=base_url?>" role="form">  
+             <div class="form-group">
+                 <button class="btn btn-default btn-custom" type="submit">Delete Token</button>
+             </div>
+         </form>
+    </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted"></p>
+    </div>
+</footer>
+
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+    <?!= include('bootstrap'); ?>
+    <?!= include('style'); ?>
+    

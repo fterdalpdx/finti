@@ -1,0 +1,69 @@
+<!-- jQuery -->
+<link type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" rel="Stylesheet" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.9.1/jquery-ui.min.js"></script>
+
+<!-- Bootstrap -->
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<!-- end bootstrap -->
+
+<!-- PSU Styles -->
+<?!= include('Stylesheet'); ?>
+
+
+<?
+    var base_url = getScriptUrl();
+    var buildings = getBuildings();
+    var nn = 0;
+?>
+<div id="bldg-content">
+    <h1 class="page-header"> Buildings</h1>
+
+    <div class="instruction" style="text-align:center;">
+        Click on a building ID to see the building's details.
+        Click on the "New Building" button to add a new building.
+    </div><br />
+
+    <a href='<?=base_url?>?building=new' class="new-button"><input type="button" value="New Building"></a>
+    <br style="clear:both;" />
+
+    <div class="table-responsive">
+    <table class="table table-striped table-roll">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Short Name</th>
+        <th>Long Name</th>
+      </tr>
+      </thead>
+      <tbody>
+      <?
+      for (var building in buildings) {
+
+        nn++;
+        ?>
+       <tr>
+         <td>
+           <a href='<?=base_url?>?building=<?= buildings[building]["building_identifier"] ?>'>
+               <?= buildings[building]["building_identifier"] ?>
+           </a>
+         </td>
+         <td><?= buildings[building]["building_code"] ?></td>
+         <td><?= buildings[building]["short_name"] ?></td>
+         <td><?= buildings[building]["long_name"] ?></td>
+       </tr>
+      <? } ?>
+      </tbody>
+    </table>
+    </div>
+
+    <a href='<?=base_url?>?building=new' class="new-button"><input type="button" value="New Building"></a>
+    <br style="clear:both;" />
+</div>
+<?!= include('Javascript'); ?>

@@ -49,6 +49,8 @@ Hello <%= user.getNickname() %>!
 Hello BLANK!
 </c:otherwise>
 </c:choose>
+<br/>
+${names}
 </body>
 
 </html>

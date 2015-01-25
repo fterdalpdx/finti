@@ -1,0 +1,132 @@
+{
+    "loggers": {
+        "buildings": {
+            "handlers": [
+                "buildings",
+                "buildings_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "model": {
+            "handlers": [
+                "model",
+                "model_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "health": {
+            "handlers": [
+                "health",
+                "health_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "tokens": {
+            "handlers": [
+                "tokens",
+                "tokens_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
+        }
+     },
+     "handlers": {
+		"buildings": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/buildings.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "buildings_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/buildings.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "model": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/model.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "model_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/model.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "health": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/health.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "health_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/health.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "tokens": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/tokens.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "tokens_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/tokens.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "console": {
+            "formatter": "default", 
+            "class": "logging.StreamHandler", 
+            "stream": "ext://sys.stdout", 
+            "level": "DEBUG"
+        } 
+ 	},
+    "version": 1, 
+    "filters": {}, 
+    "formatters": {
+        "default": {
+            "datefmt": "%Y.%m.%dT%H:%M:%S", 
+            "format": "%(asctime)s %(levelname)-8s %(name)-15s %(message)s"
+        }, 
+        "json": {
+            "()": "logstash_formatter.LogstashFormatter"
+        }, 
+        "dateTime": {
+            "datefmt": "%Y.%m.%dT%H:%M:%S", 
+            "format": "%(asctime)s %(levelname)-8s %(name)-15s %(message)s"
+        }
+    }
+}
+        

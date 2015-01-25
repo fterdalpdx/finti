@@ -1,0 +1,114 @@
+#!/bin/sh
+
+BASE=`pwd`
+NGINX_VER="nginx-1.7"
+
+# Base system installed binary dependencies
+#
+# python-dev 
+# build-essential
+# Oracle instant client: http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
+# OpenSSL development libraries
+# ZLib development library - zilb1g-dev
+# PCRE development library - libpcre3-dev
+#
+
+# Setup a Virtual Python environment if it does not already exist
+
+if [ ! -d $BASE/venv ]; then
+    mkdir $BASE/venv
+    virtualenv -p python2.7 $BASE/venv
+fi
+
+# Help cx_Oracle find its way
+
+LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH
+ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME
+
+# Activate environment and install dependencies
+. $BASE/venv/bin/activate
+pip install -r requirements.txt
+
+# Get nginx if not already installed:
+
+if [ ! -d $BASE/src ]; then mkdir $BASE/src; fi
+
+if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
+        cd $BASE/src
+        git clone https://github.com/nginx/nginx.git
+        cd nginx; git checkout "$NGINX_VER"
+        ./configure --prefix=$BASE/nginx --without-http_rewrite_module
+        make
+        make install
+        cd $BASE
+fi
+
+if [ ! -d $BASE/var ]; then mkdir $BASE/var; fi
+
+if [ ! -d $BASE/var/log ]; then mkdir $BASE/var/log; fi
+
+if [ ! -d $BASE/var/log/uwsgi ]; then mkdir $BASE/var/log/uwsgi; fi
+
+# Generate uWSGI config file from template
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-emperor-template.ini > $BASE/etc/uwsgi/emperor.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/buildings_app.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/tokens_app.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/health_app.ini
+
+# Generate NginX config file from template
+sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.conf
+
+# Add to our PYTHONPATH
+
+if grep -q '^PYTHONPATH' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^PYTHONPATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+
+echo "PYTHONPATH=$BASE:$BASE/../etc; export PYTHONPATH" >> $BASE/venv/bin/activate
+
+# Set the snOracle home
+
+if grep -q '^ORACLE_HOME' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^ORACLE_HOME' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+echo "ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME" >> $BASE/venv/bin/activate
+
+# Set the LD_LIBRARY_PATH (for Oracle)
+
+if grep -q '^LD_LIBRARY_PATH' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^LD_LIBRARY_PATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+echo "LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH" >> $BASE/venv/bin/activate
+
+# Set the release level for the environment
+
+if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^RELEASE_LEVEL' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+
+if [ -z "$1" ]; then
+	RELEASE_LEVEL='development'
+	echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
+	echo "Defaulting to release level: 'development' unless rerun with argument specifying otherwise."
+else
+	if [ "$1" = "testing" -o "$1" = "development" -o "$1" = "production" ]; then
+		RELEASE_LEVEL=$1
+	else
+		echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
+		RELEASE_LEVEL='development'
+	fi
+fi
+echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
+echo "=== RELEASE LEVEL set to $RELEASE_LEVEL"
+
+
+
+
+
+# Create the dir for a SQLite Db for testing
+
+if [ ! -d $BASE/db ]; then mkdir $BASE/db; fi

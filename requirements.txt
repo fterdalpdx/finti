@@ -12,6 +12,7 @@ pika>=0.9.13
 pycrypto>=2.6.1
 python-daemon>=1.6
 redis>=2.10.3
+requests>=2.5.1
 SQLAlchemy>=0.9.7
 uWSGI>=2.0.8
 wsgiref>=0.1.2

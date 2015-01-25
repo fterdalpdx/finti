@@ -17,7 +17,7 @@ import json
 
 #from requests.auth import HTTPBasicAuth
 
-class BuildingsTest(unittest.TestCase):
+class BuildingsTest(TestCase):
 	def create_app(self):
 		app.config['TESTING'] = True
 		self.client = app.test_client()

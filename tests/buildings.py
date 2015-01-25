@@ -3,28 +3,50 @@ Created on Sep 29, 2014
 
 @author: dennis
 '''
-import unittest
 
+import unittest
+from flask.ext.testing import TestCase
+from werkzeug.test import Client
+from werkzeug.datastructures import Headers
 from buildings_app.get_instance import app
-import json
 from config import config
+from redis import StrictRedis
+import auth
+import base64
+import json
+
 #from requests.auth import HTTPBasicAuth
 
 class BuildingsTest(unittest.TestCase):
+	def create_app(self):
+		app.config['TESTING'] = True
+		self.client = app.test_client()
+		return app
+	
 	def setUp(self):
-		#self.db_fd, buildings.app.config['DATABASE'] = tempfile.mkstemp()
 		app.config['TESTING'] = True
 		self.app = app.test_client()
-		#buildings.init_db()
+		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
+		self.token = '2144402c-586e-44fc-bd0c-62b31e98394d'
+		self.token_hash = auth.calc_hash(self.token)
+		self.cache.set(self.token_hash, 'test@test')
 
 
 	def tearDown(self):
-		#os.close(self.db_fd)
-		#os.unlink(buildings.app.config['DATABASE'])
-		pass
+		self.cache.delete(self.token_hash)
 
 	#@unittest.skip('weatherwax')
 	def test_get_buildings(self):
+		h = Headers()
+		h.add('Authorization',
+			  'Basic ' + base64.b64encode(self.token + ':'))
+		rv = Client.get(self.client, path='/erp/gen/1.0/buildings',
+						 headers=h)
+		print('rv: ' + str(rv))
+		self.assert_200(rv)
+
+		
+		
 		buildings_json = self.app.get('/erp/gen/1.0/buildings').data
 		buildings = json.loads(buildings_json)
 		self.assertTrue(len(buildings) > 50)

@@ -53,7 +53,7 @@ class Health():
 		if is_maintenance == 'true':
 			return {'result': 'error', 'message': 'system is down for maintenance'}
 
-		# Do a web request for a single building - verifies data quality
+		# Do a web request for all buildings - verifies data quality
 		
 		try:
 			cache = StrictRedis(db=config.tokens_cache_redis_db)

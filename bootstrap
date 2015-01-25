@@ -51,9 +51,9 @@ if [ ! -d $BASE/var/log/uwsgi ]; then mkdir $BASE/var/log/uwsgi; fi
 
 # Generate uWSGI config file from template
 sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-emperor-template.ini > $BASE/etc/uwsgi/emperor.ini
-sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/buildings.ini
-sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/tokens.ini
-sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/health.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/buildings_app.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/tokens_app.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/health_app.ini
 
 # Generate NginX config file from template
 sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.conf

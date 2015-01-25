@@ -5,12 +5,13 @@ Created on Sep 22, 2014
 '''
 
 #from flask.ext.sqlalchemy import SQLAlchemy
-from flask import Flask
-import os
+#from flask import Flask
+#import os
 from config import config
 import logging.config
 import redis
-from beaver.transports.base_transport import json
+#from beaver.transports.base_transport import json
+import json
 import cx_Oracle
 
 

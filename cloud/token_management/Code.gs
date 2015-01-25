@@ -50,8 +50,22 @@ function obtainToken(){
   var token = fetch_token(user);
   if (token == "") {
     token = "you do not currently possess a token";
+  } else {
+    token = "you have an existing token";
   }
   return token;
+}
+
+function bin2Hex(s) {
+  var hex = '', h;
+  for (var i = 0, l = s.length; i < l; ++i) {
+    h = (s[i] < 0 ? (0xFF + s[i] + 1) : s[i]).toString(16)
+    if (h.length < 2) {
+      h = "0" + h;
+    }
+    hex += h;
+  }
+  return hex;
 }
 
 /**
@@ -60,9 +74,7 @@ function obtainToken(){
 
 function hash(token) {
   var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, token, Utilities.Charset.US_ASCII);
-  var b64_digest = Utilities.base64Encode(digest);
-  
-  return b64_digest;
+  return(bin2Hex(digest));
 }
 
 /**
@@ -179,7 +191,11 @@ function store_token(user, token) {
  */
 
 function notify_observers(log_index) {
-  var response = UrlFetchApp.fetch("http://ruby.cat.pdx.edu:8000/erp/gen/1.0/tokens/" + log_index);
+  var ws_url = PropertiesService.getScriptProperties().getProperty("ws_url");
+  var params = {
+    "validateHttpsCertificates": false
+  };
+  var response = UrlFetchApp.fetch(ws_url + "/erp/gen/1.0/tokens/" + log_index, params);
 }
 
 /**
@@ -226,7 +242,8 @@ function genFetchURLparams(verb) {
   
   var params = {
     "method": verb,
-    "headers": headers
+    "headers": headers,
+    "validateHttpsCertificates": false
   };
 }
 

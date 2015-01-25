@@ -1,17 +1,19 @@
+import unittest
 from flask.ext.testing import TestCase
 from werkzeug.test import Client
 from werkzeug.datastructures import Headers
-from app import buildings
-import unittest
+from buildings_app.get_instance import app
+from config import config
+from redis import StrictRedis
+import auth
 import base64
 
 class BuildingsAuthTest(TestCase):
+	
 	def create_app(self):
-		#views.DATABASE = 'testing.sqlite3'
-		#if os.path.exists(views.DATABASE):
-		#	os.unlink(views.DATABASE)
-		#query_db(self.CREATE_TABLE)
-		return buildings.app
+		app.config['TESTING'] = True
+		self.client = app.test_client()
+		return app
 	
 	
 	def test_admin_page_is_locked(self):
@@ -27,15 +29,20 @@ class BuildingsAuthTest(TestCase):
 		rv = Client.open(self.client, path='/erp/gen/1.0/buildings',
 						 headers=h)
 		self.assert_401(rv)
-
+	
 	def test_admin_page_allows_valid_login(self):
+		cache = StrictRedis(db=config.tokens_cache_redis_db)
+		token = config.test_token
+		token_hash = auth.calc_hash(token)
+		cache.set(token_hash, 'test@test')
 		h = Headers()
 		h.add('Authorization',
-			  'Basic ' + base64.b64encode('2144402c-586e-44fc-bd0c-62b31e98394d:'))
+			  'Basic ' + base64.b64encode(token + ':'))
 		rv = Client.open(self.client, path='/erp/gen/1.0/buildings',
 						 headers=h)
 		self.assert_200(rv)
+		cache.delete(token_hash)
+	
 			
 if __name__ == "__main__":
-	#import sys;sys.argv = ['', 'Test.testName']
 	unittest.main()	

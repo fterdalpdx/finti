@@ -10,6 +10,9 @@ from flask import Flask, jsonify, abort, make_response, request
 #import auth
 from redis import StrictRedis
 import gdata.spreadsheet.service
+import daemon
+from optparse import OptionParser
+#from flaskext.auth.permissions import self
 
 class Tokens():
 	'''
@@ -20,7 +23,12 @@ class Tokens():
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('tokens')
 		self.log.debug('__init__(): starting')
-	
+		self.pubsub = {}
+		self.cache = {}
+		for host in config.tokens_pub_to:
+			self.cache[host] = StrictRedis(host=host)
+			self.pubsub[host] = self.cache[host].pubsub()
+		
 	def notify(self, log_index):
 		'''
 			Receive notification of a user token change event. The notify method corresponds
@@ -171,52 +179,25 @@ class Tokens():
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 		
-'''
+		
+
+tokens = Tokens()
+
 if __name__ == '__main__':	
 	parser = OptionParser()
 	parser.add_option("-D", "--debug", dest="debug", action='store_true', default=False, help="Run in debug mode")
+	parser.add_option("-f", "--fore", dest="fore", action='store_true', default=False, help="Run as a foreground process instead of a daemon")
 	
 	(options, args) = parser.parse_args()
 	
 	if not options.debug:
-	#	context = daemon.DaemonContext(umask=0o002)
-	#	with context:
-'''
+		if options.fore:
+			print '\033]0;Tokens\a' 
+			tokens.subscribe()
+		else:
+			with daemon.DaemonContext():
+				tokens.subscribe()
 
-tokens = Tokens()
 
-app = Flask(__name__)
-
-def init_db():
-	#model.init_db()
-	pass
-
-#@auth.require_auth(scope='token_manage')
-@app.route(config.tokens_uri_path + '/<log_index>', methods = ['GET'])
-def notify(log_index):
-	"""
-		Observe token updates. Wait for call from the User Token Management Service.
-		The most recent change log index is pass in. This service then fetches and applies changes starting
-		from the last locally saved log index position.
-	"""
-	global request, token
-
-	tokens.log.info('notify(): called from remote address: ' + str(request.remote_addr) + ', for end point: ' + str(request.endpoint))
-	status = tokens.notify(log_index)
-
-	if status['result'] <> 'success':
-		abort(404, status['message'])
-	else:
-		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
-		
-@app.errorhandler(400)
-def custom_400(error):
-	token.log.info('custom_400(): error: ' + str(error))
-	return make_response(jsonify( {'message': error.description}), 400)
-
-@app.errorhandler(404)
-def custom_404(error):
-	token.log.info('custom_404(): error: ' + str(error))
-	return make_response(jsonify( {'message': error.description}), 404)
 
 		

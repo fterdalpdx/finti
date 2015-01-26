@@ -160,8 +160,13 @@ def stop_uwsgi():
 	if status:
 		try:
 			check_output(['uwsgi', '--stop', "var/uwsgi_emperor.pid"])
-			sleep(3)
-			status = status_uwsgi()
+			
+			status = status_uwsgi(); patients = 5 
+			while (patients > 0) and status == False:
+				sleep(1)
+				status = status_uwsgi()
+				patients -= 1
+				
 			if status:
 				log.info('stop_uwsgi() uwsgi failed to stop .. check the logs')
 			else:
@@ -201,8 +206,10 @@ def stop():
 		Go into maintenance mode and stop all processing
 	'''
 	maint_status = health.start_maint()
-	log.info('stop() waiting to let current traffic complete processing..')
-	sleep(5)
+	if config.release_level == 'production':
+		log.info('stop() waiting to let current traffic complete processing..')
+		sleep(30)
+		
 	nginx_status = stop_nginx()
 	uwsgi_status = stop_uwsgi()
 	token_status = stop_token()

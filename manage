@@ -162,7 +162,7 @@ def stop_uwsgi():
 			check_output(['uwsgi', '--stop', "var/uwsgi_emperor.pid"])
 			
 			status = status_uwsgi(); patients = 5 
-			while (patients > 0) and status == False:
+			while (patients > 0) and status == True:
 				sleep(1)
 				status = status_uwsgi()
 				patients -= 1
@@ -222,7 +222,7 @@ def stop():
 @manager.command
 def status():
 	'''
-		Report the system status
+		Report on the system status
 	'''
 	nginx_status = status_nginx()
 	uwsgi_status = status_uwsgi()
@@ -235,7 +235,15 @@ def status():
 		log.info('status() system is fully stopped')
 	else:
 		log.info('status() system is not fully running')
-		
+
+@manager.command
+def restart():
+	'''
+		Restart the system
+	'''
+	stop()
+	start()
+	
 @manager.command
 def sync_cache():
 	log.info('sync_cache() syncing token cache with cloud')

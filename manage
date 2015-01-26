@@ -1,18 +1,239 @@
 #!/usr/bin/env python
 
 import os
-from tokens import create_app
+#from tokens import create_app
 from flask import Flask
 from flask.ext.script import Manager, Shell
+from subprocess import check_call, check_output, CalledProcessError
+import logging.config
+from config import config
+from time import sleep
+from tokens_app.tokens import tokens
+from health_app.health import health
 
 app = Flask(__name__)
 
 manager = Manager(app)
 
+logging.config.dictConfig(config.logging_conf_dict)
+log = logging.getLogger('manage')
+
 @manager.shell
 def make_shell_context():
 	return dict(app=app)
 
+@manager.command
+def status_nginx():
+	status = False
+	try:
+		check_output(['pgrep', '-f', "nginx: master process"])
+		log.info('status_nginx() NGINX is running')
+		status = True
+	except CalledProcessError:
+		log.info('status_nginx() NGINX is stopped')
 
+	return status
+
+@manager.command
+def status_token():
+	status = False
+	try:
+		check_output(['pgrep', '-f', "python tokens_app/tokens.py"])
+		log.info('status_token() token manager is running')
+		status = True
+	except CalledProcessError:
+		log.info('status_token() token manager is stopped')
+
+	return status
+
+@manager.command	
+def status_uwsgi():
+	status = False
+	try:
+		check_output(['pgrep', '-f', "uwsgi --ini etc/uwsgi/emperor.ini"])
+		log.info('status_uwsgi() uWSGI is running')
+		status = True
+	except CalledProcessError:
+		log.info('status_uwsgi() uWSGI is stopped')
+
+	return status
+
+@manager.command
+def status_maint():
+	return health.stat_maint()
+
+@manager.command	
+def start_uwsgi():
+	status = status_uwsgi()
+	if status:
+		log.info('start_uwsgi() uwsgi was already running')
+	else:
+		try:
+			check_output(['uwsgi', '--ini', 'etc/uwsgi/emperor.ini'])
+			status = status_uwsgi()
+			if status:
+				log.info('start_uwsgi() uWSGI emperor has been started')
+			else:
+				log.info('start_uwsgi() uWSGI emperor failed to start .. check the logs.')
+		except CalledProcessError:
+			log.info('start_uwsgi() uWSGI emperor failed to start .. check the logs.')
+	
+	return status
+
+@manager.command	
+def start_nginx():
+	status = status_nginx()
+	if status:
+		log.info('start_nginx() nginx was already running')
+	else:
+		try:
+			check_output(['nginx/sbin/nginx', '-c', '../nginx/conf/nginx.conf'])
+			status = status_nginx()
+			if status:
+				log.info('start_nginx() nginx has been started')
+			else:
+				log.info('start_nginx() nginx failed to start .. check the logs.')
+		except CalledProcessError:
+			log.info('start_nginx() nginx failed to start .. check the logs.')
+	
+	return status
+
+@manager.command	
+def start_token():
+	status = status_token()
+	if status:
+		log.info('start_token() token manager was already running')
+	else:
+		try:
+			check_output(['python', 'tokens_app/tokens.py'])
+			status = status_token()
+			if status:
+				log.info('start_token() token manager has been started')
+			else:
+				log.info('start_token() token manager failed to start .. check the logs.')
+		except CalledProcessError:
+			log.info('start_token() token manager failed to start .. check the logs.')
+	
+	return status
+
+@manager.command	
+def stop_token():
+	status = status_token()
+	if status:
+		try:
+			check_output(['pkill', '-f', "python tokens_app/tokens.py"])
+			sleep(1)
+			status = status_token()
+			if status:
+				log.info('stop_token() token manager failed to stop .. check the logs')
+			else:
+				log.info('stop_token() token manager has been stopped.')
+		except CalledProcessError:
+			log.info('stop_token() token manager failed to stop .. check the logs.')
+	else:
+		log.info('stop_token() token manager was already stopped')
+	
+	return status
+
+@manager.command	
+def stop_nginx():
+	status = status_nginx()
+	if status:
+		try:
+			check_output(['nginx/sbin/nginx', '-s', "stop"])
+			sleep(3)
+			status = status_nginx()
+			if status:
+				log.info('stop_nginx() nginx failed to stop .. check the logs')
+			else:
+				log.info('stop_nginx() nginx has been stopped.')
+		except CalledProcessError:
+			log.info('stop_nginx() nginx failed to stop .. check the logs.')
+	else:
+		log.info('stop_nginx() nginx was already stopped')
+	
+	return status
+
+@manager.command	
+def stop_uwsgi():
+	status = status_uwsgi()
+	if status:
+		try:
+			check_output(['uwsgi', '--stop', "var/uwsgi_emperor.pid"])
+			sleep(3)
+			status = status_uwsgi()
+			if status:
+				log.info('stop_uwsgi() uwsgi failed to stop .. check the logs')
+			else:
+				log.info('stop_uwsgi() uwsgi has been stopped.')
+		except CalledProcessError:
+			log.info('stop_uwsgi() uwsgi failed to stop .. check the logs.')
+	else:
+		log.info('stop_uwsgi() uwsgi was already stopped')
+	
+	return status
+
+@manager.command
+def start():
+	'''
+		Start system and allow live traffic flow
+	'''
+	nginx_status = start_nginx()
+	uwsgi_status = start_uwsgi()
+	token_status = start_token()
+	maint_status = False
+	
+	if nginx_status and uwsgi_status and token_status:
+		sync_cache()
+		log.info('status() leaving maintenance mode')
+		maint_status = health.stop_maint()
+	else:
+		log.info('status() not leaving maintenance mode')
+	
+	if nginx_status and uwsgi_status and token_status and not maint_status:
+		log.info('status() system is fully started')
+	else:
+		log.info('status() system failed to fully start')
+	
+@manager.command
+def stop():
+	'''
+		Go into maintenance mode and stop all processing
+	'''
+	maint_status = health.start_maint()
+	log.info('stop() waiting to let current traffic complete processing..')
+	sleep(5)
+	nginx_status = stop_nginx()
+	uwsgi_status = stop_uwsgi()
+	token_status = stop_token()
+	
+	if not nginx_status and not uwsgi_status and not token_status and maint_status:
+		log.info('status() system is fully stopped')
+	else:
+		log.info('status() system failed to fully stopped')
+	
+@manager.command
+def status():
+	'''
+		Report the system status
+	'''
+	nginx_status = status_nginx()
+	uwsgi_status = status_uwsgi()
+	token_status = status_token()
+	maint_status = status_maint()
+	
+	if nginx_status and uwsgi_status and token_status and not maint_status:
+		log.info('status() system is fully running')
+	elif not nginx_status and not uwsgi_status and not token_status and maint_status:
+		log.info('status() system is fully stopped')
+	else:
+		log.info('status() system is not fully running')
+		
+@manager.command
+def sync_cache():
+	log.info('sync_cache() syncing token cache with cloud')
+	tokens.sync_cache()
+	
+	
 if __name__ == '__main__':
 	manager.run()

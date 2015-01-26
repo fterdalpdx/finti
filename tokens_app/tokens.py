@@ -26,8 +26,7 @@ class Tokens():
 		self.pubsub = {}
 		self.cache = {}
 		for host in config.tokens_pub_to:
-			self.cache[host] = StrictRedis(host=host, db=config.tokens_cache_redis_db)
-			self.pubsub[host] = self.cache[host].pubsub()
+			self.cache[host] = StrictRedis(host=host, db=config.tokens_cache_redis_db, socket_timeout=5)
 		
 	def notify(self, log_index):
 		'''
@@ -42,11 +41,14 @@ class Tokens():
 			self.log.info('notify(): unit-test case data detected')
 			status = {'result': 'success', 'message': "unit-test triggered"}
 		else:
-			# This activity should run asynchronously 
-			updates = self.fetch_updates(log_index)
-			self.post_updates(updates, log_index)
-			# Update the local tokens from the source
-			status = {'result': 'success', 'message': "index up-to-date"}
+			try:
+				for cache in self.cache.values():
+					self.log.info('notify(): published notify item to pubsub queue')
+					cache.publish(config.tokens_pubsub_channel, log_index)
+	
+				status = {'result': 'success', 'message': "token indexing system notified"}
+			except Exception as ex:
+				status = {'result': 'error', 'message': "cluster peers are not responding"}
 		
 		return status
 		
@@ -178,7 +180,23 @@ class Tokens():
 		cache.set('log_index', num_log_entries) # Reset the cache log index to the start
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
-		
+	def listen(self):
+		cache = StrictRedis(db=config.tokens_cache_redis_db)
+		pubsub = cache.pubsub()
+		pubsub.subscribe([config.tokens_pubsub_channel])
+		for item in pubsub.listen():
+			value = str(item['data'])
+			if value.isdigit():
+				# This must be a token change
+				self.log.info('listen(): token change item seen: ' + str(item['data']))
+				updates = self.fetch_updates(item['data'])
+				self.post_updates(updates, str(item['data']))
+				self.log.info('listen(): finished processing token change for item: ' + str(item['data']))
+			else:
+				# This must be a scope change
+				self.log.info('listen(): scope change item seen: ' + str(item['data']))
+				
+				
 		
 
 tokens = Tokens()
@@ -193,10 +211,10 @@ if __name__ == '__main__':
 	if not options.debug:
 		if options.fore:
 			print '\033]0;Tokens\a' 
-			tokens.subscribe()
+			tokens.listen()
 		else:
 			with daemon.DaemonContext():
-				tokens.subscribe()
+				tokens.listen()
 
 
 

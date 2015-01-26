@@ -25,6 +25,29 @@ class Health():
 		self.log = logging.getLogger('health')
 		self.log.debug('__init__(): starting')
 	
+	def start_maint(self):
+		self.log.info("start_maint(): setting to in-maintenance mode")
+		cache = StrictRedis(db=config.health_cache_redis_db)
+		cache.set('is_maintenance', 'true')
+		return True
+
+	def stop_maint(self):
+		self.log.info("start_maint(): setting to not in-maintenance mode")
+		cache = StrictRedis(db=config.health_cache_redis_db)
+		cache.set('is_maintenance', 'false')
+		return False
+
+	def stat_maint(self):
+		self.log.info("stat_maint(): checking maintenance status")
+		cache = StrictRedis(db=config.health_cache_redis_db)
+		is_maintenance = cache.get('is_maintenance')
+		if is_maintenance == 'true':
+			self.log.info("stat_maint(): in maintenance mode")
+			return True
+		else:
+			self.log.info("stat_maint(): not in maintenance mode")
+			return False
+		
 	def check_health_status(self):
 		'''
 			Verify that all necessary systems are available and running correctly.

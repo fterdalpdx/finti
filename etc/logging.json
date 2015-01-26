@@ -31,6 +31,14 @@
                 "console"
             ], 
             "level": "DEBUG"
+        },
+        "manage": {
+            "handlers": [
+                "manage",
+                "manage_logstash",
+                "console"
+            ], 
+            "level": "DEBUG"
         }
      },
      "handlers": {
@@ -101,6 +109,24 @@
             "backupCount": 2, 
             "level": "DEBUG", 
             "filename": "BASE/tokens.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "manage": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/manage.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "manage_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/manange.json", 
             "maxBytes": 10485760, 
             "mode": "a", 
             "formatter": "json", 

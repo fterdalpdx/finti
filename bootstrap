@@ -29,15 +29,23 @@ ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME
 . $BASE/venv/bin/activate
 pip install -r requirements.txt
 
+
 # Get nginx if not already installed:
 
 if [ ! -d $BASE/src ]; then mkdir $BASE/src; fi
 
+# Get the PCRE library to support NGiNX rewrite rules
+
+if [ ! -d $BASE/src/pcre ]; then
+		cd $BASE/src
+		wget -O pcre-8.36.tar.bz2  http://sourceforge.net/projects/pcre/files/pcre/8.36/pcre-8.36.tar.bz2/download
+		tar jxvf pcre-8.36.tar.bz2
+fi
 if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
         cd $BASE/src
         git clone https://github.com/nginx/nginx.git
         cd nginx; git checkout "$NGINX_VER"
-        ./configure --prefix=$BASE/nginx --without-http_rewrite_module
+        ./configure --prefix=$BASE/nginx --with-pcre=$BASE/src/pcre-8.36
         make
         make install
         cd $BASE

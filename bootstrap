@@ -13,6 +13,38 @@ NGINX_VER="nginx-1.7"
 # PCRE development library - libpcre3-dev
 #
 
+usage(){
+cat 2>&1 << EOS
+Usage: $0 -r <release level> [-v][-T][-h]
+
+Creates and initializes project dependancies and configurations
+
+where:
+	-r <release level>		One of: 'development', 'testing', 'production'
+	-v			Show verbose output.
+	-T			Run unit tests.
+	-h			Show this help info.
+EOS
+	exit 2
+}
+
+
+# Read options from command line arguments and translate options into variables
+
+while getopts "r:vhT" arg; do
+	case "$arg" in
+		v)	VERBOSE=1;;
+		T)	UNIT_TEST=1;;
+		r)	RELEASE_LEVEL=$OPTARG;;
+		h)	usage;;
+		*)	usage;;
+	esac
+done
+
+if  [-z "$RELEASE_LEVEL" ]; then
+	usage
+fi
+
 # Setup a Virtual Python environment if it does not already exist
 
 if [ ! -d $BASE/venv ]; then
@@ -36,16 +68,11 @@ if [ ! -d $BASE/src ]; then mkdir $BASE/src; fi
 
 # Get the PCRE library to support NGiNX rewrite rules
 
-if [ ! -d $BASE/src/pcre ]; then
-		cd $BASE/src
-		wget -O pcre-8.36.tar.bz2  http://sourceforge.net/projects/pcre/files/pcre/8.36/pcre-8.36.tar.bz2/download
-		tar jxvf pcre-8.36.tar.bz2
-fi
 if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
         cd $BASE/src
         git clone https://github.com/nginx/nginx.git
         cd nginx; git checkout "$NGINX_VER"
-        ./configure --prefix=$BASE/nginx --with-pcre=$BASE/src/pcre-8.36
+        ./configure --prefix=$BASE/nginx --without-pcre
         make
         make install
         cd $BASE
@@ -113,10 +140,6 @@ fi
 echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
 echo "=== RELEASE LEVEL set to $RELEASE_LEVEL"
 
-
-
-
-
 # Create the dir for a SQLite Db for testing
 
-if [ ! -d $BASE/db ]; then mkdir $BASE/db; fi
+#if [ ! -d $BASE/db ]; then mkdir $BASE/db; fi

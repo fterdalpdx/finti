@@ -133,20 +133,7 @@ if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
 	grep -v '^RELEASE_LEVEL' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
 fi
 
-if [ -z "$1" ]; then
-	RELEASE_LEVEL='development'
-	echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
-	echo "Defaulting to release level: 'development' unless rerun with argument specifying otherwise."
-else
-	if [ "$1" = "testing" -o "$1" = "development" -o "$1" = "production" ]; then
-		RELEASE_LEVEL=$1
-	else
-		echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
-		RELEASE_LEVEL='development'
-	fi
-fi
 echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
-echo "=== RELEASE LEVEL set to $RELEASE_LEVEL"
 
 # Create the dir for a SQLite Db for testing
 

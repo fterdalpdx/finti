@@ -5,7 +5,7 @@
 
 CANONPATH=`readlink -f $0`
 BASE=`dirname $CANONPATH`
-cd $BASE
+cd $BASE/..
 
 . venv/bin/activate
 

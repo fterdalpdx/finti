@@ -21,10 +21,11 @@ Usage: $0 -r <release level> [-v][-T][-h]
 Creates and initializes project dependancies and configurations
 
 where:
-	-r <release level>		One of: 'development', 'testing', 'production'
+	-r <release level>	One of: 'development', 'testing', 'production'
 	-v			Show verbose output.
 	-T			Run unit tests.
 	-h			Show this help info.
+	
 EOS
 	exit 2
 }

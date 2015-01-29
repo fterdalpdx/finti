@@ -1,6 +1,7 @@
 #!/bin/sh
 
-BASE=`pwd`
+CANONPATH=`readlink -f $0`
+BASE=`dirname $CANONPATH`
 NGINX_VER="nginx-1.7"
 
 # Base system installed binary dependencies
@@ -41,7 +42,14 @@ while getopts "r:vhT" arg; do
 	esac
 done
 
-if  [-z "$RELEASE_LEVEL" ]; then
+if  [ -z "$RELEASE_LEVEL" ]; then
+	usage
+fi
+
+if [ "$RELEASE_LEVEL" = "testing" -o "$RELEASE_LEVEL" = "development" -o "$RELEASE_LEVEL" = "production" ]; then
+	pass
+else
+	echo "Allowed release levels: 'development', 'testing', or 'production'"
 	usage
 fi
 
@@ -72,7 +80,7 @@ if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
         cd $BASE/src
         git clone https://github.com/nginx/nginx.git
         cd nginx; git checkout "$NGINX_VER"
-        ./configure --prefix=$BASE/nginx --without-pcre
+        ./configure --prefix=$BASE/nginx --without-http_rewrite_module
         make
         make install
         cd $BASE

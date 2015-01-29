@@ -1,10 +1,12 @@
 #!/bin/sh
 #
-# 
+# Orient the execution of the manage script relative to be base of our distribution
 #
 
-. ../venv/bin/activate
+CANONPATH=`readlink -f $0`
+BASE=`dirname $CANONPATH`
+cd $BASE
 
-SERVICE=`basename $0`.py
-cd ..
+. venv/bin/activate
+
 exec python manage $*

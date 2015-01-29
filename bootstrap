@@ -48,7 +48,7 @@ if  [ -z "$RELEASE_LEVEL" ]; then
 fi
 
 if [ "$RELEASE_LEVEL" = "testing" -o "$RELEASE_LEVEL" = "development" -o "$RELEASE_LEVEL" = "production" ]; then
-	;;
+	true
 else
 	echo "Allowed release levels: 'development', 'testing', or 'production'"
 	usage

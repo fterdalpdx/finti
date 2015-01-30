@@ -74,6 +74,10 @@ class Config(object):
 		
 		self.ldap_dn = 'uid=finti,ou=service,dc=pdx,dc=edu'
 		self.ldap_password = self.decode('811ab624272946c5b0eef331279985a01952861af321f5d9820ea452fe24a8a8')
+
+		# M I S C
+		
+		self.docs_url = 'https://sites.google.com/a/pdx.edu/web-services/'
 		
 		# A C T I V E   D I R E C T O R Y
 		

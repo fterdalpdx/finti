@@ -25,3 +25,7 @@ def notify(update_id):
 @web.route('/account')
 def account():
 	return redirect(config.tokens_account_url, code=302)
+
+@web.route('/')
+def docs():
+	return redirect(config.tokens_account_url, code=302)

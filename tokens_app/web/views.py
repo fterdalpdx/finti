@@ -1,4 +1,4 @@
-from flask import make_response, abort, request
+from flask import make_response, abort, request, redirect
 from . import web
 from config import config
 from tokens_app.tokens import tokens
@@ -21,3 +21,7 @@ def notify(update_id):
 	else:
 		return(make_response((status['message'], 200, {'Content-Type': 'application/json'})))
 		
+
+@web.route('/account')
+def account():
+	return redirect(config.tokens_account_url, code=302)

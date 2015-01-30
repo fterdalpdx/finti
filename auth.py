@@ -7,7 +7,6 @@ from flask import Response, request
 from functools import wraps
 from redis import StrictRedis
 import hashlib
-import base64
 import binascii
 from config import config
 
@@ -37,7 +36,7 @@ def authenticate():
 	"""Sends a 401 response that enables basic auth"""
 	return Response(
 	'Could not verify your access level for that URL.\n'
-	'You have to login with proper credentials', 401,
+	'You have to provide proper credentials', 401,
 	{'WWW-Authenticate': 'Basic realm="Login Required"'})
 	
 def requires_auth(scope=""):

@@ -160,8 +160,13 @@ def stop_uwsgi():
 	if status:
 		try:
 			check_output(['uwsgi', '--stop', "var/uwsgi_emperor.pid"])
-			sleep(3)
-			status = status_uwsgi()
+			
+			status = status_uwsgi(); patients = 5 
+			while (patients > 0) and status == True:
+				sleep(1)
+				status = status_uwsgi()
+				patients -= 1
+				
 			if status:
 				log.info('stop_uwsgi() uwsgi failed to stop .. check the logs')
 			else:
@@ -185,15 +190,15 @@ def start():
 	
 	if nginx_status and uwsgi_status and token_status:
 		sync_cache()
-		log.info('status() leaving maintenance mode')
+		log.info('start() leaving maintenance mode')
 		maint_status = health.stop_maint()
 	else:
-		log.info('status() not leaving maintenance mode')
+		log.info('start() not leaving maintenance mode')
 	
 	if nginx_status and uwsgi_status and token_status and not maint_status:
-		log.info('status() system is fully started')
+		log.info('start() system is fully started')
 	else:
-		log.info('status() system failed to fully start')
+		log.info('start() system failed to fully start')
 	
 @manager.command
 def stop():
@@ -201,21 +206,23 @@ def stop():
 		Go into maintenance mode and stop all processing
 	'''
 	maint_status = health.start_maint()
-	log.info('stop() waiting to let current traffic complete processing..')
-	sleep(5)
+	if config.release_level == 'production':
+		log.info('stop() waiting to let current traffic complete processing..')
+		sleep(30)
+		
 	nginx_status = stop_nginx()
 	uwsgi_status = stop_uwsgi()
 	token_status = stop_token()
 	
 	if not nginx_status and not uwsgi_status and not token_status and maint_status:
-		log.info('status() system is fully stopped')
+		log.info('stop() system is fully stopped')
 	else:
-		log.info('status() system failed to fully stopped')
+		log.info('stop() system failed to fully stopped')
 	
 @manager.command
 def status():
 	'''
-		Report the system status
+		Report on the system status
 	'''
 	nginx_status = status_nginx()
 	uwsgi_status = status_uwsgi()
@@ -228,7 +235,15 @@ def status():
 		log.info('status() system is fully stopped')
 	else:
 		log.info('status() system is not fully running')
-		
+
+@manager.command
+def restart():
+	'''
+		Restart the system
+	'''
+	stop()
+	start()
+	
 @manager.command
 def sync_cache():
 	log.info('sync_cache() syncing token cache with cloud')

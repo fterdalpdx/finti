@@ -1,6 +1,7 @@
 #!/bin/sh
 
-BASE=`pwd`
+CANONPATH=`readlink -f $0`
+BASE=`dirname $CANONPATH`
 NGINX_VER="nginx-1.7"
 
 # Base system installed binary dependencies
@@ -12,6 +13,46 @@ NGINX_VER="nginx-1.7"
 # ZLib development library - zilb1g-dev
 # PCRE development library - libpcre3-dev
 #
+
+usage(){
+cat 2>&1 << EOS
+Usage: $0 -r <release level> [-v][-T][-h]
+
+Creates and initializes project dependancies and configurations
+
+where:
+	-r <release level>	One of: 'development', 'testing', 'production'
+	-v			Show verbose output.
+	-T			Run unit tests.
+	-h			Show this help info.
+	
+EOS
+	exit 2
+}
+
+
+# Read options from command line arguments and translate options into variables
+
+while getopts "r:vhT" arg; do
+	case "$arg" in
+		v)	VERBOSE=1;;
+		T)	UNIT_TEST=1;;
+		r)	RELEASE_LEVEL=$OPTARG;;
+		h)	usage;;
+		*)	usage;;
+	esac
+done
+
+if  [ -z "$RELEASE_LEVEL" ]; then
+	usage
+fi
+
+if [ "$RELEASE_LEVEL" = "testing" -o "$RELEASE_LEVEL" = "development" -o "$RELEASE_LEVEL" = "production" ]; then
+	true
+else
+	echo "Allowed release levels: 'development', 'testing', or 'production'"
+	usage
+fi
 
 # Setup a Virtual Python environment if it does not already exist
 
@@ -29,9 +70,12 @@ ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME
 . $BASE/venv/bin/activate
 pip install -r requirements.txt
 
+
 # Get nginx if not already installed:
 
 if [ ! -d $BASE/src ]; then mkdir $BASE/src; fi
+
+# Get the PCRE library to support NGiNX rewrite rules
 
 if [ ! -d $BASE/src/nginx ] || [ ! -d $BASE/nginx ]; then
         cd $BASE/src
@@ -90,25 +134,8 @@ if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
 	grep -v '^RELEASE_LEVEL' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
 fi
 
-if [ -z "$1" ]; then
-	RELEASE_LEVEL='development'
-	echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
-	echo "Defaulting to release level: 'development' unless rerun with argument specifying otherwise."
-else
-	if [ "$1" = "testing" -o "$1" = "development" -o "$1" = "production" ]; then
-		RELEASE_LEVEL=$1
-	else
-		echo "Allowed release levels: 'development', 'testing', or 'production'. Argument: $1 not understood."
-		RELEASE_LEVEL='development'
-	fi
-fi
 echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
-echo "=== RELEASE LEVEL set to $RELEASE_LEVEL"
-
-
-
-
 
 # Create the dir for a SQLite Db for testing
 
-if [ ! -d $BASE/db ]; then mkdir $BASE/db; fi
+#if [ ! -d $BASE/db ]; then mkdir $BASE/db; fi

@@ -28,4 +28,4 @@ def account():
 
 @web.route('/')
 def docs():
-	return redirect(config.tokens_account_url, code=302)
+	return redirect(config.doc_url, code=302)

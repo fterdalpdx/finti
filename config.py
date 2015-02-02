@@ -78,6 +78,8 @@ class Config(object):
 		# M I S C
 		
 		self.docs_url = 'https://sites.google.com/a/pdx.edu/web-services/'
+		self.pushbullet_target_id = ''
+		self.pushbullet_api_token = 'o8Afh9VzNVOvvj0O9dBdonqByMlDPaRm'
 		
 		# A C T I V E   D I R E C T O R Y
 		

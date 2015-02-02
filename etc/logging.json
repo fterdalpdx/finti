@@ -4,6 +4,7 @@
             "handlers": [
                 "buildings",
                 "buildings_logstash",
+                "pushbullet",
                 "console"
             ], 
             "level": "DEBUG"
@@ -12,6 +13,7 @@
             "handlers": [
                 "model",
                 "model_logstash",
+                "pushbullet",
                 "console"
             ], 
             "level": "DEBUG"
@@ -20,7 +22,8 @@
             "handlers": [
                 "health",
                 "health_logstash",
-                "console"
+                "pushbullet",
+                "console",
             ], 
             "level": "DEBUG"
         },
@@ -28,6 +31,7 @@
             "handlers": [
                 "tokens",
                 "tokens_logstash",
+                "pushbullet",
                 "console"
             ], 
             "level": "DEBUG"
@@ -36,6 +40,7 @@
             "handlers": [
                 "manage",
                 "manage_logstash",
+                "pushbullet",
                 "console"
             ], 
             "level": "DEBUG"
@@ -137,7 +142,13 @@
             "class": "logging.StreamHandler", 
             "stream": "ext://sys.stdout", 
             "level": "DEBUG"
+        }, 
+        "pushbullet": {
+            "formatter": "default", 
+            "class": "PushbulletHandler.PushbulletHandler", 
+            "level": "ERROR"
         } 
+         
  	},
     "version": 1, 
     "filters": {}, 

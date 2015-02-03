@@ -23,7 +23,7 @@
                 "health",
                 "health_logstash",
                 "pushbullet",
-                "console",
+                "console"
             ], 
             "level": "DEBUG"
         },

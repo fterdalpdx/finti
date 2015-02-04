@@ -181,6 +181,7 @@ class Tokens():
 		pubsub.subscribe([config.tokens_pubsub_channel])
 		myhostname = socket.gethostname()
 		neighbors = [host for host in config.neighbors if host <> myhostname]
+		self.log.info('listen(): neighbors are: ' + str(neighbors))
 		
 		for item in pubsub.listen():
 			value = str(item['data'])

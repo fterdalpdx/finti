@@ -234,6 +234,7 @@ if __name__ == '__main__':
 			tokens.listen()
 		else:
 			with daemon.DaemonContext():
+				tokens = Tokens()
 				tokens.listen()
 
 

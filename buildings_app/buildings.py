@@ -19,7 +19,7 @@ class Buildings():
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('buildings')
-		self.log.debug('__init__(): starting')
+		self.log.debug('init(): starting')
 	
 	def get_buildings(self):
 		'''

@@ -66,6 +66,39 @@ fi
 LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH
 ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME
 
+# Add to our PYTHONPATH
+
+if grep -q '^PYTHONPATH' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^PYTHONPATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+echo "PYTHONPATH=$BASE:$BASE/../etc; export PYTHONPATH" >> $BASE/venv/bin/activate
+
+# Set the snOracle home
+
+if grep -q '^ORACLE_HOME' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^ORACLE_HOME' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+echo "ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME" >> $BASE/venv/bin/activate
+
+# Set the LD_LIBRARY_PATH (for Oracle)
+
+if grep -q '^LD_LIBRARY_PATH' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^LD_LIBRARY_PATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+echo "LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH" >> $BASE/venv/bin/activate
+
+# Set the release level for the environment
+
+if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
+	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
+	grep -v '^RELEASE_LEVEL' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
+fi
+
+echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
+
 # Activate environment and install dependencies
 . $BASE/venv/bin/activate
 pip install -r requirements.txt
@@ -102,39 +135,7 @@ sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vass
 # Generate NginX config file from template
 sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.conf
 
-# Add to our PYTHONPATH
 
-if grep -q '^PYTHONPATH' $BASE/venv/bin/activate; then
-	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
-	grep -v '^PYTHONPATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
-fi
-
-echo "PYTHONPATH=$BASE:$BASE/../etc; export PYTHONPATH" >> $BASE/venv/bin/activate
-
-# Set the snOracle home
-
-if grep -q '^ORACLE_HOME' $BASE/venv/bin/activate; then
-	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
-	grep -v '^ORACLE_HOME' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
-fi
-echo "ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME" >> $BASE/venv/bin/activate
-
-# Set the LD_LIBRARY_PATH (for Oracle)
-
-if grep -q '^LD_LIBRARY_PATH' $BASE/venv/bin/activate; then
-	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
-	grep -v '^LD_LIBRARY_PATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
-fi
-echo "LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH" >> $BASE/venv/bin/activate
-
-# Set the release level for the environment
-
-if grep -q '^RELEASE_LEVEL' $BASE/venv/bin/activate; then
-	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
-	grep -v '^RELEASE_LEVEL' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
-fi
-
-echo "RELEASE_LEVEL=$RELEASE_LEVEL; export RELEASE_LEVEL" >> $BASE/venv/bin/activate
 
 # Create the dir for a SQLite Db for testing
 

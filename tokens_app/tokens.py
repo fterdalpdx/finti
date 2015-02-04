@@ -38,16 +38,12 @@ class Tokens():
 		status = {'result': 'error', 'message': ''}
 
 		self.log.info("notify(): log_index: " + str(log_index))
-		if log_index == '0':
-			self.log.info('notify(): unit-test case data detected')
-			status = {'result': 'success', 'message': "unit-test triggered"}
-		else:
-			try:
-				self.log.info('notify(): published notify item to pubsub queue')
-				self.cache.publish(config.tokens_pubsub_channel, log_index)
-				status = {'result': 'success', 'message': "token indexing system notified"}
-			except Exception as ex:
-				status = {'result': 'error', 'message': "queue is not responding"}
+		try:
+			self.log.info('notify(): published notify item to pubsub queue')
+			self.cache.publish(config.tokens_pubsub_channel, log_index)
+			status = {'result': 'success', 'message': "token indexing system notified"}
+		except Exception as ex:
+			status = {'result': 'error', 'message': "queue is not responding"}
 		
 		return status
 		
@@ -197,15 +193,18 @@ class Tokens():
 			if value.isdigit():
 				# This must be a token change
 				self.log.info('listen(): token change item seen: ' + str(item['data']))
-				updates = self.fetch_updates(value)
-				self.post_updates(updates, str(value))
-				if is_echo == False:
-					self.log.info('listen(): alerting neighbors of change')
-					for neighbor in neighbors:
-						try:
-							requests.get('http://' + neighbor + ':8888/erp/gen/%s/tokens/echo ' + value)
-						except Exception:
-							self.log.warn('listen() failed to contact neighbor: ' + neighbor)
+				if value == '0':
+					self.log.info('notify(): unit-test case data detected')
+				else:
+					updates = self.fetch_updates(value)
+					self.post_updates(updates, str(value))
+					if is_echo == False:
+						self.log.info('listen(): alerting neighbors of change')
+						for neighbor in neighbors:
+							try:
+								requests.get('http://' + neighbor + ':8888/erp/gen/%s/tokens/echo ' + value)
+							except Exception:
+								self.log.warn('listen() failed to contact neighbor: ' + neighbor)
 							
 				self.log.info('listen(): finished processing token change for item: ' + str(item['data']))
 			else:

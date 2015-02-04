@@ -72,7 +72,7 @@ class Buildings():
 			building_json = json.dumps(building)
 			status = {'result': 'success', 'message': building_json}
 		else:
-			self.log.warn('get_building(): error: building not found for building_identifier: ' + building_identifier)
+			self.log.info('get_building(): error: building not found for building_identifier: ' + building_identifier)
 			status = {'result': 'error', 'message': 'Building does not exist'}
 		return status
 

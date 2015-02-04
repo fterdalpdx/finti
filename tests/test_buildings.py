@@ -53,6 +53,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue('short_name' in buildings[17])
 		self.assertTrue('building_identifier' in buildings[11])
 
+	#@unittest.skip('weatherwax')
 	def test_get_building_history(self):
 		h = Headers()
 		h.add('Authorization',
@@ -71,6 +72,7 @@ class BuildingsTest(TestCase):
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
+		
 		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings/B0038',
 						 headers=h)
 		EB = json.loads(EB_rv.data)
@@ -94,8 +96,8 @@ class BuildingsTest(TestCase):
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
-		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings/00000038',
-						 headers=h)
+		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings/0000000038', headers=h)
+		print('status_code: ' + str(EB_rv.status_code))
 		self.assertTrue(EB_rv.status_code == 404)
 
 		# Test the case of not finding a building via query string
@@ -334,15 +336,15 @@ class BuildingsTest(TestCase):
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 
-	@unittest.skip('weatherwax')
+	#@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# test_building_is_valid test covers this test
 		# Test positive case of update to an existing building
-		'''
+
 		HEMB = {
 		   "geolocate_long" : -122.682755,
-		   "zipcode" : "97225",
+		   "zipcode" : "97888",
 		   "building_code" : "XEH",
 		   "to_date" : "2016-12-01",
 		   "from_date" : "1888-12-02",
@@ -364,22 +366,23 @@ class BuildingsTest(TestCase):
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
-		
+
+		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers=h )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['zipcode'] == "97888")
 		
-		HEMB['zipcode'] = '88888888'
-		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		HEMB['zipcode'] = '88888'
+		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers=h )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
-		self.assertTrue(HEMB_rv_data['zipcode'] == '88888888')
-		
+		self.assertTrue(HEMB_rv_data['zipcode'] == '88888')
+
 		# Test update to a non-existent building
-		HEMB['building_identifier'] = '42'
-		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		HEMB['building_identifier'] = '242'
+		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers=h )
 		self.assertTrue(HEMB_rv.status_code == 404)
-		'''
+
 	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_delete_building(self):

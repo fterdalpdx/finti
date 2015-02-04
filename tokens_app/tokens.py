@@ -26,8 +26,6 @@ class Tokens():
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('tokens')
 		#self.pubsub = {}
-		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
-		self.log.debug('init(): starting tokens service. connected to cache')
 		
 	def notify(self, log_index):
 		'''
@@ -35,6 +33,9 @@ class Tokens():
 			to the Observer design pattern 'notify' which is called by the 'subject'
 		'''
 		
+		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
+		self.log.debug('init(): starting tokens service. connected to cache')
+
 		status = {'result': 'error', 'message': ''}
 
 		self.log.info("notify(): log_index: " + str(log_index))
@@ -133,7 +134,7 @@ class Tokens():
 		
 		# Delete 'general' cache state
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		cache.flushdb()	# Remove all kes from the current database
+		cache.flushdb()	# Remove all keys from the current database
 		
 		# Fetch token list
 		query = gdata.spreadsheet.service.CellQuery()
@@ -176,8 +177,11 @@ class Tokens():
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
+		cache = StrictRedis(db=config.tokens_cache_redis_db)
+		self.log.debug('listen(): connected to cache')
+
 		self.log.info('listen(): starting listener')
-		pubsub = self.cache.pubsub()
+		pubsub = cache.pubsub()
 		pubsub.subscribe([config.tokens_pubsub_channel])
 		self.log.info('listen(): subscribed to channel: ' + config.tokens_pubsub_channel)
 
@@ -234,8 +238,8 @@ if __name__ == '__main__':
 			tokens.listen()
 		else:
 			with daemon.DaemonContext():
-				tokens = Tokens()
-				tokens.listen()
+				daemon_tokens = Tokens()
+				daemon_tokens.listen()
 
 
 

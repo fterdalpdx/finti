@@ -43,13 +43,11 @@ class Tokens():
 			status = {'result': 'success', 'message': "unit-test triggered"}
 		else:
 			try:
-				for cache in self.cache.values():
-					self.log.info('notify(): published notify item to pubsub queue')
-					cache.publish(config.tokens_pubsub_channel, log_index)
-	
+				self.log.info('notify(): published notify item to pubsub queue')
+				self.cache.publish(config.tokens_pubsub_channel, log_index)
 				status = {'result': 'success', 'message': "token indexing system notified"}
 			except Exception as ex:
-				status = {'result': 'error', 'message': "cluster peers are not responding"}
+				status = {'result': 'error', 'message': "queue is not responding"}
 		
 		return status
 		

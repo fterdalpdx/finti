@@ -14,7 +14,7 @@ import daemon
 from optparse import OptionParser
 import socket
 import requests
-from pip._vendor.requests.cookies import RequestsCookieJar
+
 #from flaskext.auth.permissions import self
 
 class Tokens():

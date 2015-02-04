@@ -177,6 +177,9 @@ class Tokens():
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
+		logging.config.dictConfig(config.logging_conf_dict)
+		self.log = logging.getLogger('tokens')
+		
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
 		self.log.debug('listen(): connected to cache')
 

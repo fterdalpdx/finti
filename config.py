@@ -147,9 +147,7 @@ class DevelopmentConfig(Config):
 	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1x7XfLNokm1YVkKbGrBQA4Ql3C5ifjVyGTVd1hbEKjlw'
 	tokens_worksheet_id = 'od6'
-	#tokens_pub_to = ['tama.oit.pdx.edu']
-	tokens_pub_to = ['localhost']
-	redis_hosts = tokens_pub_to
+	neighbors = ['localhost']
 	tokens_account_url = 'https://script.google.com/a/macros/pdx.edu/s/AKfycbzTj8aFkCAJSrx997q3nHw_dAxZBXAZy2g2n40I4aqLcARfMA8/exec'
 	doc_url = ''
 	
@@ -163,8 +161,7 @@ class TestingConfig(Config):
 	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1hPN8DRqB5l-S0R1dWcP14P4TzSwACCalt5MZryDOhTY'
 	tokens_worksheet_id = 'ozcjjmt'
-	tokens_pub_to = ['kiso.oit.pdx.edu', 'yoshino.oit.pdx.edu']
-	redis_hosts = tokens_pub_to
+	neighbors = ['kiso.oit.pdx.edu', 'yoshino.oit.pdx.edu']
 	tokens_account_url = 'https://script.google.com/a/macros/pdx.edu/s/AKfycbyu8hIMQgUldW51xvKOzhUYyCkCNeuUCGTJmS1gsBIBVEK3hJU/exec'
 	doc_url = ''
 	
@@ -178,8 +175,7 @@ class ProductionConfig(Config):
 	ldap_url = 'ldaps://ldap-bulk.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1aMQkO1QDrNQUhOrbHVso6SA9Y4q83utfMQtGIuj2Cn8'
 	tokens_worksheet_id = 'ovq5ph6'
-	tokens_pub_to = ['agano.oit.pdx.edu', 'shinano.oit.pdx.edu']
-	redis_hosts = tokens_pub_to
+	neighbors = ['agano.oit.pdx.edu', 'shinano.oit.pdx.edu']
 	tokens_account_url = 'https://script.google.com/a/macros/pdx.edu/s/AKfycbyxw8T7ruDqESWppCDtyhn20xnDESGxffF_MC5V5y37PCoyGaU/exec'
 	doc_url = ''
 	

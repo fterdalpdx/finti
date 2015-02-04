@@ -12,6 +12,9 @@ from redis import StrictRedis
 import gdata.spreadsheet.service
 import daemon
 from optparse import OptionParser
+import socket
+import requests
+from pip._vendor.requests.cookies import RequestsCookieJar
 #from flaskext.auth.permissions import self
 
 class Tokens():
@@ -22,11 +25,9 @@ class Tokens():
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('tokens')
-		self.log.debug('__init__(): starting')
-		self.pubsub = {}
-		self.cache = {}
-		for host in config.tokens_pub_to:
-			self.cache[host] = StrictRedis(host=host, db=config.tokens_cache_redis_db, socket_timeout=5)
+		#self.pubsub = {}
+		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
+		self.log.debug('init(): starting tokens service. connected to cache')
 		
 	def notify(self, log_index):
 		'''
@@ -184,13 +185,30 @@ class Tokens():
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
 		pubsub = cache.pubsub()
 		pubsub.subscribe([config.tokens_pubsub_channel])
+		myhostname = socket.gethostname()
+		neighbors = [host for host in config.neighbors if host <> myhostname]
+		
 		for item in pubsub.listen():
 			value = str(item['data'])
+			is_echo = False
+			if value.startswith('echo'):
+				is_echo = True
+				value = value.split()[1]
+				self.log.info('listen(): token echo change detected: ' + value)
+				
 			if value.isdigit():
 				# This must be a token change
 				self.log.info('listen(): token change item seen: ' + str(item['data']))
-				updates = self.fetch_updates(item['data'])
-				self.post_updates(updates, str(item['data']))
+				updates = self.fetch_updates(value)
+				self.post_updates(updates, str(value))
+				if is_echo == False:
+					self.log.info('listen(): alerting neighbors of change')
+					for neighbor in neighbors:
+						try:
+							requests.get('http://' + neighbor + ':8888/erp/gen/%s/tokens/echo ' + value)
+						except Exception:
+							self.log.warn('listen() failed to contact neighbor: ' + neighbor)
+							
 				self.log.info('listen(): finished processing token change for item: ' + str(item['data']))
 			else:
 				# This must be a scope change

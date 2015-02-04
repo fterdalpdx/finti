@@ -1,7 +1,9 @@
 from flask import make_response, abort, request, redirect
 from . import web
 from config import config
-from tokens_app.tokens import tokens
+from tokens_app.tokens import Tokens
+
+tokens = Tokens()
 
 #@auth.require_auth(scope='token_manage')
 @web.route(config.tokens_uri_path + '/<update_id>', methods = ['GET'])

@@ -224,10 +224,6 @@ class Tokens():
 				self.log.info('listen(): scope change item seen: ' + str(item['data']))
 				
 				
-		
-
-tokens = Tokens()
-
 if __name__ == '__main__':	
 	parser = OptionParser()
 	parser.add_option("-D", "--debug", dest="debug", action='store_true', default=False, help="Run in debug mode")
@@ -237,6 +233,7 @@ if __name__ == '__main__':
 	
 	if not options.debug:
 		if options.fore:
+			tokens = Tokens()
 			print '\033]0;Tokens\a' 
 			tokens.listen()
 		else:

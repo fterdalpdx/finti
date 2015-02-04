@@ -176,14 +176,17 @@ class Tokens():
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
-		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		pubsub = cache.pubsub()
+		self.log.info('listen(): starting listener')
+		pubsub = self.cache.pubsub()
 		pubsub.subscribe([config.tokens_pubsub_channel])
+		self.log.info('listen(): subscribed to channel: ' + config.tokens_pubsub_channel)
+
 		myhostname = socket.gethostname()
 		neighbors = [host for host in config.neighbors if host <> myhostname]
 		self.log.info('listen(): neighbors are: ' + str(neighbors))
 		
 		for item in pubsub.listen():
+			self.log.info('listen(): item detected: ' + str(item))
 			value = str(item['data'])
 			is_echo = False
 			if value.startswith('echo'):
@@ -204,6 +207,7 @@ class Tokens():
 						for neighbor in neighbors:
 							try:
 								requests.get('http://' + neighbor + ':8888/erp/gen/%s/tokens/echo ' + value)
+								self.log.info('listen(): alerted neighbor of change: ' + neighbor)
 							except Exception:
 								self.log.warn('listen() failed to contact neighbor: ' + neighbor)
 							

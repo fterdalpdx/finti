@@ -5,7 +5,7 @@ Created on Dec 31, 2014
 '''
 import unittest
 #from buildings_app.oracle_model import model
-import buildings_app
+import buildings_app.oracle_model
 from config import config
 
 class Test(unittest.TestCase):

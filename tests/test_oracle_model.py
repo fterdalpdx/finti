@@ -7,6 +7,7 @@ import unittest
 #from buildings_app.oracle_model import model
 import buildings_app.oracle_model
 from config import config
+import time
 
 class Test(unittest.TestCase):
 
@@ -69,10 +70,12 @@ class Test(unittest.TestCase):
 
 		building['building_code'] = 'HL'
 		self.model.update_building(building)
+		time.sleep(1)
 		building = self.model.get_building('B0001')
 		self.assertTrue(building['building_code'] == 'HL', 'LH building better have a changed code of HL')
 		building['building_code'] = 'LH'
 		self.model.update_building(building)
+		time.sleep(1)
 		building = self.model.get_building('B0001')
 		self.assertTrue(building['building_code'] == 'LH', 'LH building better have a code of LH again')
 

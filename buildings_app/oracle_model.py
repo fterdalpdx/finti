@@ -22,7 +22,7 @@ class Buildings():
 		self.log.info('init() connecting to local cache')
 		self.cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
 		self.log.info('init() initializing cache entries')
-		#self.update_caches()
+		self.update_cache()
 			
 	def update_cache(self):
 		# Eliminate all cache data including deleted (inactive) buildings

@@ -39,10 +39,10 @@ def status_tokens():
 	status = False
 	try:
 		check_output(['pgrep', '-f', "python tokens_app/tokens.py"])
-		log.info('status_token() token manager is running')
+		log.info('status_tokens() token manager is running')
 		status = True
 	except CalledProcessError:
-		log.info('status_token() token manager is stopped')
+		log.info('status_tokens() token manager is stopped')
 
 	return status
 
@@ -102,17 +102,17 @@ def start_nginx():
 def start_tokens():
 	status = status_tokens()
 	if status:
-		log.info('start_token() token manager was already running')
+		log.info('start_tokens() token manager was already running')
 	else:
 		try:
 			check_output(['python', 'tokens_app/tokens.py'])
 			status = status_tokens()
 			if status:
-				log.info('start_token() token manager has been started')
+				log.info('start_tokens() token manager has been started')
 			else:
-				log.info('start_token() token manager failed to start .. check the logs.')
+				log.info('start_tokens() token manager failed to start .. check the logs.')
 		except CalledProcessError:
-			log.info('start_token() token manager failed to start .. check the logs.')
+			log.info('start_tokens() token manager failed to start .. check the logs.')
 	
 	return status
 
@@ -125,13 +125,13 @@ def stop_tokens():
 			sleep(1)
 			status = status_tokens()
 			if status:
-				log.info('stop_token() token manager failed to stop .. check the logs')
+				log.info('stop_tokens() token manager failed to stop .. check the logs')
 			else:
-				log.info('stop_token() token manager has been stopped.')
+				log.info('stop_tokens() token manager has been stopped.')
 		except CalledProcessError:
-			log.info('stop_token() token manager failed to stop .. check the logs.')
+			log.info('stop_tokens() token manager failed to stop .. check the logs.')
 	else:
-		log.info('stop_token() token manager was already stopped')
+		log.info('stop_tokens() token manager was already stopped')
 	
 	return status
 

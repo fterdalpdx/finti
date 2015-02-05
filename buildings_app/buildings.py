@@ -8,7 +8,7 @@ import logging.config
 from config import config
 import json
 import re
-import buildings_app
+import buildings_app.oracle_model
 from optparse import OptionParser
 
 class Buildings():

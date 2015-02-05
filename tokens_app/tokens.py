@@ -195,6 +195,9 @@ class Tokens():
 		for item in pubsub.listen():
 			self.log.info('listen(): item detected: ' + str(item))
 			value = str(item['data'])
+			message_type = str(item['type'])
+			if message_type <> 'message':
+				continue
 			is_echo = False
 			if value.startswith('echo'):
 				is_echo = True

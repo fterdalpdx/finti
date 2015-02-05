@@ -55,6 +55,10 @@ class Test(unittest.TestCase):
 		self.assertTrue(building['city'] == 'Portland', 'missing essential data check')
 		self.assertTrue(building['building_identifier'] == 'B0001', 'building identifier form check')
 		#print('LH: ' + repr(building))
+		
+		# test lookup for non-existent building
+		building = model.get_building('ASTUNTHEUNO')
+		self.assertTrue(building is None)
 
 	#@unittest.skip('not ready to update now')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
@@ -71,6 +75,12 @@ class Test(unittest.TestCase):
 		building = model.get_building('B0001')
 		self.assertTrue(building['building_code'] == 'LH', 'LH building better have a code of LH again')
 
+		# test update of non-existing building
+		building['building_identifier'] = '424'
+		result = model.update_building(building)
+		self.assertFalse(result, 'shouldnt be able to update a non-existent building')
+		
+		
 	@unittest.skip('not ready to update now')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_add_building(self):

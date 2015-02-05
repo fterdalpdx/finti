@@ -19,7 +19,7 @@ class Buildings():
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('buildings')
-		self.log.debug('__init__(): starting')
+		self.log.debug('init(): starting')
 	
 	def get_buildings(self):
 		'''
@@ -72,7 +72,7 @@ class Buildings():
 			building_json = json.dumps(building)
 			status = {'result': 'success', 'message': building_json}
 		else:
-			self.log.warn('get_building(): error: building not found for building_identifier: ' + building_identifier)
+			self.log.info('get_building(): error: building not found for building_identifier: ' + building_identifier)
 			status = {'result': 'error', 'message': 'Building does not exist'}
 		return status
 

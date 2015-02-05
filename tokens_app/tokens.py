@@ -12,6 +12,9 @@ from redis import StrictRedis
 import gdata.spreadsheet.service
 import daemon
 from optparse import OptionParser
+import socket
+import requests
+
 #from flaskext.auth.permissions import self
 
 class Tokens():
@@ -22,11 +25,7 @@ class Tokens():
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('tokens')
-		self.log.debug('__init__(): starting')
-		self.pubsub = {}
-		self.cache = {}
-		for host in config.tokens_pub_to:
-			self.cache[host] = StrictRedis(host=host, db=config.tokens_cache_redis_db, socket_timeout=5)
+		#self.pubsub = {}
 		
 	def notify(self, log_index):
 		'''
@@ -34,21 +33,18 @@ class Tokens():
 			to the Observer design pattern 'notify' which is called by the 'subject'
 		'''
 		
+		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
+		self.log.debug('init(): starting tokens service. connected to cache')
+
 		status = {'result': 'error', 'message': ''}
 
 		self.log.info("notify(): log_index: " + str(log_index))
-		if log_index == '0':
-			self.log.info('notify(): unit-test case data detected')
-			status = {'result': 'success', 'message': "unit-test triggered"}
-		else:
-			try:
-				for cache in self.cache.values():
-					self.log.info('notify(): published notify item to pubsub queue')
-					cache.publish(config.tokens_pubsub_channel, log_index)
-	
-				status = {'result': 'success', 'message': "token indexing system notified"}
-			except Exception as ex:
-				status = {'result': 'error', 'message': "cluster peers are not responding"}
+		try:
+			self.log.info('notify(): published notify item to pubsub queue')
+			self.cache.publish(config.tokens_pubsub_channel, log_index)
+			status = {'result': 'success', 'message': "token indexing system notified"}
+		except Exception as ex:
+			status = {'result': 'error', 'message': "queue is not responding"}
 		
 		return status
 		
@@ -138,7 +134,7 @@ class Tokens():
 		
 		# Delete 'general' cache state
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		cache.flushdb()	# Remove all kes from the current database
+		cache.flushdb()	# Remove all keys from the current database
 		
 		# Fetch token list
 		query = gdata.spreadsheet.service.CellQuery()
@@ -181,26 +177,53 @@ class Tokens():
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
+		logging.config.dictConfig(config.logging_conf_dict)
+		self.log = logging.getLogger('tokens')
+		
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
+		self.log.debug('listen(): connected to cache')
+
+		self.log.info('listen(): starting listener')
 		pubsub = cache.pubsub()
 		pubsub.subscribe([config.tokens_pubsub_channel])
+		self.log.info('listen(): subscribed to channel: ' + config.tokens_pubsub_channel)
+
+		myhostname = socket.gethostname()
+		neighbors = [host for host in config.neighbors if host <> myhostname]
+		self.log.info('listen(): neighbors are: ' + str(neighbors))
+		
 		for item in pubsub.listen():
+			self.log.info('listen(): item detected: ' + str(item))
 			value = str(item['data'])
+			is_echo = False
+			if value.startswith('echo'):
+				is_echo = True
+				value = value.split()[1]
+				self.log.info('listen(): token echo change detected: ' + value)
+				
 			if value.isdigit():
 				# This must be a token change
 				self.log.info('listen(): token change item seen: ' + str(item['data']))
-				updates = self.fetch_updates(item['data'])
-				self.post_updates(updates, str(item['data']))
+				if value == '0':
+					self.log.info('notify(): unit-test case data detected')
+				else:
+					updates = self.fetch_updates(value)
+					self.post_updates(updates, str(value))
+					if is_echo == False:
+						self.log.info('listen(): alerting neighbors of change')
+						for neighbor in neighbors:
+							try:
+								requests.get('http://' + neighbor + ':8888/erp/gen/1.0/tokens/echo ' + value)
+								self.log.info('listen(): alerted neighbor of change: ' + neighbor)
+							except Exception:
+								self.log.warn('listen() failed to contact neighbor: ' + neighbor)
+							
 				self.log.info('listen(): finished processing token change for item: ' + str(item['data']))
 			else:
 				# This must be a scope change
 				self.log.info('listen(): scope change item seen: ' + str(item['data']))
 				
 				
-		
-
-tokens = Tokens()
-
 if __name__ == '__main__':	
 	parser = OptionParser()
 	parser.add_option("-D", "--debug", dest="debug", action='store_true', default=False, help="Run in debug mode")
@@ -210,11 +233,13 @@ if __name__ == '__main__':
 	
 	if not options.debug:
 		if options.fore:
+			tokens = Tokens()
 			print '\033]0;Tokens\a' 
 			tokens.listen()
 		else:
 			with daemon.DaemonContext():
-				tokens.listen()
+				daemon_tokens = Tokens()
+				daemon_tokens.listen()
 
 
 

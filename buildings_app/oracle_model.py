@@ -4,39 +4,81 @@ Created on Sep 22, 2014
 @author: dennis
 '''
 
-#from flask.ext.sqlalchemy import SQLAlchemy
-#from flask import Flask
-#import os
 from config import config
 import logging.config
 import redis
-#from beaver.transports.base_transport import json
 import json
 import cx_Oracle
 
 
-#app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(config.db_path, 'data.sqlite')
-#app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
-
-#db = SQLAlchemy(app)
-
 class Buildings():
-	buildings_cache = {}
 	
 	def __init__(self):
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('model')
-		if config.buildings_cache_enabled == True:
-			redis = redis.StrictRedis(db=config.buildings_cache_redis_db)
-
-	def cache_buildings(self, buildings):
-		self.buildings_cache = {}
-		self.log.debug('cache_buildings(): updating local cache of all buildings')
-		
-		for building in buildings:
-			self.buildings_cache[building['building_identifier']] = building
+		self.log.info('init() connecting to local cache')
+		self.cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
+		self.log.info('init() initializing cache entries')
+		#self.update_caches()
 			
+	def update_cache(self):
+		# Eliminate all cache data including deleted (inactive) buildings
+		self.cache.flushdb()
+		
+		buildings = self.list_buildings()
+		buildings_json = json.dumps(buildings)
+		
+		self.cache.set('buildings', buildings_json)
+		self.log.info('update_caches(): updated buildings cache')
+
+		for building in buildings:
+			ident = building['building_identifier']
+			code = building['building_code']
+			building_json = json.dumps(building)
+			self.cache.set(ident, building_json)
+			self.cache.set(code, building_json)
+									
+	def no_update_caches(self):
+		'''
+			Update the cache for building(s). Buildings are cached by:
+			all building list (single item), buildings by id, and buildings by code.
+			Also update sibling caches
+		'''
+		
+		self.log.info('update_caches(): regenerating caches')
+		
+		caches = {}
+		for host in config.redis_hosts:
+			try:
+				cache = redis.StrictRedis(host=host, db=config.buildings_cache_redis_db, socket_connect_timeout=2) # dont block indefinitely
+				cache.get('buildings')	# test connection to Redis
+				caches[host] = cache
+				self.log.info('update_caches(): connected to cache on host: ' + host)
+			except:
+				self.log.warn('update_caches(): cannot connect to Redis on host: ' + host)
+
+		for cache in caches.values():
+			cache.flushdb()	# Nuke all entries from orbit, it's the only way to be sure (eliminates deletes/deactivations).
+			self.log.info('update_caches(): flushed db on host')
+
+		buildings = self.list_buildings()
+		buildings_json = json.dumps(buildings)
+			
+		for cache in caches.values():
+			cache.set('buildings', buildings_json)
+			self.log.info('update_caches(): updated buildings cache on host')
+
+		for building in buildings:
+			ident = building['building_identifier']
+			code = building['building_code']
+			building_json = json.dumps(building)
+			# verify building to/from date is valid
+			
+			for cache in caches.values():
+				cache.set(ident, building_json)
+				cache.set(code, building_json)
+
+				
 	def conv_building(self, bldg):
 		result = {	'building_identifier': bldg['ZGTVBLDG_ID'],
 			'long_name': bldg['ZGTVBLDG_LONG_NAME'],
@@ -79,26 +121,23 @@ class Buildings():
 			building_descriptor['to_date']])
 		return ora_array
 	
-	def list_buildings(self, force_cache_refresh = False):
+	def list_buildings(self):
 		'''
-			List all current PSU buildings. Does not contain the building histories
+			List all current PSU buildings. Does not contain the building histories.
 		
-			@type	force_cache_refresh: boolean 
-			@param  force_cache_refresh: Optional parameter to force and cache a reload of all building data
 			@rtype list
 			@return list of dictionaries containing building descriptor data
 		'''
 		buildings = []
 		try:
-			if config.buildings_cache_enabled == True and force_cache_refresh == False:
-				self.log.debug('list_buildings(): global caching enabled')
-				buildings_json = redis.get('buildings')
-				if buildings_json is not None:
-					buildings = json.loads(buildings_json)
-					self.log.info('list_buildings(): global cache hit')
-					return buildings
-			else:
-				self.log.debug('list_buildings(): global cache lookup disabled')
+			self.log.debug('list_buildings(): global caching enabled')
+			buildings_json = self.cache.get('buildings')
+			if buildings_json is not None:
+				buildings = json.loads(buildings_json)
+				self.log.info('list_buildings(): global cache hit')
+				return buildings
+
+			self.log.info('list_buildings(): global cache miss.')
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
@@ -106,25 +145,19 @@ class Buildings():
 			call_cursor = cursor.var(cx_Oracle.CURSOR)
 			
 			cursor.callfunc('zgd_building.f_getBuildings', call_cursor, [])
+			self.log.info('list_buildings(): looked-up building list from db')
 			
 			for building_raw in list(call_cursor.getvalue()):
 				building_json = building_raw[0]
 				#self.log.debug('list_buildings(): raw JSON data: ' + str(building_json))
 				building = json.loads(building_json)
 				buildings.append(self.conv_building(building))
-			
-			# Set the local cache for buildings
-			self.cache_buildings(buildings)
-					
-			if config.buildings_cache_enabled == True:
-				buildings_json = json.dumps(buildings)
-				redis.set('buildings', buildings_json, ex=config.buildings_cache_ttl)
-				self.log.info('list_buildings(): set global cache')
-	
+			self.log.info('list_buildings(): transformed building list into normal form')
+			db.close()
+
 		except Exception as ex:
 			self.log.error('list_building(): error: ' + str(ex))
-		finally:
-			db.close()
+		#finally:
 	
 		self.log.info('list_buildings(): returning list of buildings with length: ' + str(len(buildings)))
 		return(buildings)
@@ -142,20 +175,11 @@ class Buildings():
 		'''
 		
 		self.log.info('get_building(): looking-up building with building_identifier: ' + building_identifier)
-		building = []
-		if building_identifier in self.buildings_cache:
+		building = None
+		building_json = self.cache.get(building_identifier)
+		if building_json is not None:
+			building = json.loads(building_json)
 			self.log.info('get_building(): cache hit')
-			building = self.buildings_cache[building_identifier]
-		else:
-			# Get the buildings list with the side-effect of setting the buildings cache
-			self.log.info('get_building(): cache miss')
-			self.list_buildings(force_cache_refresh=True)
-			if building_identifier in self.buildings_cache:
-				self.log.info('get_building(): found building with building_identifier: ' + building_identifier)
-				building = self.buildings_cache[building_identifier]
-			else:
-				self.log.info('get_building(): building does not exist. building_identifier: ' + building_identifier)
-				building = None
 
 		return building
 		
@@ -206,7 +230,7 @@ class Buildings():
 		
 		try:
 			self.log.debug('add_building(): building_descriptor to add: ' + str(building))
-					
+
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
 			cursor = db.cursor()
@@ -233,81 +257,13 @@ class Buildings():
 			cursor.callproc('zgd_building.p_insBldg', [building_desc])
 			self.log.info('add_building(): added building: ' + str(building))
 
-			# Update the building caches
-			self.list_buildings(force_cache_refresh=True)
+			self.update_cache()
 			is_success = True
 		except Exception as ex:
-			self.log.error('add_building(): error: ' + str(ex))
+			self.log.critical('add_building(): failed to update DB for building: ' + str(building) + ', error: ' + str(ex))
 	
 		return is_success
 		
-	def remove_building(self, building_identifier):
-		'''
-			Remove (deactivate) a building from the set of all PSU buildings
-		
-			@type	building_identifier: string
-			@param  building_identifier: Identity of the building to remove
-			@rtype None
-			@return Nothing is returned
-		'''
-		# Update the to_date for the building to now.
-	
-		
-	def removeme_create_building(self, building_descriptor):
-		'''
-			Create a building and add to the set of all PSU buildings
-		
-			@type	building_descriptor: dict
-			@param  building_descriptor: Information describing the building to create
-			@rtype dict or None
-			@return building_descriptor on success or None on failure
-		'''
-
-		try:
-			return self.add_building(building_descriptor)
-		
-			self.log.debug('create_building(): t')
-					
-			dsn = cx_Oracle.makedsn(*config.database_dsn)
-			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
-			cursor = db.cursor()
-			call_cursor = cursor.var(cx_Oracle.CURSOR)
-			building_array = self.to_arrayvar(building_descriptor, cursor)
-			#  INDEX BY BINARY_INTEGER: http://bytes.com/topic/python/answers/744211-cx_oracle-array-parameter
-			#result = cursor.arrayvar(cx_Oracle.STRING, 16)
-
-			# Following produces: error: ORA-06550: line 1, column 7: PLS-00306: wrong number or types of arguments in call to 'P_INSBLDG
-			cursor.callproc('zgd_building.p_insBldg', [building_array])
-			# Following produces: PLS-00306: wrong number or types of arguments in call to 'P_INSBLDG', ORA-06550: line 1, column 7: PL/SQL: Statement ignored
-			cursor.callproc('zgd_building.p_insBldg', [
-						building_descriptor['long_name'],
-						building_descriptor['short_name'],
-						building_descriptor['building_code'],
-						building_descriptor['street_address'],
-						building_descriptor['city'],
-						building_descriptor['state_code'],
-						building_descriptor['zipcode'],
-						building_descriptor['centroid_lat'],
-						building_descriptor['centroid_long'],
-						building_descriptor['rlis_lat'],
-						building_descriptor['rlis_long'],
-						building_descriptor['geolocate_lat'],
-						building_descriptor['geolocate_long'],
-						building_descriptor['building_identifier'],
-						building_descriptor['from_date'],
-						building_descriptor['to_date'],
-				])
-
-			# Update the building caches
-			self.list_buildings(force_cache_refresh=True)
-								
-		except Exception as ex:
-			self.log.error('create_building(): error: ' + str(ex))
-		finally:
-			db.close()
-	
-		self.log.info('create_building(): created building: ' + str(building_descriptor))
-
 			
 	def update_building(self, building_descriptor):
 		'''
@@ -321,13 +277,19 @@ class Buildings():
 
 		is_success = False
 		
+		building_identifier = building_descriptor['building_identifier']
+		cached_building = self.cache.get(building_identifier)
+		if cached_building is None:
+			self.log.info('update_building(): attempting to update a non-existent building: ' + building_identifier)
+			return False
+			
 		try:
 			self.log.debug('update_building(): updating building: ' + building_descriptor['building_identifier'])
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
 			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
 			cursor = db.cursor()
-			call_cursor = cursor.var(cx_Oracle.CURSOR)
+			#call_cursor = cursor.var(cx_Oracle.CURSOR)
 			building_desc = cursor.arrayvar(cx_Oracle.STRING, [
 						building_descriptor['long_name'],
 						building_descriptor['short_name'],
@@ -348,14 +310,13 @@ class Buildings():
 				])
 
 			cursor.callproc('zgd_building.p_updBldg', [building_desc])
+			db.close()
 
 			# Update the building caches
-			self.list_buildings(force_cache_refresh=True)
+			self.update_cache()
 			is_success = True
 		except Exception as ex:
 			self.log.error('update_building(): error: ' + str(ex))
-		finally:
-			db.close()
 	
 		self.log.info('update_building(): updated building: ' + str(building_descriptor))
 		return(is_success)

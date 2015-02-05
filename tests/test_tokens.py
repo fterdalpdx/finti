@@ -20,7 +20,7 @@ class TokensTest(unittest.TestCase):
 
 	#@unittest.skip('weatherwax')
 	def test_notify(self):
-		rv = self.app.get('/erp/gen/1.0/tokens/0')
+		rv = self.app.get('/inf/v1/tokens/0')
 		self.assertTrue(rv.status_code == 200)
 
 if __name__ == "__main__":

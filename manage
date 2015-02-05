@@ -51,10 +51,10 @@ def status_buildings():
 	status = False
 	try:
 		check_output(['pgrep', '-f', "python buildings_app/oracle_model.py"])
-		log.info('status_tokens() building manager is running')
+		log.info('status_buildings() building manager is running')
 		status = True
 	except CalledProcessError:
-		log.info('status_tokens() building manager is stopped')
+		log.info('status_buildings() building manager is stopped')
 
 	return status
 

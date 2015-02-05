@@ -81,20 +81,20 @@ class Buildings():
 				cache.set(ident, building_json)
 				cache.set(code, building_json)
 
-	def notify_cache(self, cache_request):
+	def notify_neighbors(self, cache_request):
 		'''
 			Receive notification of a user token change event. The notify method corresponds
 			to the Observer design pattern 'notify' which is called by the 'subject'
 		'''
 		
 		cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
-		self.log.debug('notify_cache(): connected to cache')
+		self.log.debug('notify_neighbors(): connected to cache')
 
 		try:
-			self.log.info('notify_cache(): published notify item to pubsub queue')
+			self.log.info('notify_neighbors(): published notify item to pubsub queue')
 			cache.publish(config.buildings_pubsub_channel, cache_request)
 		except Exception as ex:
-			self.log.error('notify_cache(): failed to publish to the ' + config.buildings_pubsub_channel +' queue, error: ' + str(ex))
+			self.log.error('notify_neighbors(): failed to publish to the ' + config.buildings_pubsub_channel +' queue, error: ' + str(ex))
 	
 				
 	def conv_building(self, bldg):
@@ -193,7 +193,7 @@ class Buildings():
 		'''
 		
 		if building_identifier == config.buildings_refresh:
-			self.notify_cache(config.buildings_echo)
+			self.notify_neighbors(config.buildings_echo)
 			return {}
 		
 		self.log.info('get_building(): looking-up building with building_identifier: ' + building_identifier)
@@ -279,8 +279,8 @@ class Buildings():
 			cursor.callproc('zgd_building.p_insBldg', [building_desc])
 			self.log.info('add_building(): added building: ' + str(building))
 
-			#self.update_cache()
-			self.notify_cache(config.buildings_refresh)
+			self.update_cache()
+			self.notify_neighbors(config.buildings_refresh)
 			
 			is_success = True
 		except Exception as ex:
@@ -337,8 +337,8 @@ class Buildings():
 			db.close()
 
 			# Update the building caches
-			#self.update_cache()
-			self.notify_cache(config.buildings_refresh)
+			self.update_cache()
+			self.notify_neighbors(config.buildings_refresh)
 			
 			is_success = True
 		except Exception as ex:
@@ -367,7 +367,7 @@ class Buildings():
 			self.log.info('listen(): item detected: ' + str(item))
 			value = str(item['data'])
 			message_type = str(item['type'])
-			if message_type <> 'message':
+			if message_type <> 'message':	# only look at message, not un/subscribe events
 				continue
 			
 			is_echo = False
@@ -377,20 +377,19 @@ class Buildings():
 				
 			self.log.info('listen(): updating cache on case: ' + value)
 
-			self.update_cache()
 
 			if is_echo == False:
 				self.log.info('listen(): alerting neighbors of change')
 				for neighbor in neighbors:
 					try:
-						requests.get('http://' + neighbor + ':8888/erp/gen/v1/buildings/' + config.buildings_refresh)
+						requests.get('http://' + neighbor + ':8888/org/v1/buildings/' + config.buildings_refresh)
 						self.log.info('listen(): alerted neighbor of change: ' + neighbor)
 					except Exception:
 						self.log.warn('listen() failed to contact neighbor: ' + neighbor)
 						
 				self.log.info('listen(): finished processing token change for item: ' + str(item['data']))
-
-	
+			else:
+				self.update_cache()		# This is the neighbor of the updated host
 	
 #model = Buildings()
 

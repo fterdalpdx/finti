@@ -185,7 +185,7 @@ def start():
 	'''
 	nginx_status = start_nginx()
 	uwsgi_status = start_uwsgi()
-	token_status = start_token()
+	token_status = start_tokens()
 	maint_status = False
 	
 	if nginx_status and uwsgi_status and token_status:

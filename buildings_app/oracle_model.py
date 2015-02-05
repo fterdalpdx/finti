@@ -20,7 +20,24 @@ class Buildings():
 		self.cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
 		self.log.info('init() initializing cache entries')
 		#self.update_caches()
-										
+			
+	def update_cache(self):
+		# Eliminate all cache data including deleted (inactive) buildings
+		self.cache.flushdb()
+		
+		buildings = self.list_buildings()
+		buildings_json = json.dumps(buildings)
+		
+		self.cache.set('buildings', buildings_json)
+		self.log.info('update_caches(): updated buildings cache')
+
+		for building in buildings:
+			ident = building['building_identifier']
+			code = building['building_code']
+			building_json = json.dumps(building)
+			self.cache.set(ident, building_json)
+			self.cache.set(code, building_json)
+									
 	def no_update_caches(self):
 		'''
 			Update the cache for building(s). Buildings are cached by:
@@ -240,7 +257,7 @@ class Buildings():
 			cursor.callproc('zgd_building.p_insBldg', [building_desc])
 			self.log.info('add_building(): added building: ' + str(building))
 
-			#self.update_caches()
+			self.update_cache()
 			is_success = True
 		except Exception as ex:
 			self.log.critical('add_building(): failed to update DB for building: ' + str(building) + ', error: ' + str(ex))
@@ -296,7 +313,7 @@ class Buildings():
 			db.close()
 
 			# Update the building caches
-			#self.update_caches()
+			self.update_cache()
 			is_success = True
 		except Exception as ex:
 			self.log.error('update_building(): error: ' + str(ex))

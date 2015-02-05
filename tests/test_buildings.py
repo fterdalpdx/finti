@@ -76,6 +76,7 @@ class BuildingsTest(TestCase):
 		EB_rv = Client.get(self.client, path='/erp/gen/v1/buildings/B0038',
 						 headers=h)
 		EB = json.loads(EB_rv.data)
+		print("EB: " + EB)
 		self.assertTrue(EB['street_address'] == '1930 SW FOURTH AVENUE')
 		self.assertTrue(EB_rv.status_code == 200)
 

@@ -4,14 +4,15 @@ Created on Dec 31, 2014
 @author: dennis
 '''
 import unittest
-from buildings_app.oracle_model import model
+#from buildings_app.oracle_model import model
+import buildings_app
 from config import config
 
 class Test(unittest.TestCase):
 
 
 	def setUp(self):
-		#self.model = model()
+		self.model = buildings_app.oracle_model.Buildings()
 		pass
 
 
@@ -20,7 +21,7 @@ class Test(unittest.TestCase):
 
 	#@unittest.skip('')
 	def test_list_buildings(self):
-		buildings = model.list_buildings()
+		buildings = self.model.list_buildings()
 		#self.assertTrue(len(buildings) > 40, 'more than a few buildings check')
 		found_lh = False
 		for building in buildings:
@@ -39,7 +40,7 @@ class Test(unittest.TestCase):
 	#@unittest.expectedFailure
 	def test_get_building_history(self):
 
-		history = model.get_building_history('B0001')
+		history = self.model.get_building_history('B0001')
 		print('LH history: ' + repr(history))
 		self.assertTrue(len(history) >= 1)
 	
@@ -47,7 +48,7 @@ class Test(unittest.TestCase):
 	#@unittest.expectedFailure
 	def test_get_building(self):
 
-		building = model.get_building('B0001')
+		building = self.model.get_building('B0001')
 		self.assertTrue(building['building_code'] == 'LH', 'lincoln hall better be lincoln hall')
 		self.assertTrue(building['zipcode'] == '97201', 'missing essential data check')
 		self.assertTrue(building['street_address'] == '1620 SW PARK AVE', 'missing essential data check')
@@ -57,27 +58,27 @@ class Test(unittest.TestCase):
 		#print('LH: ' + repr(building))
 		
 		# test lookup for non-existent building
-		building = model.get_building('ASTUNTHEUNO')
+		building = self.model.get_building('ASTUNTHEUNO')
 		self.assertTrue(building is None)
 
 	#@unittest.skip('not ready to update now')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
-		building = model.get_building('B0001')
+		building = self.model.get_building('B0001')
 		#self.assertTrue(building['building_code'] == 'HEX', 'HEM building better have a code of HEX')
 
 		building['building_code'] = 'HL'
-		model.update_building(building)
-		building = model.get_building('B0001')
+		self.model.update_building(building)
+		building = self.model.get_building('B0001')
 		self.assertTrue(building['building_code'] == 'HL', 'LH building better have a changed code of HL')
 		building['building_code'] = 'LH'
-		model.update_building(building)
-		building = model.get_building('B0001')
+		self.model.update_building(building)
+		building = self.model.get_building('B0001')
 		self.assertTrue(building['building_code'] == 'LH', 'LH building better have a code of LH again')
 
 		# test update of non-existing building
 		building['building_identifier'] = '424'
-		result = model.update_building(building)
+		result = self.model.update_building(building)
 		self.assertFalse(result, 'shouldnt be able to update a non-existent building')
 		
 		
@@ -102,7 +103,7 @@ class Test(unittest.TestCase):
 			'from_date':		'1888-12-02',
 			'to_date':			'2016-12-01'
 		}
-		result = model.add_building(test_building)
+		result = self.model.add_building(test_building)
 				
 if __name__ == "__main__":
 	

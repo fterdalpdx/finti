@@ -9,7 +9,10 @@ import logging.config
 import redis
 import json
 import cx_Oracle
-
+import daemon
+from optparse import OptionParser
+import socket
+import requests
 
 class Buildings():
 	
@@ -78,6 +81,21 @@ class Buildings():
 				cache.set(ident, building_json)
 				cache.set(code, building_json)
 
+	def notify_cache(self, cache_request):
+		'''
+			Receive notification of a user token change event. The notify method corresponds
+			to the Observer design pattern 'notify' which is called by the 'subject'
+		'''
+		
+		cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
+		self.log.debug('notify_cache(): connected to cache')
+
+		try:
+			self.log.info('notify_cache(): published notify item to pubsub queue')
+			cache.publish(config.buildings_pubsub_channel, cache_request)
+		except Exception as ex:
+			self.log.error('notify_cache(): failed to publish to the ' + config.buildings_pubsub_channel +' queue, error: ' + str(ex))
+	
 				
 	def conv_building(self, bldg):
 		result = {	'building_identifier': bldg['ZGTVBLDG_ID'],
@@ -174,6 +192,10 @@ class Buildings():
 			@return Dictionary containing building descriptor data
 		'''
 		
+		if building_identifier == config.buildings_refresh:
+			self.notify_cache(config.buildings_echo)
+			return {}
+		
 		self.log.info('get_building(): looking-up building with building_identifier: ' + building_identifier)
 		building = None
 		building_json = self.cache.get(building_identifier)
@@ -257,7 +279,9 @@ class Buildings():
 			cursor.callproc('zgd_building.p_insBldg', [building_desc])
 			self.log.info('add_building(): added building: ' + str(building))
 
-			self.update_cache()
+			#self.update_cache()
+			self.notify_cache(config.buildings_refresh)
+			
 			is_success = True
 		except Exception as ex:
 			self.log.critical('add_building(): failed to update DB for building: ' + str(building) + ', error: ' + str(ex))
@@ -313,13 +337,78 @@ class Buildings():
 			db.close()
 
 			# Update the building caches
-			self.update_cache()
+			#self.update_cache()
+			self.notify_cache(config.buildings_refresh)
+			
 			is_success = True
 		except Exception as ex:
 			self.log.error('update_building(): error: ' + str(ex))
 	
 		self.log.info('update_building(): updated building: ' + str(building_descriptor))
 		return(is_success)
+
+	def listen(self):
+		logging.config.dictConfig(config.logging_conf_dict)
+		self.log = logging.getLogger('model')
+		
+		cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
+		self.log.debug('listen(): connected to cache')
+
+		self.log.info('listen(): starting listener')
+		pubsub = cache.pubsub()
+		pubsub.subscribe([config.buildings_pubsub_channel])
+		self.log.info('listen(): subscribed to channel: ' + config.buildings_pubsub_channel)
+
+		myhostname = socket.gethostname()
+		neighbors = [host for host in config.neighbors if host <> myhostname]
+		self.log.info('listen(): neighbors are: ' + str(neighbors))
+		
+		for item in pubsub.listen():
+			self.log.info('listen(): item detected: ' + str(item))
+			value = str(item['data'])
+			message_type = str(item['type'])
+			if message_type <> 'message':
+				continue
+			
+			is_echo = False
+			if value.startswith('echo'):
+				is_echo = True
+				self.log.info('listen(): echo update detected: ' + value)
+				
+			self.log.info('listen(): updating cache on case: ' + value)
+
+			self.update_cache()
+
+			if is_echo == False:
+				self.log.info('listen(): alerting neighbors of change')
+				for neighbor in neighbors:
+					try:
+						requests.get('http://' + neighbor + ':8888/erp/gen/v1/buildings/' + config.buildings_refresh)
+						self.log.info('listen(): alerted neighbor of change: ' + neighbor)
+					except Exception:
+						self.log.warn('listen() failed to contact neighbor: ' + neighbor)
+						
+				self.log.info('listen(): finished processing token change for item: ' + str(item['data']))
+
 	
 	
-model = Buildings()
+#model = Buildings()
+
+if __name__ == '__main__':	
+	parser = OptionParser()
+	parser.add_option("-D", "--debug", dest="debug", action='store_true', default=False, help="Run in debug mode")
+	parser.add_option("-f", "--fore", dest="fore", action='store_true', default=False, help="Run as a foreground process instead of a daemon")
+	
+	(options, args) = parser.parse_args()
+	
+	if not options.debug:
+		if options.fore:
+			buildings = Buildings()
+			print '\033]0;Buildings\a' 
+			buildings.listen()
+		else:
+			with daemon.DaemonContext():
+				buildings = Buildings()
+				buildings.listen()
+
+

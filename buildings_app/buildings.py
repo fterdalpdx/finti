@@ -8,7 +8,7 @@ import logging.config
 from config import config
 import json
 import re
-from buildings_app.oracle_model import model
+import buildings_app
 from optparse import OptionParser
 
 class Buildings():
@@ -20,6 +20,7 @@ class Buildings():
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('buildings')
 		self.log.debug('init(): starting')
+		self.model = buildings_app.oracle_model.Buildings()
 	
 	def get_buildings(self):
 		'''
@@ -28,7 +29,7 @@ class Buildings():
 		'''
 		status = {'result': 'error', 'message': ''}
 
-		buildings = model.list_buildings()
+		buildings = self.model.list_buildings()
 		if len(buildings) > 0:
 			buildings_json = json.dumps(buildings)
 			status = {'result': 'success', 'message': buildings_json}
@@ -43,7 +44,7 @@ class Buildings():
 		'''
 		status = {'result': 'error', 'message': ''}
 
-		history = model.get_building_history(building_identifier)
+		history = self.model.get_building_history(building_identifier)
 		if len(history) > 0:
 			history_json = json.dumps(history)
 			status = {'result': 'success', 'message': history_json}
@@ -66,7 +67,7 @@ class Buildings():
 			return(status)
 			
 		self.log.debug('get_building(): looking-up from database: building_identifier: ' + building_identifier)
-		building = model.get_building(building_identifier)
+		building = self.model.get_building(building_identifier)
 		if not building is None:
 			self.log.debug('get_building(): found in database, cache miss')
 			building_json = json.dumps(building)
@@ -137,7 +138,7 @@ class Buildings():
 		status = self.building_is_valid(building)
 
 		if status['result'] == 'success':
-			if model.add_building(building) == True:
+			if self.model.add_building(building) == True:
 				self.log.debug('add_building(): successfully added a new building')
 				status = {'result': 'success', 'message': 'successfully added a new building'}
 			else:
@@ -156,7 +157,7 @@ class Buildings():
 		status = self.building_is_valid(building)
 
 		if status['result'] == 'success':
-			if model.update_building(building) == True:
+			if self.model.update_building(building) == True:
 				self.log.debug('update_building(): successfully updated building: ' + str(building))
 				status = {'result': 'success', 'message': 'successfully updated a building'}
 			else:
@@ -178,7 +179,7 @@ class Buildings():
 			self.log.debug('get_building(): ' + status['message'])
 			return(status)
 		
-		if model.remove_building(building_identifier) == True:
+		if self.model.remove_building(building_identifier) == True:
 			self.log.info('delete_builiding(): removed building from model: building_identifier: ' + building_identifier)
 			status = {'result': 'success', 'message': 'successfully deleted a building'}
 		else:

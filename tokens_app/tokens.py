@@ -34,7 +34,7 @@ class Tokens():
 		'''
 		
 		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
-		self.log.debug('init(): starting tokens service. connected to cache')
+		self.log.debug('notify(): connected to cache')
 
 		status = {'result': 'error', 'message': ''}
 
@@ -213,7 +213,7 @@ class Tokens():
 						self.log.info('listen(): alerting neighbors of change')
 						for neighbor in neighbors:
 							try:
-								requests.get('http://' + neighbor + ':8888/erp/gen/1.0/tokens/echo ' + value)
+								requests.get('http://' + neighbor + ':8888/erp/gen/v1/tokens/echo ' + value)
 								self.log.info('listen(): alerted neighbor of change: ' + neighbor)
 							except Exception:
 								self.log.warn('listen() failed to contact neighbor: ' + neighbor)

@@ -195,7 +195,7 @@ function notify_observers(log_index) {
   var params = {
     "validateHttpsCertificates": false
   };
-  var response = UrlFetchApp.fetch(ws_url + "/erp/gen/1.0/tokens/" + log_index, params);
+  var response = UrlFetchApp.fetch(ws_url + "/inf/v1/tokens/" + log_index, params);
 }
 
 /**

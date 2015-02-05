@@ -82,7 +82,7 @@ class Buildings():
 			Check if the provided building data is valid. At a minimum, check if all required fields are present
 		'''
 		status = {'result': 'success', 'message': 'building descriptor is valid'}
-		alphanumspace_re = re.compile('[^a-zA-Z0-9-_., ]')
+		alphanumspace_re = re.compile('[^a-zA-Z0-9-_., &]')
 		self.log.debug('building_is_valid(): building_descriptor: ' + str(building_descriptor))
 		
 		try:

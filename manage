@@ -8,7 +8,7 @@ from subprocess import check_call, check_output, CalledProcessError
 import logging.config
 from config import config
 from time import sleep
-from tokens_app.tokens import tokens
+from tokens_app.tokens import Tokens
 from health_app.health import health
 
 app = Flask(__name__)
@@ -35,7 +35,7 @@ def status_nginx():
 	return status
 
 @manager.command
-def status_token():
+def status_tokens():
 	status = False
 	try:
 		check_output(['pgrep', '-f', "python tokens_app/tokens.py"])
@@ -99,14 +99,14 @@ def start_nginx():
 	return status
 
 @manager.command	
-def start_token():
-	status = status_token()
+def start_tokens():
+	status = status_tokens()
 	if status:
 		log.info('start_token() token manager was already running')
 	else:
 		try:
 			check_output(['python', 'tokens_app/tokens.py'])
-			status = status_token()
+			status = status_tokens()
 			if status:
 				log.info('start_token() token manager has been started')
 			else:
@@ -117,13 +117,13 @@ def start_token():
 	return status
 
 @manager.command	
-def stop_token():
-	status = status_token()
+def stop_tokens():
+	status = status_tokens()
 	if status:
 		try:
 			check_output(['pkill', '-f', "python tokens_app/tokens.py"])
 			sleep(1)
-			status = status_token()
+			status = status_tokens()
 			if status:
 				log.info('stop_token() token manager failed to stop .. check the logs')
 			else:
@@ -212,7 +212,7 @@ def stop():
 		
 	nginx_status = stop_nginx()
 	uwsgi_status = stop_uwsgi()
-	token_status = stop_token()
+	token_status = stop_tokens()
 	
 	if not nginx_status and not uwsgi_status and not token_status and maint_status:
 		log.info('stop() system is fully stopped')
@@ -226,7 +226,7 @@ def status():
 	'''
 	nginx_status = status_nginx()
 	uwsgi_status = status_uwsgi()
-	token_status = status_token()
+	token_status = status_tokens()
 	maint_status = status_maint()
 	
 	if nginx_status and uwsgi_status and token_status and not maint_status:
@@ -247,6 +247,7 @@ def restart():
 @manager.command
 def sync_cache():
 	log.info('sync_cache() syncing token cache with cloud')
+	tokens = Tokens()
 	tokens.sync_cache()
 	
 	

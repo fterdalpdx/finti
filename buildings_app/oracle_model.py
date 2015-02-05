@@ -32,7 +32,7 @@ class Buildings():
 		buildings_json = json.dumps(buildings)
 		
 		self.cache.set('buildings', buildings_json)
-		self.log.info('update_caches(): updated buildings cache')
+		self.log.info('update_cache(): updated buildings cache')
 
 		for building in buildings:
 			ident = building['building_identifier']

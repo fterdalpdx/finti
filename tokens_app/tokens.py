@@ -14,6 +14,8 @@ import daemon
 from optparse import OptionParser
 import socket
 import requests
+#from django.contrib.auth.context_processors import auth
+import auth
 
 #from flaskext.auth.permissions import self
 
@@ -134,7 +136,6 @@ class Tokens():
 		
 		# Delete 'general' cache state
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		cache.flushdb()	# Remove all keys from the current database
 		
 		# Fetch token list
 		query = gdata.spreadsheet.service.CellQuery()
@@ -159,6 +160,8 @@ class Tokens():
 					scopes[worksheet_title].append(cell.content.text)
 				self.log.debug('sync_cache() fetched scope: ' + str(worksheet_title) + ', with number of items: ' + str(len(cells)))
 					
+		cache.flushdb()	# Remove all keys from the current database
+
 		# Build user and general cache
 		for token_ent in tokens:
 			(user, token, datetime) = token_ent
@@ -175,6 +178,10 @@ class Tokens():
 		num_log_entries = len(client.GetListFeed( config.tokens_spreadsheet_id, wksht_id=worksheet_ids['change log']).entry) + 1
 		cache.set('log_index', num_log_entries) # Reset the cache log index to the start
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
+		
+		# Add our admin token for maintaining cache coherency
+		admin_token_hash = auth.calc_hash(config.admin_token)
+		cache.set('admin', admin_token_hash)
 		
 	def listen(self):
 		logging.config.dictConfig(config.logging_conf_dict)

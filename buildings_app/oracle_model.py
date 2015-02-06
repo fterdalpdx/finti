@@ -382,8 +382,11 @@ class Buildings():
 				self.log.info('listen(): alerting neighbors of change')
 				for neighbor in neighbors:
 					try:
-						requests.get('http://' + neighbor + ':8888/org/v1/buildings/' + config.buildings_refresh)
-						self.log.info('listen(): alerted neighbor of change: ' + neighbor)
+						rv = requests.get('http://' + neighbor + ':8888/org/v1/buildings/' + config.buildings_refresh, auth=(config.admin_token,''))
+						if rv.status_code == 200:
+							self.log.info('listen(): alerted neighbor of change: ' + neighbor)
+						else:
+							self.log.info('listen(): failed to alert neighbor of change: ' + neighbor)
 					except Exception:
 						self.log.warn('listen() failed to contact neighbor: ' + neighbor)
 						

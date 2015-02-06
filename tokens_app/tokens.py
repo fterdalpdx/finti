@@ -181,7 +181,8 @@ class Tokens():
 		
 		# Add our admin token for maintaining cache coherency
 		admin_token_hash = auth.calc_hash(config.admin_token)
-		cache.set('admin', admin_token_hash)
+		cache.set(admin_token_hash, 'finti_admin@pdx.edu')
+		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
 		logging.config.dictConfig(config.logging_conf_dict)

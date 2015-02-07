@@ -83,7 +83,7 @@ class Health():
 			token = config.test_token
 			token_hash = auth.calc_hash(token)
 			cache.set(token_hash, 'test@test')
-			r = requests.get('http://localhost:8888/erp/gen/1.0/buildings', auth=(token, ''))
+			r = requests.get('http://localhost:8888/org/v1/buildings', auth=(token, ''))
 			buildings = r.json()
 			
 			if len(buildings) < 65 or len(buildings) > 90:

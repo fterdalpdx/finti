@@ -36,6 +36,15 @@
             ], 
             "level": "DEBUG"
         },
+        "building_dir_agent": {
+            "handlers": [
+                "building_dir_agent",
+                "building_dir_agent_logstash",
+                "pushbullet",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
         "manage": {
             "handlers": [
                 "manage",
@@ -119,6 +128,24 @@
             "formatter": "json", 
             "class": "logging.handlers.RotatingFileHandler"
         }, 
+        "building_dir_agent": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/building_dir_agent.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "building_dir_agent_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/building_dir_agent.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        },
         "manage": {
             "backupCount": 5, 
             "level": "DEBUG", 

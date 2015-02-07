@@ -46,6 +46,19 @@ def status_tokens():
 
 	return status
 
+@manager.command
+def status_buildings():
+	status = False
+	try:
+		check_output(['pgrep', '-f', "python buildings_app/oracle_model.py"])
+		log.info('status_buildings() building manager is running')
+		status = True
+	except CalledProcessError:
+		log.info('status_buildings() building manager is stopped')
+
+	return status
+
+
 @manager.command	
 def status_uwsgi():
 	status = False
@@ -136,6 +149,44 @@ def stop_tokens():
 	return status
 
 @manager.command	
+def start_buildings():
+	status = status_buildings()
+	if status:
+		log.info('start_buildings() buildings manager was already running')
+	else:
+		try:
+			check_output(['python', 'buildings_app/oracle_model.py'])
+			status = status_buildings()
+			if status:
+				log.info('start_buildings() building manager has been started')
+			else:
+				log.info('start_buildings() building manager failed to start .. check the logs.')
+		except CalledProcessError:
+			log.info('start_buildings() building manager failed to start .. check the logs.')
+	
+	return status
+
+@manager.command	
+def stop_buildings():
+	status = status_buildings()
+	if status:
+		try:
+			check_output(['pkill', '-f', "python buildings_app/oracle_model.py"])
+			sleep(1)
+			status = status_buildings()
+			if status:
+				log.info('stop_buildings() building manager failed to stop .. check the logs')
+			else:
+				log.info('stop_buildings() building manager has been stopped.')
+		except CalledProcessError:
+			log.info('stop_buildings() building manager failed to stop .. check the logs.')
+	else:
+		log.info('stop_buildings() building manager was already stopped')
+	
+	return status
+
+
+@manager.command	
 def stop_nginx():
 	status = status_nginx()
 	if status:
@@ -186,6 +237,7 @@ def start():
 	nginx_status = start_nginx()
 	uwsgi_status = start_uwsgi()
 	token_status = start_tokens()
+	building_status = start_buildings()
 	maint_status = False
 	
 	if nginx_status and uwsgi_status and token_status:
@@ -195,7 +247,7 @@ def start():
 	else:
 		log.info('start() not leaving maintenance mode')
 	
-	if nginx_status and uwsgi_status and token_status and not maint_status:
+	if nginx_status and uwsgi_status and token_status and building_status and not maint_status:
 		log.info('start() system is fully started')
 	else:
 		log.info('start() system failed to fully start')
@@ -213,8 +265,9 @@ def stop():
 	nginx_status = stop_nginx()
 	uwsgi_status = stop_uwsgi()
 	token_status = stop_tokens()
+	building_status = stop_buildings()
 	
-	if not nginx_status and not uwsgi_status and not token_status and maint_status:
+	if not nginx_status and not uwsgi_status and not token_status and not building_status and maint_status:
 		log.info('stop() system is fully stopped')
 	else:
 		log.info('stop() system failed to fully stopped')
@@ -227,9 +280,10 @@ def status():
 	nginx_status = status_nginx()
 	uwsgi_status = status_uwsgi()
 	token_status = status_tokens()
+	building_status = status_buildings()
 	maint_status = status_maint()
 	
-	if nginx_status and uwsgi_status and token_status and not maint_status:
+	if nginx_status and uwsgi_status and token_status and building_status and not maint_status:
 		log.info('status() system is fully running')
 	elif not nginx_status and not uwsgi_status and not token_status and maint_status:
 		log.info('status() system is fully stopped')

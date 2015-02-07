@@ -14,6 +14,8 @@ import daemon
 from optparse import OptionParser
 import socket
 import requests
+#from django.contrib.auth.context_processors import auth
+import auth
 
 #from flaskext.auth.permissions import self
 
@@ -34,7 +36,7 @@ class Tokens():
 		'''
 		
 		self.cache = StrictRedis(db=config.tokens_cache_redis_db)
-		self.log.debug('init(): starting tokens service. connected to cache')
+		self.log.debug('notify(): connected to cache')
 
 		status = {'result': 'error', 'message': ''}
 
@@ -134,7 +136,6 @@ class Tokens():
 		
 		# Delete 'general' cache state
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
-		cache.flushdb()	# Remove all keys from the current database
 		
 		# Fetch token list
 		query = gdata.spreadsheet.service.CellQuery()
@@ -159,6 +160,8 @@ class Tokens():
 					scopes[worksheet_title].append(cell.content.text)
 				self.log.debug('sync_cache() fetched scope: ' + str(worksheet_title) + ', with number of items: ' + str(len(cells)))
 					
+		cache.flushdb()	# Remove all keys from the current database
+
 		# Build user and general cache
 		for token_ent in tokens:
 			(user, token, datetime) = token_ent
@@ -174,6 +177,11 @@ class Tokens():
 		# Reset the cache log index to the last entry
 		num_log_entries = len(client.GetListFeed( config.tokens_spreadsheet_id, wksht_id=worksheet_ids['change log']).entry) + 1
 		cache.set('log_index', num_log_entries) # Reset the cache log index to the start
+		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
+		
+		# Add our admin token for maintaining cache coherency
+		admin_token_hash = auth.calc_hash(config.admin_token)
+		cache.set(admin_token_hash, 'finti_admin@pdx.edu')
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
@@ -195,6 +203,9 @@ class Tokens():
 		for item in pubsub.listen():
 			self.log.info('listen(): item detected: ' + str(item))
 			value = str(item['data'])
+			message_type = str(item['type'])
+			if message_type <> 'message':
+				continue
 			is_echo = False
 			if value.startswith('echo'):
 				is_echo = True
@@ -213,7 +224,7 @@ class Tokens():
 						self.log.info('listen(): alerting neighbors of change')
 						for neighbor in neighbors:
 							try:
-								requests.get('http://' + neighbor + ':8888/erp/gen/1.0/tokens/echo ' + value)
+								requests.get('http://' + neighbor + ':8888/inf/v1/tokens/echo ' + value)
 								self.log.info('listen(): alerted neighbor of change: ' + neighbor)
 							except Exception:
 								self.log.warn('listen() failed to contact neighbor: ' + neighbor)

@@ -45,7 +45,7 @@ function getBuilding(building_identifier) {
   Logger.log("getBuilding: fetching building: " + building_identifier );
   var url = PropertiesService.getScriptProperties().getProperty("ws_url");
   var params = genFetchURLparams('GET');
-  var response = UrlFetchApp.fetch(url + "/erp/gen/1.0/buildings/" + building_identifier, params);
+  var response = UrlFetchApp.fetch(url + "/org/v1/buildings/" + building_identifier, params);
   var json = response.getContentText();
   var building = JSON.parse(json);
   Logger.log("getBuilding: " + json );
@@ -61,7 +61,7 @@ function getBuildingHistory(building_identifier) {
   Logger.log("getBuildingHistory: fetching building history: " + building_identifier );
   var params = genFetchURLparams('GET');
   var url = PropertiesService.getScriptProperties().getProperty("ws_url");
-  var response = UrlFetchApp.fetch(url + "/erp/gen/1.0/buildings/" + building_identifier + "/history", params);
+  var response = UrlFetchApp.fetch(url + "/org/v1/buildings/" + building_identifier + "/history", params);
   var json = response.getContentText();
   Logger.log("getBuildingHistory: " + json );
   return json.replace(/'/g,"&quot;");
@@ -75,7 +75,7 @@ function getBuildingHistory(building_identifier) {
 function getBuildings() {
   var params = genFetchURLparams('GET');
   var url = PropertiesService.getScriptProperties().getProperty("ws_url");
-  var response = UrlFetchApp.fetch(url + "/erp/gen/1.0/buildings", params);
+  var response = UrlFetchApp.fetch(url + "/org/v1/buildings", params);
   var json = response.getContentText();
   var buildings = JSON.parse(json);
   return buildings;
@@ -105,7 +105,8 @@ function makeBuilding(form) {
     "from_date": form.fromdate,
     "to_date": form.todate
   };
-  return data;
+  var defaulted_data = defaultify(data);
+  return defaulted_data;
 }
 
 /**
@@ -118,8 +119,8 @@ function makeEmptyBuilding() {
     "short_name": "",
     "building_code": "",
     "street_address": "",
-    "city": "",
-    "state_code": "",
+    "city": "Portland",
+    "state_code": "OR",
     "zipcode": "",
     "centroid_lat": "",
     "centroid_long": "",
@@ -146,6 +147,53 @@ function sendEmail(action, bldgid)
   MailApp.sendEmail(recip, subj, mesg);
 }
 
+/*
+ * Add reasonable defaults for required data when not specified
+ */
+function defaultify(building){
+  if (building["street_address"] != null) {
+    // Yea, we have a start
+    if (building["city"] == null || building["city"] == "") {
+      building["city"] = "Portland";
+    }
+    if (building["state_code"] == null || building["state_code"] == "") {
+      building["state_code"] = "OR";
+    }
+    var street_addr = 
+        building["street_address"] + ", "
+        + building["city"] + " " + building["state_code"];
+
+    Logger.log("defaultify(): geolocating address: " + street_addr);
+    var location = pdxGeolocate(street_addr);
+    
+    if (building["centroid_lat"] == null || isNaN(parseFloat(building["centroid_lat"]))) {
+      building["centroid_lat"] = location[0];
+    }
+  
+    if (building["centroid_long"] == null || isNaN(parseFloat(building["centroid_long"]))) {
+      building["centroid_long"] = location[1];
+    }
+  
+    if (building["rlis_lat"] == null || isNaN(parseFloat(building["rlis_lat"]))) {
+      building["rlis_lat"] = location[0];
+    }
+  
+    if (building["rlis_long"] == null || isNaN(parseFloat(building["rlis_long"]))) {
+      building["rlis_long"] = location[1];
+    }
+  
+    if (building["geolocate_lat"] == null || isNaN(parseFloat(building["geolocate_lat"]))) {
+      building["geolocate_lat"] = location[0];
+    }
+  
+    Logger.log("defaultify(): building[geolocate_long]: " + building["geolocate_long"]);
+    if (building["geolocate_long"] == null || isNaN(parseFloat(building["geolocate_long"]))) {
+      building["geolocate_long"] = location[1];
+      Logger.log("defaultify(): setting geolocate_long");
+    }
+  }
+  return building;
+}
 
 /**
  * Create a new building
@@ -155,12 +203,12 @@ function postBuilding(form) {
 
   Logger.log("postBuilding");
   var data = makeBuilding(form);
-
+  
   payload = JSON.stringify(data);
   Logger.log('payload: ' + payload);
 
   var ws_url = PropertiesService.getScriptProperties().getProperty("ws_url");
-  var url = ws_url + "/erp/gen/1.0/buildings";
+  var url = ws_url + "/org/v1/buildings";
   var options = {
     "method": "post", 
     "contentType": "application/json", 
@@ -193,14 +241,14 @@ function putBuilding(form) {
 
   Logger.log("putBuilding");
   var data = makeBuilding(form);
-
+  
   payload = JSON.stringify(data);
   Logger.log('payload: ' + payload);
 
   var user = Session.getActiveUser().toString();
   var user_token = PropertiesService.getScriptProperties().getProperty(user);
   var ws_url = PropertiesService.getScriptProperties().getProperty("ws_url");
-  var url = ws_url + "/erp/gen/1.0/buildings";
+  var url = ws_url + "/org/v1/buildings";
   Logger.log('url:' + url);
   var options = { 
     "method": "put", 
@@ -228,6 +276,16 @@ function putBuilding(form) {
   return 'update|' + bldgID + '|' + Logger.getLog();
 }
 
+/**
+ * Geolocate a building around Portland
+ */
+
+function pdxGeolocate(address){
+  response = Maps.newGeocoder().setBounds(44.1419049,-120.5380992, 45.977013, -116.945570).geocode(address)
+  var result = response.results[0];
+  Logger.log("pdxGeolocate() geolocated: " + address);
+  return [result.geometry.location.lat, result.geometry.location.lng];
+}
 
 /**
  * Remove an existing building
@@ -237,7 +295,7 @@ function deleteBuilding(form) {
 
   Logger.log("deleteBuilding");
   var ws_url = PropertiesService.getScriptProperties().getProperty("ws_url");
-  var url = ws_url + "/erp/gen/1.0/buildings/" + form.id;
+  var url = ws_url + "/org/v1/buildings/" + form.id;
   Logger.log('url:' + url);
   var options = {
     "method": "delete",
@@ -268,4 +326,46 @@ function genFetchURLparams(verb) {
   };
   return params;
 }
+
+/**
+ * Run the unit-test suite
+ */
+function unittest(){
+  testpdxGeolocate();
+  testdefaultify();
+}
+
+/**
+ * Test pdxGeolocate
+ */
+function testpdxGeolocate(){
+  var address = "2000 SW 5TH AVE";
+  var location = pdxGeolocate(address);
+  Logger.log("lat: " + location[0] + ", long: " + location[1]);
+  assert_true( location[0] == 45.50849270000001 && location[1] == -122.6830174, "verify the geolocated address is reasonable");
+}
+
+/**
+ * Test defaultify
+ */ 
+function testdefaultify(){
+  var bld = makeEmptyBuilding();
+  bld["street_address"] = "2000 SW 5TH AVE";
+  var better_bld = defaultify(bld);
+  assert_true(better_bld["centroid_long"] == -122.6830174, "verify default values are added");
+  assert_true(better_bld["geolocate_lat"] == 45.50849270000001, "verify default values are added");
+}
+
+
+/**
+ * Report and check unit-test results
+ */
+function assert_true(cond, msg) {
+  if (cond) {
+    Logger.log('===============  OK: ' + msg);
+  } else {
+    Logger.log('============= ERROR: ' + msg);
+  }
+}
+
 

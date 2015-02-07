@@ -40,7 +40,7 @@ class BuildingsTest(TestCase):
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
-		rv = Client.get(self.client, path='/erp/gen/1.0/buildings',
+		rv = Client.get(self.client, path='/org/v1/buildings',
 						 headers=h)
 		self.assert_200(rv)
 		
@@ -58,7 +58,7 @@ class BuildingsTest(TestCase):
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
-		rv = Client.get(self.client, path='/erp/gen/1.0/buildings/B0038/history',
+		rv = Client.get(self.client, path='/org/v1/buildings/B0038/history',
 						 headers=h)
 		building_history_json = rv.data
 		history = json.loads(building_history_json)
@@ -73,18 +73,19 @@ class BuildingsTest(TestCase):
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		
-		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings/B0038',
+		EB_rv = Client.get(self.client, path='/org/v1/buildings/B0038',
 						 headers=h)
 		EB = json.loads(EB_rv.data)
+		print("EB: " + str(EB))
 		self.assertTrue(EB['street_address'] == '1930 SW FOURTH AVENUE')
 		self.assertTrue(EB_rv.status_code == 200)
 
 		# Test the positive case of finding an expected building via query string
-		#EB_rv = self.app.get('/erp/gen/1.0/buildings', query_string=dict(building_identifier='B0038'))
+		#EB_rv = self.app.get('/org/v1/buildings', query_string=dict(building_identifier='B0038'))
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
-		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings',
+		EB_rv = Client.get(self.client, path='/org/v1/buildings',
 						 headers=h, query_string=dict(building_identifier='B0038'))
 		#print('EB_rv: ' + str(EB_rv.data))
 		EB = json.loads(EB_rv.data)
@@ -92,20 +93,20 @@ class BuildingsTest(TestCase):
 		self.assertTrue(EB_rv.status_code == 200)
 
 		# Test the case of not finding a building via URI path
-		#EB_rv = self.app.get('/erp/gen/1.0/buildings/0000038')
+		#EB_rv = self.app.get('/org/v1/buildings/0000038')
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
-		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings/0000000038', headers=h)
+		EB_rv = Client.get(self.client, path='/org/v1/buildings/0000000038', headers=h)
 		print('status_code: ' + str(EB_rv.status_code))
 		self.assertTrue(EB_rv.status_code == 404)
 
 		# Test the case of not finding a building via query string
-		#EB_rv = self.app.get('/erp/gen/1.0/buildings', query_string=dict(building_identifier='0000038'))
+		#EB_rv = self.app.get('/org/v1/buildings', query_string=dict(building_identifier='0000038'))
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
-		EB_rv = Client.get(self.client, path='/erp/gen/1.0/buildings',
+		EB_rv = Client.get(self.client, path='/org/v1/buildings',
 						 headers=h, query_string=dict(building_identifier='0000038'))
 		self.assertTrue(EB_rv.status_code == 404)
 
@@ -124,7 +125,7 @@ class BuildingsTest(TestCase):
 			"rlis_long": -122.682749, 
 			"centroid_lat": 45.508593,
 			"centroid_long": -122.682749, 
-			"building_identifier": "B8888",
+			"building_identifier": "B88888",
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
@@ -132,14 +133,14 @@ class BuildingsTest(TestCase):
 			"from_date": "2010-01-01",
 			"to_date": "2016-01-01"
 		 }		
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.post(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		
 		# This will succeed the first time only
@@ -159,7 +160,7 @@ class BuildingsTest(TestCase):
 			"rlis_long": -122.682749, 
 			"centroid_lat": 45.508593,
 			"centroid_long": -122.682749, 
-			"building_identifier": "B8888",
+			"building_identifier": "B88888",
 			"state_code": "OR",
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
@@ -168,13 +169,13 @@ class BuildingsTest(TestCase):
 			"to_date": "2016-01-01"
 		}
 			
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.post(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
@@ -198,13 +199,13 @@ class BuildingsTest(TestCase):
 			"from_date": "2010-01-01",
 			"to_date": "2016-01-01"
 		}		
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.post(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.post(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
@@ -232,13 +233,13 @@ class BuildingsTest(TestCase):
 		}		
 
 		# Check well-formed case
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		print('PUT result: ', HEMB_rv.data)
 		self.assertTrue(HEMB_rv.status_code == 200)
@@ -246,13 +247,13 @@ class BuildingsTest(TestCase):
 		# Check additional field case
 		HEMB_PLUS = HEMB
 		HEMB_PLUS['another'] = 'field'
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_PLUS), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_PLUS),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_PLUS),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -260,78 +261,78 @@ class BuildingsTest(TestCase):
 		HEMB_MINUS = HEMB
 		del HEMB_MINUS['rlis_lat']
 		
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_MINUS), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_MINUS),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_MINUS),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check type: non-numeric
 		HEMB_NON_NUM = HEMB
 		HEMB_NON_NUM["centroid_lat"] = 'abc'
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_NON_NUM), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NON_NUM),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_NON_NUM),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check type: unicode
 		HEMB_ASCII = HEMB
 		HEMB_ASCII["city"] = 123
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_ASCII), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_ASCII),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_ASCII),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check null entries
 		HEMB_NULL = HEMB
 		HEMB_NULL["city"] = ''
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_NULL), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_NULL),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_NULL),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check entries too long
 		HEMB_LONG = HEMB
 		HEMB_LONG["city"] = 'asoethaoetuhsatoehuatoestnahseutasoehusaoehusaohsuathoeuthasoehusoaehuatohenahoesuhaonehunaohestn'
-#		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG), headers={'Content-type': 'application/json'} )
+#		HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_LONG), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_LONG),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_LONG),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 		# Check null entries too short
 		HEMB_SHORT = HEMB
 		HEMB_SHORT["city"] = ' '
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB_SHORT), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 		
-		HEMB_rv = Client.put(self.client, path='/erp/gen/1.0/buildings', data=json.dumps(HEMB_SHORT),
+		HEMB_rv = Client.put(self.client, path='/org/v1/buildings', data=json.dumps(HEMB_SHORT),
 						 headers=h)
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
@@ -361,26 +362,27 @@ class BuildingsTest(TestCase):
 		   "building_identifier" : "B88888"
 		}
 
-		#HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		#HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		h = Headers()
 		h.add('Authorization',
 			  'Basic ' + base64.b64encode(self.token + ':'))
 		h.add('Content-type', 'application/json')
 
-		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers=h )
+		HEMB_rv = self.app.put('/org/v1/buildings', data=json.dumps(HEMB), headers=h )
+		print('HEMB_rv: ' + str(HEMB_rv))
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['zipcode'] == "97888")
 		
 		HEMB['zipcode'] = '88888'
-		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers=h )
+		HEMB_rv = self.app.put('/org/v1/buildings', data=json.dumps(HEMB), headers=h )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['zipcode'] == '88888')
 
 		# Test update to a non-existent building
 		HEMB['building_identifier'] = '242'
-		HEMB_rv = self.app.put('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers=h )
+		HEMB_rv = self.app.put('/org/v1/buildings', data=json.dumps(HEMB), headers=h )
 		self.assertTrue(HEMB_rv.status_code == 404)
 
 	@unittest.skip('weatherwax')
@@ -404,21 +406,21 @@ class BuildingsTest(TestCase):
 			"city": "Ankh-Morpork",
 			"street_address": "2000 SW 5TH AVE",
 			"zipcode": "88888" }		
-		HEMB_rv = self.app.post('/erp/gen/1.0/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
+		HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
 		self.assertTrue(HEMB_rv.status_code == 200)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		self.assertTrue(HEMB_rv_data['zipcode'] == "88888")
 
-		HEMB_rv = self.app.delete('/erp/gen/1.0/buildings/888')	# Delete the new building and check the result
+		HEMB_rv = self.app.delete('/org/v1/buildings/888')	# Delete the new building and check the result
 		self.assertTrue(HEMB_rv.status_code == 200)
 		self.assertTrue(HEMB_rv.data == "building removed")
 		
-		HEMB_rv = self.app.get('/erp/gen/1.0/buildings/888')	# Really check to see if the building is gone
+		HEMB_rv = self.app.get('/org/v1/buildings/888')	# Really check to see if the building is gone
 		self.assertTrue(HEMB_rv.status_code == 404)
 		
 		# Test the deletion of a non-existent building
 		
-		HEMB_rv = self.app.delete('/erp/gen/1.0/buildings/080808')	# Delete the new building and check the result
+		HEMB_rv = self.app.delete('/org/v1/buildings/080808')	# Delete the new building and check the result
 		self.assertTrue(HEMB_rv.status_code == 404)
 		
 		'''

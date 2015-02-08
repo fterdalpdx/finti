@@ -182,7 +182,7 @@ class Tokens():
 		# Update keys in the local cache
 		
 		# Build user and general cache
-		for token_ent in tokens:
+		for token_ent in cloud_tokens:
 			(user, token, datetime) = token_ent
 			cache.set(token, user)
 		self.log.debug('sync_cache() updated tokens, count: ' + str(len(tokens)))

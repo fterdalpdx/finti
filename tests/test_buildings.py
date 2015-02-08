@@ -184,7 +184,8 @@ class BuildingsTest(TestCase):
 		
 		HEMB_rv = Client.post(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
-		self.assertTrue(HEMB_rv.status_code == 404)
+		
+		self.assertTrue(HEMB_rv.status_code == 400)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		
 		# Test of malformed data add

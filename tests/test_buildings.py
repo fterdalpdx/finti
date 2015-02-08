@@ -35,7 +35,7 @@ class BuildingsTest(TestCase):
 	def tearDown(self):
 		self.cache.delete(self.token_hash)
 
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	def test_get_buildings(self):
 		h = Headers()
 		h.add('Authorization',
@@ -53,7 +53,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue('short_name' in buildings[17])
 		self.assertTrue('building_identifier' in buildings[11])
 
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	def test_get_building_history(self):
 		h = Headers()
 		h.add('Authorization',
@@ -111,7 +111,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue(EB_rv.status_code == 404)
 
 	
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_add_building(self):
 		# Test of complete and correctly formated building data add
@@ -210,7 +210,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 	
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_building_is_valid(self):
 		HEMB = {
@@ -337,7 +337,7 @@ class BuildingsTest(TestCase):
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# test_building_is_valid test covers this test

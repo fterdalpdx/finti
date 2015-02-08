@@ -390,6 +390,7 @@ class BuildingsTest(TestCase):
 		# Test update to a non-existent building
 		HEMB['building_identifier'] = '242'
 		HEMB_rv = self.app.put('/org/v1/buildings', data=json.dumps(HEMB), headers=h )
+		print('HEMB_rv.status_code: ' + HEMB_rv.status_code)
 		self.assertTrue(HEMB_rv.status_code == 404)
 
 	@unittest.skip('weatherwax')

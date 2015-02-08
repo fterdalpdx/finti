@@ -162,7 +162,7 @@ class DevelopmentConfig(Config):
 	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1x7XfLNokm1YVkKbGrBQA4Ql3C5ifjVyGTVd1hbEKjlw'
 	tokens_worksheet_id = 'od6'
-	neighbors = ['localhost']
+	neighbors = []
 	redis_hosts = neighbors
 	tokens_account_url = 'https://script.google.com/a/macros/pdx.edu/s/AKfycbzTj8aFkCAJSrx997q3nHw_dAxZBXAZy2g2n40I4aqLcARfMA8/exec'
 	doc_url = ''

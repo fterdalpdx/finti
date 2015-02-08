@@ -66,7 +66,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue(len(history) > 0)
 
 
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	def test_get_building(self):
 
 		# Test the positive case of finding an expected building via URI path

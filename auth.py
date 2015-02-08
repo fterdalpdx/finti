@@ -3,7 +3,7 @@ Created on Jan 15, 2015
 
 @author: dennis
 '''
-from flask import Response, request
+from flask import Response, request, make_response
 from functools import wraps
 from redis import StrictRedis
 import hashlib
@@ -41,7 +41,7 @@ def authenticate():
 
 def forbidden():
 	"""Informs of lack of authorization"""
-	return Response(status='Forbidden', status_code=403, headers={'Content-Type': 'application/json'})
+	return make_response('Forbidden', 403, {'Content-Type': 'application/json'})
 
 def requires_auth(scope=""):
 	def required_auth_wrapper(f):

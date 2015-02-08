@@ -104,7 +104,7 @@ def update_building():
 		if status['result'] <> 'success':
 			buildings.log.info('update_building() handler: failed to update building: ' + status['message'])
 			if status['message'] == config.buildings_err_gen:
-				buildings.log.info('update_building() aborting with status: ' + config.buildings_code_by_error[status['message']] + ' message: ' + status['message'])
+				buildings.log.info('update_building() aborting with status: ' + str(config.buildings_code_by_error[status['message']]) + ' message: ' + status['message'])
 				abort(config.buildings_code_by_error[status['message']], status['message'])
 			else:
 				abort(404, status['message'])

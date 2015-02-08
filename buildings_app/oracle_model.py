@@ -284,7 +284,7 @@ class Buildings():
 			
 			is_success = True
 		except Exception as ex:
-			self.log.critical('add_building(): failed to update DB for building: ' + str(building) + ', error: ' + str(ex))
+			self.log.warn('add_building(): failed to update DB for building: ' + str(building) + ', error: ' + str(ex))
 	
 		return is_success
 		

@@ -33,8 +33,9 @@ class BuildingsTest(TestCase):
 
 
 	def tearDown(self):
-		self.cache.delete(self.token_hash)
-
+		#self.cache.delete(self.token_hash)
+		pass
+	
 	#@unittest.skip('weatherwax')
 	def test_get_buildings(self):
 		h = Headers()
@@ -82,15 +83,18 @@ class BuildingsTest(TestCase):
 
 		# Test the positive case of finding an expected building via query string
 		#EB_rv = self.app.get('/org/v1/buildings', query_string=dict(building_identifier='B0038'))
-		h = Headers()
-		h.add('Authorization',
-			  'Basic ' + base64.b64encode(self.token + ':'))
-		EB_rv = Client.get(self.client, path='/org/v1/buildings',
-						 headers=h, query_string=dict(building_identifier='B0038'))
+		#
+		# Eliminating the query string method for now
+		#
+		#h = Headers()
+		#h.add('Authorization',
+		#	  'Basic ' + base64.b64encode(self.token + ':'))
+		#EB_rv = Client.get(self.client, path='/org/v1/buildings',
+		#				 headers=h, query_string=dict(building_identifier='B0038'))
 		#print('EB_rv: ' + str(EB_rv.data))
-		EB = json.loads(EB_rv.data)
-		self.assertTrue(EB['street_address'] == '1930 SW FOURTH AVENUE')
-		self.assertTrue(EB_rv.status_code == 200)
+		#EB = json.loads(EB_rv.data)
+		#self.assertTrue(EB['street_address'] == '1930 SW FOURTH AVENUE')
+		#self.assertTrue(EB_rv.status_code == 200)
 
 		# Test the case of not finding a building via URI path
 		#EB_rv = self.app.get('/org/v1/buildings/0000038')
@@ -103,12 +107,15 @@ class BuildingsTest(TestCase):
 
 		# Test the case of not finding a building via query string
 		#EB_rv = self.app.get('/org/v1/buildings', query_string=dict(building_identifier='0000038'))
-		h = Headers()
-		h.add('Authorization',
-			  'Basic ' + base64.b64encode(self.token + ':'))
-		EB_rv = Client.get(self.client, path='/org/v1/buildings',
-						 headers=h, query_string=dict(building_identifier='0000038'))
-		self.assertTrue(EB_rv.status_code == 404)
+		#
+		# Eliminating the query string method for now
+		#
+		#h = Headers()
+		#h.add('Authorization',
+		#	  'Basic ' + base64.b64encode(self.token + ':'))
+		#EB_rv = Client.get(self.client, path='/org/v1/buildings',
+		#				 headers=h, query_string=dict(building_identifier='0000038'))
+		#self.assertTrue(EB_rv.status_code == 404)
 
 	
 	#@unittest.skip('weatherwax')
@@ -177,7 +184,8 @@ class BuildingsTest(TestCase):
 		
 		HEMB_rv = Client.post(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
-		self.assertTrue(HEMB_rv.status_code == 404)
+		
+		self.assertTrue(HEMB_rv.status_code == 400)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		
 		# Test of malformed data add
@@ -383,6 +391,7 @@ class BuildingsTest(TestCase):
 		# Test update to a non-existent building
 		HEMB['building_identifier'] = '242'
 		HEMB_rv = self.app.put('/org/v1/buildings', data=json.dumps(HEMB), headers=h )
+		print('HEMB_rv.status_code: ' + str(HEMB_rv.status_code))
 		self.assertTrue(HEMB_rv.status_code == 404)
 
 	@unittest.skip('weatherwax')

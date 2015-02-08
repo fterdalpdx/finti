@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+  <title>Pushbullet API Documentation</title>
+  <!-- <link rel="stylesheet" href="/css/pushbullet.css"> -->
+  <link rel="stylesheet" href="http://www.pushbullet.com/css/common.css">
+  <link rel="icon" type="image/x-icon" href="http://www.pushbullet.com/favicon.ico">
+  <link rel="canonical" href="https://docs.pushbullet.com/v2/pushes/">
+  <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <style>
+    #header img {
+      margin:0;
+    }
+    #footer {
+      background-color:#fff;
+    }
+    #footer .area .col {
+      padding:0px;
+    }
+    h1 {
+      line-height:39px;
+    }
+    h2 {
+      font-size:24px;
+      line-height:30px;
+      margin:20px 0;
+    }
+    h4 {
+      font-size:19px !important;
+      font-weight:bold !important;
+      line-height:26px !important;
+      margin:20px 0 !important;
+    }
+    hr {
+      border:0;
+      border-top:1px solid #eeeeee;
+      border-bottom:1px solid #ffffff;
+      margin:20px 0px;
+    }
+    pre {
+      font-size:14px;
+      overflow-x:auto;
+    }
+    .entry {
+      margin:10px 20px !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="fake-header"></div>
+  <div style="line-height:24px; font-size:15px">
+    <div class="page markdown">
+      <div class="inner" style="background:white;box-shadow:0 0 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.12);overflow:hidden;padding:60px 120px 120px 120px;">
+        <h1>Buildings</h1>
+
+<h2>https://ws.oit.pdx.edu/org/v1/buildings</h2>
+
+<hr>
+
+<h3>Get all PSU buildings</h3>
+
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/v1/buildings</pre>
+
+<h5>Attributes</h5>
+<p>The following building descriptor is a <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> dictionary containing properties which describe a Portland State University building.</p>
+<pre>{
+  "long_name":  &#60;string&#62;,
+  "short_name": &#60;string&#62;,
+  "building_code": &#60;string&#62;,
+  "building_identifier": &#60;string&#62;,
+  "street_address": &#60;string&#62;,
+  "city": &#60;string&#62;,
+  "state_code": &#60;string&#62;,
+  "zipcode": &#60;string&#62;,
+  "geolocate_lat": &#60;float&#62;,
+  "geolocate_long": &#60;float&#62;,
+  "centroid_lat": &#60;float&#62;,
+  "centroid_long": &#60;float&#62;,
+  "rlis_lat": &#60;float&#62;,
+  "rlis_long": &#60;float&#62;,
+  "start_date": &#60;string&#62;,
+  "end_date": &#60;string&#62;
+}</pre>
+<ul>
+<li><code>long_name</code> - The long name for a building, ex: “Stephen E. Epler Residence Hall”.  Must be longer than one and less than or equal to 60 unicode characters.</li>
+<li><code>short_name</code> - The short building name, ex: “Epler Res Hall” for the “Stephen E. Epler Residence Hall” building.  Must be longer than one and less than or equal to 30 characters.</li>
+<li><code>building_code</code> - The even shorter building name, ex: “SEH” for the “Epler Res Hall” building. Must be longer than one and less than or equal to 6 unicode characters.</li>
+<li><code>building_identifier</code> - The long-lived unique identifier for a PSU building which does not change with building name changes, ex: “B0042” is the building_identifier for the Stephen E. Epler Residence Hall.</li>
+<li>street_address<code></code> - The street address including street number and name, ex: “1136 SW Montgomery Street”.  Must be longer than one and less than or equal to 75 characters.</li>
+<li><code>city</code> - The city, ex: “Portland”</li>
+<li><code>state_code</code> - State, ex: “OR”</li>
+<li><code>zipcode</code> - The zipcode, ex: “97201”</li>
+<li><code>location</code> - The geographic building location as a centroid, RLIS, and Geolocate coordinates specified as a JSON floating point number element containing the latitude and longitude in decimal degrees (DDD) format, ex: { "centroid_lat": 45.512853, 'centroid_long': -122.688024 }.</li>
+<li><code>start_date, end_date</code> - The date range in which a building_descriptor is valid, specified as ISO-8601 date format, ex:  2015-01-07 represents January 7th, 2015.</li>
+</ul>
+<p>All text fields, including building_identifiers passed as arguments, must contain only mixed case alphanumeric, comma, period, hyphen, underscore and space characters.</p>
+<h5>Actions</h5>
+<h4><code>DELETE</code> - Deactivate a Building</h4>
+<pre><b>DELETE</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings/<i>building_identifier</i></pre>
+<p>Change the given building status to inactive in the list of current Portland State University buildings.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>building_identifier</code> - Unique building identifier.</li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Malformed building_identifier</li>
+      <li><code>403</code> - Forbidden</li>
+      <li><code>404</code> - Building does not exist</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+</ul>
+<h4><code>GET</code> - List All PSU Buildings</h4>
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings</pre>
+<p>Retrieve the list of current Portland State University buildings.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Request failed</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON array of BuildingDescriptor elements</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>GET</code> - Get a Building</h4>
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings/<i>building_identifier</i></pre>
+<p>Retrieve a current Portland State University building descriptor.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>building_identifier</code> - Unique building identifier.</li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Malformed building_identifier</li>
+      <li><code>404</code> - Building does not exist</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON BuildingDescriptor</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>GET</code> - Building Change History</h4>
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings/<i>building_identifier</i>/history</pre>
+<p>Retrieve a history of changes for a Portland State University building.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>building_identifier</code> - Unique building identifier.</li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Malformed building_identifier</li>
+      <li><code>404</code> - Building does not exist</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON array of BuildingDescriptor elements</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>POST</code> - Create a New Building</h4>
+<pre><b>POST</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings/<i>building_identifier</i>/history</pre>
+<p>Creates a new Portland State University building.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>building_identifier</code> - Unique building identifier.</li>
+    </ul>
+  </li>
+  <li>
+    JSON Parameters
+    <ul>
+      <li><code>BuildingDescriptor</code> - New building descriptor</code></li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Request failed</li>
+      <li><code>403</code> - Forbidden</li>
+      <li><code>404</code> - Building descriptor is not valid. Details of descriptor errors are reported.</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON BuildingDescriptor element of the newly created building on success, otherwise nothing</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>PUT</code> - Update an Existing Building</h4>
+<pre><b>PUT</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings/<i>building_identifier</i></pre>
+<p>Updates an existing Portland State University building.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>building_identifier</code> - Unique building identifier.</li>
+    </ul>
+  </li>
+  <li>
+    JSON Parameters
+    <ul>
+      <li><code>BuildingDescriptor</code> - Updated building descriptor</code></li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Request failed</li>
+      <li><code>403</code> - Forbidden</li>
+      <li><code>404</code> - Building descriptor is not valid. Details of descriptor errors are reported.</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON BuildingDescriptor element of the updated building on success, otherwise nothing</li>
+    </ul>
+  </li>
+</ul>
+</body>
+</html>

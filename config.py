@@ -61,6 +61,16 @@ class Config(object):
 		self.buildings_pubsub_channel = 'buildings_pubsub'
 		self.buildings_refresh = 'refresh'
 		self.buildings_echo = 'echo'
+
+		self.buildings_err_bad_id = "Malformed building_identifier"
+		self.buildings_err_dne = "Building does not exist"
+		self.buildings_err_gen = "Request failed"
+		
+		self.buildings_code_by_error = {
+			self.buildings_err_bad_id: 400,
+			self.buildings_err_dne:	404,
+			self.buildings_err_gen: 400,
+		}
 		
 		# T O K E N S
 		
@@ -152,7 +162,7 @@ class DevelopmentConfig(Config):
 	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1x7XfLNokm1YVkKbGrBQA4Ql3C5ifjVyGTVd1hbEKjlw'
 	tokens_worksheet_id = 'od6'
-	neighbors = ['localhost']
+	neighbors = []
 	redis_hosts = neighbors
 	tokens_account_url = 'https://script.google.com/a/macros/pdx.edu/s/AKfycbzTj8aFkCAJSrx997q3nHw_dAxZBXAZy2g2n40I4aqLcARfMA8/exec'
 	doc_url = ''

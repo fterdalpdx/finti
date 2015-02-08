@@ -28,7 +28,7 @@ class BuildingsAuthTest(TestCase):
 		h.add('Authorization', 'Basic ' + base64.b64encode('foo:my_password'))
 		rv = Client.open(self.client, path='/org/v1/buildings',
 						 headers=h)
-		self.assert_401(rv)
+		self.assert_403(rv)
 	
 	def test_admin_page_allows_valid_login(self):
 		cache = StrictRedis(db=config.tokens_cache_redis_db)

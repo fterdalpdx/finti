@@ -167,7 +167,7 @@ class Buildings():
 				status = {'result': 'success', 'message': 'successfully updated a building'}
 			else:
 				self.log.warn('update_building(): failed to updated building in database')
-				status = {'result': 'error', 'message': config.buildings_err_gen}
+				status = {'result': 'error', 'message': config.buildings_err_dne}
 		else:
 			self.log.warn('update_building(): building data is not valid')
 			status = {'result': 'error', 'message': 'building data is not valid: ' + status['message']}

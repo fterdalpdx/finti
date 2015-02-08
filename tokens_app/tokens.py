@@ -176,6 +176,10 @@ class Tokens():
 
 		# Eliminate keys in local cache which are not in the cloud cache
 		for token in cache.keys():
+			if cache.type(token) <> 'string':	# This is a scope set, and not a token
+				continue
+			if len(token) < 60 or len(token) > 70:		# The cache item is the wrong size to be a token
+				continue
 			if token not in token_ent_by_token:
 				self.log.info('sync_cache() eliminating stale token: ' + token)
 				cache.delete(token)

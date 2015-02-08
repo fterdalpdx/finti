@@ -34,7 +34,8 @@ class BuildingsTest(TestCase):
 
 	def tearDown(self):
 		#self.cache.delete(self.token_hash)
-
+		pass
+	
 	@unittest.skip('weatherwax')
 	def test_get_buildings(self):
 		h = Headers()

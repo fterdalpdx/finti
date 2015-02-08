@@ -217,7 +217,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 	
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_building_is_valid(self):
 		HEMB = {
@@ -344,7 +344,7 @@ class BuildingsTest(TestCase):
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 
-	#@unittest.skip('weatherwax')
+	@unittest.skip('weatherwax')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# test_building_is_valid test covers this test

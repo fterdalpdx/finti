@@ -162,7 +162,9 @@ class Buildings():
 			@return Dictionary containing building descriptor data
 		'''
 		
+		self.log.debug('get_building()::model: building_identifier: ' + building_identifier)
 		if building_identifier == config.buildings_refresh:
+			self.log.debug('get_building()::model: detected refresh request')
 			self.notify_neighbors(config.buildings_echo)
 			return {}
 		

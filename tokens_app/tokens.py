@@ -175,7 +175,7 @@ class Tokens():
 		#cache.flushdb()	# Remove all keys from the current database -- ok in dev, evil in practice
 
 		# Eliminate keys in local cache which are not in the cloud cache
-		for token in cache.scan_iter():
+		for token in cache.keys():
 			if token not in token_ent_by_token:
 				self.log.info('sync_cache() eliminating stale token: ' + token)
 				cache.delete(token)

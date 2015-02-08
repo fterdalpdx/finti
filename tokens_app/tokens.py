@@ -122,7 +122,7 @@ class Tokens():
 	
 	def sync_cache(self):
 		'''
-			Erase the local cache of tokens and scopes, and reload from cloud storage
+			Update the local token and scope cache from cloud storage
 		'''
 		
 		# Collect Token management info from the cloud
@@ -134,7 +134,7 @@ class Tokens():
 			worksheet_ids[worksheet.title.text] = worksheet.id.text.split('/')[-1]
 			self.log.debug('sync_cache() found sheets: ' + worksheet.title.text)
 		
-		# Delete 'general' cache state
+		# Connect to the local token cache
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
 		
 		# Fetch token list
@@ -143,33 +143,61 @@ class Tokens():
 		cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=worksheet_ids['tokens'], query=query).entry
 		cols = 3
 		rows = len(cells) / cols
-		tokens = []
+		cloud_tokens = []
+		token_ent_by_token = {}
 		for row in range(0, rows):
-			tokens.append([str(cell.content.text) for cell in cells[row * cols : (row + 1) * cols]])
+			token_ent = [str(cell.content.text) for cell in cells[row * cols : (row + 1) * cols]]
+			(user, token, datetime) = token_ent
+			token_ent_by_token[token] = token_ent
+			cloud_tokens.append(token_ent)
 		self.log.debug('sync_cache() fetched tokens from cloud: ' + str(rows))
 		
+		# Add our admin token for maintaining caches
+		admin_token_hash = auth.calc_hash(config.admin_token)
+		admin_ent = ('finti_admin@pdx.edu', admin_token_hash,'')
+		token_ent_by_token[admin_token_hash] = admin_ent
+		cloud_tokens.append(admin_ent)
+
 		# Fetch scopes
-		scopes = {}
+		cloud_scopes = {}
 		
 		for worksheet_title in worksheet_ids.keys():
 			if worksheet_title not in ['tokens', 'change log']:	# must then be a scope list
 				self.log.debug('sync_cache() fetching scope: ' + str(worksheet_title))
-				scopes[worksheet_title] = []
+				cloud_scopes[worksheet_title] = []
 				cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=worksheet_ids[worksheet_title], query=query).entry
 				for cell in cells:
-					scopes[worksheet_title].append(cell.content.text)
+					cloud_scopes[worksheet_title].append(cell.content.text)
 				self.log.debug('sync_cache() fetched scope: ' + str(worksheet_title) + ', with number of items: ' + str(len(cells)))
-					
-		cache.flushdb()	# Remove all keys from the current database
+		
+		# At this point the current live state of all tokens and scopes has been retrieved from cloud storage			
 
+		#cache.flushdb()	# Remove all keys from the current database -- ok in dev, evil in practice
+
+		# Eliminate keys in local cache which are not in the cloud cache
+		for token in cache.scan_iter():
+			if token not in token_ent_by_token:
+				self.log.info('sync_cache() eliminating stale token: ' + token)
+				cache.delete(token)
+		# Update keys in the local cache
+		
 		# Build user and general cache
 		for token_ent in tokens:
 			(user, token, datetime) = token_ent
 			cache.set(token, user)
-		self.log.debug('sync_cache() added tokens, count: ' + str(len(tokens)))
+		self.log.debug('sync_cache() updated tokens, count: ' + str(len(tokens)))
+		
+		# Eliminate keys in local cache which are not in the cloud cache
+		for (cloud_scope_name, cloud_scope_list) in cloud_scopes.items():
+			for user in cache.smembers(cloud_scope_name):
+				if user not in cloud_scope_list:
+					cache.srem(cloud_scope_name, user)
+					self.log.info('sync_cache() eliminated user: ' + user + ' from scope: ' + cloud_scope_name)
+
+		# TODO: Eliminate deactivated scopes
 		
 		# Build scopes
-		for (scope_name, scope_list) in scopes.items():
+		for (scope_name, scope_list) in cloud_scopes.items():
 			for user in scope_list:
 				cache.sadd(scope_name, user)
 			self.log.debug('sync_cache() added scope: ' + scope_name + ', with member count: ' + str(len(scope_list)))
@@ -179,12 +207,11 @@ class Tokens():
 		cache.set('log_index', num_log_entries) # Reset the cache log index to the start
 		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
-		# Add our admin token for maintaining cache coherency
-		admin_token_hash = auth.calc_hash(config.admin_token)
-		cache.set(admin_token_hash, 'finti_admin@pdx.edu')
-		self.log.debug('sync_cache() set log_index to: ' + str(num_log_entries))
 		
 	def listen(self):
+		'''
+			Listen on a pub/sub channel for token cache update requests
+		'''
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('tokens')
 		
@@ -233,7 +260,7 @@ class Tokens():
 			else:
 				# This must be a scope change
 				self.log.info('listen(): scope change item seen: ' + str(item['data']))
-				
+				self.sync_cache()
 				
 if __name__ == '__main__':	
 	parser = OptionParser()

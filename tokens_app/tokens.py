@@ -185,7 +185,7 @@ class Tokens():
 		for token_ent in cloud_tokens:
 			(user, token, datetime) = token_ent
 			cache.set(token, user)
-		self.log.debug('sync_cache() updated tokens, count: ' + str(len(tokens)))
+		self.log.debug('sync_cache() updated tokens, count: ' + str(len(cloud_tokens)))
 		
 		# Eliminate keys in local cache which are not in the cloud cache
 		for (cloud_scope_name, cloud_scope_list) in cloud_scopes.items():

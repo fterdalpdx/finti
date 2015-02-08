@@ -35,7 +35,7 @@ class Buildings():
 			status = {'result': 'success', 'message': buildings_json}
 		else:
 			self.log.error('get_buildings(): error: no buildings exist in model.')
-			status['message'] = 'Request failed'
+			status['message'] = config.buildings_err_gen
 		return status
 			
 	def get_building_history(self, building_identifier):
@@ -44,6 +44,11 @@ class Buildings():
 		'''
 		status = {'result': 'error', 'message': ''}
 
+		if not building_identifier.isalnum():
+			status = {'result': 'error', 'message': config.buildings_err_bad_id}
+			self.log.debug('get_building(): ' + status['message'])
+			return(status)
+
 		history = self.model.get_building_history(building_identifier)
 		if len(history) > 0:
 			history_json = json.dumps(history)
@@ -51,31 +56,31 @@ class Buildings():
 			self.log.debug('get_building_history(): successfully looked-up building history for: ' + building_identifier)
 		else:
 			self.log.error('get_building_history(): error: no history exists for building: ' + building_identifier)
-			status['message'] = 'Request failed'
+			status['message'] = config.buildings_err_dne
 		return status
 			
-	# FIXME: Should use get parameters for input instead of requiring a JSON body
+
 	def get_building(self, building_identifier):
 		'''
-			Get a single building by its building_identifier. First check the cache for a fresh copy, otherwise 
-			go to the database and retrieve the entry, and cache afterward.
+			Get a single building by its building_identifier.
 		'''
 		status = {'result': 'error', 'message': ''}
 		if not building_identifier.isalnum():
-			status = {'result': 'error', 'message': 'invalid building_identifier: identifier is not an alphanumeric'}
+			status = {'result': 'error', 'message': config.buildings_err_bad_id}
 			self.log.debug('get_building(): ' + status['message'])
 			return(status)
 			
 		self.log.debug('get_building(): looking-up from database: building_identifier: ' + building_identifier)
 		building = self.model.get_building(building_identifier)
 		if not building is None:
-			self.log.debug('get_building(): found in database, cache miss')
+			self.log.debug('get_building(): found building: ' + building_identifier)
 			building_json = json.dumps(building)
 			status = {'result': 'success', 'message': building_json}
 		else:
 			self.log.info('get_building(): error: building not found for building_identifier: ' + building_identifier)
-			status = {'result': 'error', 'message': 'Building does not exist'}
+			status = {'result': 'error', 'message': config.buildings_err_dne}
 		return status
+
 
 	def building_is_valid(self, building_descriptor):
 		'''
@@ -140,10 +145,10 @@ class Buildings():
 		if status['result'] == 'success':
 			if self.model.add_building(building) == True:
 				self.log.debug('add_building(): successfully added a new building')
-				status = {'result': 'success', 'message': 'successfully added a new building'}
+				status = {'result': 'success', 'message': 'Successfully added a new building'}
 			else:
 				self.log.warn('add_building(): failed to add new building to database')
-				status = {'result': 'error', 'message': 'failed to add new building to database'}
+				status = {'result': 'error', 'message': config.buildings_err_gen}
 		else:
 			self.log.warn('add_building(): building data is not valid: ' + status['message'])
 		
@@ -162,10 +167,10 @@ class Buildings():
 				status = {'result': 'success', 'message': 'successfully updated a building'}
 			else:
 				self.log.warn('update_building(): failed to updated building in database')
-				status = {'result': 'error', 'message': 'failed to update building in database'}
+				status = {'result': 'error', 'message': config.buildings_err_gen}
 		else:
 			self.log.warn('update_building(): building data is not valid')
-			status = {'result': 'error', 'message': 'building data is not valid'}
+			status = {'result': 'error', 'message': 'building data is not valid: ' + status['message']}
 		
 		return(status)
 
@@ -175,16 +180,16 @@ class Buildings():
 		'''
 		status = {'result': 'error', 'message': ''}
 		if not building_identifier.isalnum():
-			status = {'result': 'error', 'message': 'invalid building_identifier: identifier is not an alphanumeric'}
+			status = {'result': 'error', 'message': config.buildings_err_bad_id}
 			self.log.debug('get_building(): ' + status['message'])
 			return(status)
 		
 		if self.model.remove_building(building_identifier) == True:
 			self.log.info('delete_builiding(): removed building from model: building_identifier: ' + building_identifier)
-			status = {'result': 'success', 'message': 'successfully deleted a building'}
+			status = {'result': 'success', 'message': 'Action succeeded'}
 		else:
 			self.log.info('delete_builiding(): failed to remove building from model: building_identifier: ' + building_identifier)
-			status = {'result': 'error', 'message': 'failed to delete a building: ' + building_identifier}
+			status = {'result': 'error', 'message': config.buildings_err_dne}
 		return status
 
 buildings = Buildings()

@@ -61,6 +61,16 @@ class Config(object):
 		self.buildings_pubsub_channel = 'buildings_pubsub'
 		self.buildings_refresh = 'refresh'
 		self.buildings_echo = 'echo'
+
+		self.buildings_err_bad_id = "Malformed building_identifier"
+		self.buildings_err_dne = "Building does not exist"
+		self.buildings_err_gen = "Request failed"
+		
+		self.buildings_code_by_error = {
+			self.buildings_err_bad_id: 400,
+			self.buildings_err_dne:	404,
+			self.buildings_err_gen: 400,
+		}
 		
 		# T O K E N S
 		

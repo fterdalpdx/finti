@@ -38,14 +38,20 @@ def authenticate():
 	'Could not verify your access level for that URL.\n'
 	'You have to provide proper credentials', 401,
 	{'WWW-Authenticate': 'Basic realm="Login Required"'})
-	
+
+def forbidden():
+	"""Informs of lack of authorization"""
+	return Response(status='Forbidden', status_code=403, headers={'Content-Type': 'application/json'})
+
 def requires_auth(scope=""):
 	def required_auth_wrapper(f):
 		@wraps(f)
 		def decorated(*args, **kwargs):
 			auth = request.authorization
-			if not auth or not check_auth(auth.username, auth.password, scope):
+			if not auth:
 				return authenticate()
+			if not check_auth(auth.username, auth.password, scope):
+				return forbidden()
 			return f(*args, **kwargs)
 		return decorated
 	return required_auth_wrapper

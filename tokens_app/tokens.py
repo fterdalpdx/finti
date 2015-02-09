@@ -83,11 +83,11 @@ class Tokens():
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
 		log_prev_index = cache.get('log_index')
 		
-		if log_update_index <= log_prev_index is None:
-			log_prev_index = 0
+		if int(log_update_index) <= int(log_prev_index) is None:
+			log_prev_index = '0'
 		
 		
-		self.log.info('fetch_updates(): log_prev_index: ' + str(log_prev_index))
+		self.log.info('fetch_updates(): log_prev_index: ' + str(log_prev_index) + ', log_update_index: ' + str(log_update_index))
 			
 		cols = 4
 		updates = []

@@ -83,7 +83,7 @@ class Tokens():
 		cache = StrictRedis(db=config.tokens_cache_redis_db)
 		log_prev_index = cache.get('log_index')
 		
-		if int(log_update_index) <= int(log_prev_index) is None:
+		if int(log_update_index) <= int(log_prev_index):
 			log_prev_index = '0'
 		
 		

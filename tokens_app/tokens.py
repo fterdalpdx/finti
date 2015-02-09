@@ -60,18 +60,21 @@ class Tokens():
 		for update in updates:			# TODO: could re-add the Redis "Pipelines" feature to combine Redis requests for better performance when available
 			(user, token, date, action) = update
 			if action == 'add':
-				cache.hset('general', token, user)	# user-by-token -- really just existence of a token
-				cache.hset('users', user, token)	# token-by-user: allow lookup of previous token on token changes
+				cache.hset('general', token, user)	# future method - user-by-token -- really just existence of a token
+				cache.hset('users', user, token)	# future-method - token-by-user: allow lookup of previous token on token changes
+				cache.set(token, user)	# Current method
 				self.log.info('post_updates(): added token for user: ' + user)
 			elif action == 'delete':
-				cache.hdel('general', token)	# disables the ability to authenticate
-				cache.hdel('users', user)	# removes history of token
+				cache.hdel('general', token)	# future method - disables the ability to authenticate
+				cache.hdel('users', user)	# future method - removes history of token
+				cache.delete(token)
 				self.log.info('post_updates(): deleted token for user: ' + user)
 			elif action == 'update':
 				prev_token = cache.hget('users', user)
-				cache.hdel('general', prev_token)	# disables the ability to authenticate with previous token
-				cache.hset('general', token, user)		# set the new token for the user
-				cache.hset('users', user, token)		# set the user as possessing the new token
+				cache.hdel('general', prev_token)	# future method - disables the ability to authenticate with previous token
+				cache.hset('general', token, user)		# future method - set the new token for the user
+				cache.hset('users', user, token)		# future method - set the user as possessing the new token
+				cache.set(token, user)
 				self.log.info('post_updates(): updated token for user: ' + user)
 			else:
 				self.log.critical('post_updates(): unexpected change type: ' + action)

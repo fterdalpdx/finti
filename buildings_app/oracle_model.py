@@ -25,10 +25,16 @@ class Buildings():
 		self.update_cache()
 			
 	def update_cache(self):
-		# Eliminate all cache data including deleted (inactive) buildings
-		self.cache.flushdb()
+		'''
+			Pick-up updates to the building list from the database back-end. The neighbor nodes updates will be retrieved and
+			the cache on each node will be coherent with their neighbors.
+			Buildings are cached by: all building list (single item), buildings by id, and buildings by code.
+		'''
+		buildings = self.list_buildings(bypass_cache=True)	# get the buildings list from the db directly
+		if len(buildings) < 50:		# something has gone very wrong with oracle. fail with a static version from the cache instead.
+			self.log.critical('update_cache(): db version of the building list is incorrect. using current cache values instead')
+			return()
 		
-		buildings = self.list_buildings()
 		buildings_json = json.dumps(buildings)
 		
 		self.cache.set('buildings', buildings_json)
@@ -41,45 +47,6 @@ class Buildings():
 			self.cache.set(ident, building_json)
 			self.cache.set(code, building_json)
 									
-	def no_update_caches(self):
-		'''
-			Update the cache for building(s). Buildings are cached by:
-			all building list (single item), buildings by id, and buildings by code.
-			Also update sibling caches
-		'''
-		
-		self.log.info('update_caches(): regenerating caches')
-		
-		caches = {}
-		for host in config.redis_hosts:
-			try:
-				cache = redis.StrictRedis(host=host, db=config.buildings_cache_redis_db, socket_connect_timeout=2) # dont block indefinitely
-				cache.get('buildings')	# test connection to Redis
-				caches[host] = cache
-				self.log.info('update_caches(): connected to cache on host: ' + host)
-			except:
-				self.log.warn('update_caches(): cannot connect to Redis on host: ' + host)
-
-		for cache in caches.values():
-			cache.flushdb()	# Nuke all entries from orbit, it's the only way to be sure (eliminates deletes/deactivations).
-			self.log.info('update_caches(): flushed db on host')
-
-		buildings = self.list_buildings()
-		buildings_json = json.dumps(buildings)
-			
-		for cache in caches.values():
-			cache.set('buildings', buildings_json)
-			self.log.info('update_caches(): updated buildings cache on host')
-
-		for building in buildings:
-			ident = building['building_identifier']
-			code = building['building_code']
-			building_json = json.dumps(building)
-			# verify building to/from date is valid
-			
-			for cache in caches.values():
-				cache.set(ident, building_json)
-				cache.set(code, building_json)
 
 	def notify_neighbors(self, cache_request):
 		'''
@@ -139,7 +106,7 @@ class Buildings():
 			building_descriptor['to_date']])
 		return ora_array
 	
-	def list_buildings(self):
+	def list_buildings(self, bypass_cache=False):
 		'''
 			List all current PSU buildings. Does not contain the building histories.
 		
@@ -148,13 +115,16 @@ class Buildings():
 		'''
 		buildings = []
 		try:
-			self.log.debug('list_buildings(): global caching enabled')
-			buildings_json = self.cache.get('buildings')
-			if buildings_json is not None:
-				buildings = json.loads(buildings_json)
-				self.log.info('list_buildings(): global cache hit')
-				return buildings
-
+			if bypass_cache == False:
+				self.log.debug('list_buildings(): global caching enabled')
+				buildings_json = self.cache.get('buildings')
+				if buildings_json is not None:
+					buildings = json.loads(buildings_json)
+					self.log.info('list_buildings(): global cache hit')
+					return buildings
+			else:
+				self.log.debug('list_buildings(): building cache bypassed')
+				
 			self.log.info('list_buildings(): global cache miss.')
 					
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
@@ -192,7 +162,9 @@ class Buildings():
 			@return Dictionary containing building descriptor data
 		'''
 		
+		self.log.debug('get_building()::model: building_identifier: ' + building_identifier)
 		if building_identifier == config.buildings_refresh:
+			self.log.debug('get_building()::model: detected refresh request')
 			self.notify_neighbors(config.buildings_echo)
 			return {}
 		

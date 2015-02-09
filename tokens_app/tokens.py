@@ -84,39 +84,39 @@ class Tokens():
 		log_prev_index = cache.get('log_index')
 		
 		if log_prev_index is None:
-			log_prev_index = 1
+			log_prev_index = 0
 
-		self.log.info('fetch_delta(): log_prev_index: ' + str(log_prev_index))
+		self.log.info('fetch_updates(): log_prev_index: ' + str(log_prev_index))
 			
 		cols = 4
 		updates = []
 
 		try:
-			self.log.info('fetch_delta(): connecting to Google spreadsheet')
+			self.log.info('fetch_updates(): connecting to Google spreadsheet')
 			client = gdata.spreadsheet.service.SpreadsheetsService()
 			client.ClientLogin(config.tokens_google_client_login, config.tokens_google_client_password)
 			query = gdata.spreadsheet.service.CellQuery()
 			query.min_row = str(int(log_prev_index) + 1)
 			query.max_row = str(log_update_index)
 			cells = client.GetCellsFeed(config.tokens_spreadsheet_id, wksht_id=config.tokens_worksheet_id, query=query).entry
-			self.log.info('fetch_delta(): spreadsheet list of changes')
+			self.log.info('fetch_updates(): spreadsheet list of changes')
 			
 			updates = []
 			rows = int(log_update_index) - int(log_prev_index)
-			self.log.info('fetch_delta(): fetching number of rows: ' + str(rows))
+			self.log.info('fetch_updates(): fetching number of rows: ' + str(rows))
 			for row in range(0,rows):
 				(user, token, date, action) = [str(cell.content.text) for cell in cells[row * cols : (row + 1) * cols]]
-				self.log.info('fetch_delta() updating user: ' + user + ', on date: ' + date + ', with action: ' + action)
+				self.log.info('fetch_updates() updating user: ' + user + ', on date: ' + date + ', with action: ' + action)
 				if not action in ('add', 'delete', 'update'):
-					self.log.critical('fetch_delta() invalid action detected')
+					self.log.critical('fetch_updates() invalid action detected')
 					updates = []
 					break
 				else:
 					updates.append((user, token, date, action))
 	
-			self.log.info('fetch_delta(): returning update count: ' + str(len(updates)))
+			self.log.info('fetch_updates(): returning update count: ' + str(len(updates)))
 		except Exception as ex:
-			self.log.error('fetch_delta(): exception: ' + str(ex))
+			self.log.error('fetch_updates(): exception: ' + str(ex))
 			
 		return updates
 	

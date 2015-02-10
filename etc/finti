@@ -3,6 +3,9 @@
 # Orient the execution of the manage script relative to be base of our distribution
 #
 
+#chkconfig: 2345 80 05
+#description: Finti Web Services
+
 run_as='finti'
 who_am_i=`whoami`
 

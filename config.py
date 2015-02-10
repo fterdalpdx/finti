@@ -89,6 +89,12 @@ class Config(object):
 		self.ldap_base = 'ou=buildings,dc=pdx,dc=edu'
 		self.ldap_password = self.decode('811ab624272946c5b0eef331279985a01952861af321f5d9820ea452fe24a8a8')
 
+		# A D
+		
+		self.ad_dn = 'uid=finti,ou=Service Accounts,ou=CST,ou=Resources,DC=AMST,DC=XSU'
+		self.ad_base = 'ou=buildings,DC=AMST,DC=XSU'
+		self.ad_password = self.decode('811ab624272946c5b0eef331279985a01952861af321f5d9820ea452fe24a8a8')
+		
 		# M I S C
 		
 		self.docs_url = 'https://sites.google.com/a/pdx.edu/web-services/'
@@ -159,7 +165,9 @@ class Config(object):
 class DevelopmentConfig(Config):
 	database_host = 'devl.banner.pdx.edu'
 	database_instance = 'DEVL'
-	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
+	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
+	ad_url = 'ldap://131.252.123.10:3268/'
+	#ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1x7XfLNokm1YVkKbGrBQA4Ql3C5ifjVyGTVd1hbEKjlw'
 	tokens_worksheet_id = 'od6'
 	neighbors = []
@@ -175,6 +183,7 @@ class TestingConfig(Config):
 	database_host = 'test.banner.pdx.edu'
 	database_instance = 'TEST'
 	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
+	ad_url = 'ldap://131.252.107.41:3268/'
 	tokens_spreadsheet_id = '1hPN8DRqB5l-S0R1dWcP14P4TzSwACCalt5MZryDOhTY'
 	tokens_worksheet_id = 'ozcjjmt'
 	neighbors = ['kiso.oit.pdx.edu', 'yoshino.oit.pdx.edu']
@@ -190,6 +199,7 @@ class ProductionConfig(Config):
 	database_host = 'oprd.banner.pdx.edu'
 	database_instance = 'OPRD'
 	ldap_url = 'ldaps://ldap-bulk.oit.pdx.edu:636/'
+	ad_url = 'ldap://psu.ds.pdx.edu:3268/'
 	tokens_spreadsheet_id = '1aMQkO1QDrNQUhOrbHVso6SA9Y4q83utfMQtGIuj2Cn8'
 	tokens_worksheet_id = 'ovq5ph6'
 	neighbors = ['agano.oit.pdx.edu', 'shinano.oit.pdx.edu']

@@ -3,6 +3,14 @@
 # Orient the execution of the manage script relative to be base of our distribution
 #
 
+run_as='finti'
+who_am_i=`whoami`
+
+if [ "$who_am_i" = "root" ]; then
+	sudo -u $run_as $0 $*
+	exit $?
+fi
+
 CANONPATH=`readlink -f $0`
 BASE=`dirname $CANONPATH`
 cd $BASE/..

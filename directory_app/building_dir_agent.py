@@ -35,6 +35,22 @@ class BuildingDirAgent():
 		self.ldap_con.simple_bind_s(config.ldap_dn, config.ldap_password)
 		self.log.info('connect_ldap() connected to: ' + config.ldap_url)
 		
+	def connect_ad(self):
+		self.log.info('connect_ad() connecting to: ' + config.ad_url + ', with dn: ' + config.ad_dn)
+
+		'''
+		ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+		self.ldap_con = ldap.initialize(config.ldap_url)
+		self.ldap_con.set_option(ldap.OPT_REFERRALS, 0)
+		self.ldap_con.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
+		self.ldap_con.set_option(ldap.OPT_X_TLS,ldap.OPT_X_TLS_DEMAND)
+		self.ldap_con.set_option( ldap.OPT_X_TLS_DEMAND, True )
+		self.ldap_con.set_option( ldap.OPT_DEBUG_LEVEL, 255 )
+		'''
+		self.ad_con = ldap.initialize(config.ad_url)
+		self.ad_con.simple_bind_s(config.ad_dn, config.ad_password)
+		self.log.info('connect_ad() connected to: ' + config.ad_url)
+		
 	def list_buildings(self):
 		self.log.info('list_buildings(): starting')
 		result_set = []
@@ -47,7 +63,7 @@ class BuildingDirAgent():
 			scope = ldap.SCOPE_SUBTREE
 			ret_attrs = None
 			
-			ldap_result_id = self.ldap_con.search(base_dn, scope, 'cn=*', ret_attrs)
+			ldap_result_id = self.ldap_con.search(base_dn, scope, 'buildingIdentifier=*', ret_attrs)
 			
 			while True:
 				result_type, result_data = self.ldap_con.result(ldap_result_id,0)
@@ -65,11 +81,14 @@ class BuildingDirAgent():
 		return result_set
 		
 	def add_building(self, building):
-		self.log.info('list_buildings(): starting')
+		status = False
 		try:
+			self.log.info('add_building(): adding building: ' + building['building_code'] + " to LDAP")
 			self.connect_ldap()
-			dn = config.ldap_base
+			dn = 'buildingIdentifier=' + building['building_identifier'] + ',' + config.ldap_base
+			self.log.info('add_building(): adding building, dn: ' + dn)
 			attrs = {
+				"ou": 'buildings',
 				"buildingCode": building['building_code'],
 				"buildingIdentifier": building['building_identifier'],
 				"buildingName": building['long_name'],
@@ -80,11 +99,41 @@ class BuildingDirAgent():
 				"postalCode": building['zipcode'],
 				"labeledURI": 'geo:' + building['geolocate_lat'] + ',' + building['geolocate_long']
 			}
-			ldif = modlist.addModlist(attrs)
+			ldif = [
+				("objectclass", ['psuBuilding']),
+				("buildingCode", [str(building['building_code'])]),
+				("buildingIdentifier", [str(building['building_identifier'])]),
+				("buildingName", [str(building['long_name'])]),
+				("buildingShortName", [str(building['short_name'])]),
+				("street", [str(building['street_address'])]),
+				("l", [str(building['city'])]),
+				("st", [str(building['state_code'])]),
+				("postalCode", [str(building['zipcode'])]),
+				("labeledURI", [str('geo:' + building['geolocate_lat'] + ',' + building['geolocate_long'])])
+			]
+			#ldif = modlist.addModlist(attrs)
+			self.ldap_con.add_s(dn, ldif)
+			status = True
+			self.log.debug('add_building(): ldif: ' + str(ldif))
 			
+			self.log.info('add_building(): successfully added building: ' + building['building_code'] + " to LDAP")
 		except Exception as ex:
-			self.log.error('add_buildings(): failed to add to LDAP: error: ' + str(ex))
+			self.log.error('add_buildings(): failed to add ' + building['building_code'] + ' to LDAP: error: ' + str(ex))
 		
+		return status
+	
+	def delete_building(self, building):
+		status = False
+		try:
+			self.connect_ldap()
+			self.log.info('delete_building(): deleting building from LDAP: ' + building['building_code'])
+			dn = 'buildingIdentifier=' + building['building_identifier'] + ',' + config.ldap_base
+			self.log.info('add_building(): adding building, dn: ' + dn)
+			self.ldap_con.delete_s(dn)
+			status = True
+		except Exception as ex:
+			self.log.error('delete_buildings(): failed to delete ' + building['building_code'] + ' from LDAP: error: ' + str(ex))
+	
 if __name__ == '__main__':	
 	parser = OptionParser()
 	parser.add_option("-D", "--debug", dest="debug", action='store_true', default=False, help="Run in debug mode")

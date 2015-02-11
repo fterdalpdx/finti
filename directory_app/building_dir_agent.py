@@ -7,10 +7,8 @@ Created on Feb 5, 2015
 from config import config
 import logging.config
 import redis
-import json
 import daemon
 from optparse import OptionParser
-import socket
 import ldap
 import json
 import ldap.modlist as modlist
@@ -234,6 +232,32 @@ class BuildingDirAgent():
 		# Modify (update) all the buildings in LDAP
 		for building in cur_buildings:
 			self.modify_building(building)
+
+
+	def listen(self):
+		'''
+			Listen for update requests via pubsub. Allows asynchronous updates to LDAP/AD from the
+			incoming web services requests
+		'''
+		
+		cache = redis.StrictRedis(db=config.buildings_cache_redis_db)
+		self.log.debug('listen(): connected to cache')
+
+		self.log.info('listen(): starting listener')
+		pubsub = cache.pubsub()
+		pubsub.subscribe([config.directory_pubsub_channel])
+		self.log.info('listen(): subscribed to channel: ' + config.directory_pubsub_channel)
+		
+		for item in pubsub.listen():
+			self.log.info('listen(): item detected: ' + str(item))
+			value = str(item['data'])
+			message_type = str(item['type'])
+			if message_type <> 'message':	# only look at message, not un/subscribe events
+				continue
+			
+			self.log.info('listen(): updating directory on case: ' + value)
+			self.update_buildings()
+	
 			
 					
 if __name__ == '__main__':	
@@ -245,8 +269,8 @@ if __name__ == '__main__':
 	
 	if not options.debug:
 		if options.fore:
-			building_dir_agent = BuildingDirAgent()
 			print '\033]0;BuildingDirAgent\a' 
+			building_dir_agent = BuildingDirAgent()
 			building_dir_agent.listen()
 		else:
 			with daemon.DaemonContext():

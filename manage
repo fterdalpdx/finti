@@ -10,6 +10,7 @@ from config import config
 from time import sleep
 from tokens_app.tokens import Tokens
 from health_app.health import health
+from directory_app.building_dir_agent import BuildingDirAgent
 
 app = Flask(__name__)
 
@@ -43,6 +44,18 @@ def status_tokens():
 		status = True
 	except CalledProcessError:
 		log.info('status_tokens() token manager is stopped')
+
+	return status
+
+@manager.command
+def status_directory():
+	status = False
+	try:
+		check_output(['pgrep', '-f', "python directory_app/building_dir_agent.py"])
+		log.info('status_directory() directory agent is running')
+		status = True
+	except CalledProcessError:
+		log.info('status_directory() directory agent is stopped')
 
 	return status
 
@@ -110,6 +123,43 @@ def start_nginx():
 			log.info('start_nginx() nginx failed to start .. check the logs.')
 	
 	return status
+@manager.command	
+def start_directory():
+	status = status_directory()
+	if status:
+		log.info('start_directory() directory agent was already running')
+	else:
+		try:
+			check_output(['python', 'directory_app/building_dir_agent.py'])
+			status = status_directory()
+			if status:
+				log.info('start_directory() directory agent has been started')
+			else:
+				log.info('start_directory() directory agent failed to start .. check the logs.')
+		except CalledProcessError:
+			log.info('start_directory() directory agent failed to start .. check the logs.')
+	
+	return status
+
+@manager.command	
+def stop_directory():
+	status = status_directory()
+	if status:
+		try:
+			check_output(['pkill', '-f', "python directory_app/building_dir_agent.py"])
+			sleep(1)
+			status = status_directory()
+			if status:
+				log.info('stop_directory() directory agent failed to stop .. check the logs')
+			else:
+				log.info('stop_directory() directory agent has been stopped.')
+		except CalledProcessError:
+			log.info('stop_directory() directory agent failed to stop .. check the logs.')
+	else:
+		log.info('stop_directory() directory agest was already stopped')
+	
+	return status
+
 
 @manager.command	
 def start_tokens():
@@ -303,6 +353,13 @@ def sync_cache():
 	log.info('sync_cache() syncing token cache with cloud')
 	tokens = Tokens()
 	tokens.sync_cache()
+	
+@manager.command
+def sync_directory():
+	log.info('sync_directory() syncing directory with cloud')
+	bdir = BuildingDirAgent()
+	bdir.update_buildings()
+
 	
 	
 if __name__ == '__main__':

@@ -101,8 +101,10 @@ class Config(object):
 		self.pushbullet_api_token = self.decode('cc17ba4b11a68924fb4ca1dd0f192861469f767067427456b12973f9acf3840422bd016e8820b8556afdc97295dc49c5')
 		self.admin_token = self.decode('4d5142f10a8903f7e1eb36690133a9970c55497726426d72e7d8b26d8d4c6cdcdae7dedc3467f1a86feda6c7e9ff82a7')
 		
-		# A C T I V E   D I R E C T O R Y
+		#  D I R E C T O R Y
 		
+		self.directory_pubsub_channel = 'directory'
+
 		# H E A L T H   C H E C K
 		
 		self.health_uri_path = '/status'

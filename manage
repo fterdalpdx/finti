@@ -288,6 +288,7 @@ def start():
 	uwsgi_status = start_uwsgi()
 	token_status = start_tokens()
 	building_status = start_buildings()
+	directory_status = start_directory()
 	maint_status = False
 	
 	if nginx_status and uwsgi_status and token_status:
@@ -297,7 +298,7 @@ def start():
 	else:
 		log.info('start() not leaving maintenance mode')
 	
-	if nginx_status and uwsgi_status and token_status and building_status and not maint_status:
+	if nginx_status and uwsgi_status and token_status and building_status and directory_status and not maint_status:
 		log.info('start() system is fully started')
 	else:
 		log.info('start() system failed to fully start')
@@ -316,8 +317,9 @@ def stop():
 	uwsgi_status = stop_uwsgi()
 	token_status = stop_tokens()
 	building_status = stop_buildings()
+	directory_status = stop_directory()
 	
-	if not nginx_status and not uwsgi_status and not token_status and not building_status and maint_status:
+	if not nginx_status and not uwsgi_status and not token_status and not building_status and not directory_status and maint_status:
 		log.info('stop() system is fully stopped')
 	else:
 		log.info('stop() system failed to fully stopped')
@@ -331,9 +333,10 @@ def status():
 	uwsgi_status = status_uwsgi()
 	token_status = status_tokens()
 	building_status = status_buildings()
+	directory_status = status_directory()
 	maint_status = status_maint()
 	
-	if nginx_status and uwsgi_status and token_status and building_status and not maint_status:
+	if nginx_status and uwsgi_status and token_status and building_status and directory_status and not maint_status:
 		log.info('status() system is fully running')
 	elif not nginx_status and not uwsgi_status and not token_status and maint_status:
 		log.info('status() system is fully stopped')

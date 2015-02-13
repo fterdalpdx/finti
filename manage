@@ -24,6 +24,115 @@ def make_shell_context():
 	return dict(app=app)
 
 @manager.command
+def start():
+	'''
+		Start system and allow live traffic flow
+	'''
+	nginx_status = start_nginx()
+	uwsgi_status = start_uwsgi()
+	token_status = start_tokens()
+	building_status = start_buildings()
+	directory_status = start_directory()
+	maint_status = False
+	
+	if nginx_status and uwsgi_status and token_status:
+		sync_cache()
+		log.info('start() leaving maintenance mode')
+		maint_status = health.stop_maint()
+	else:
+		log.info('start() not leaving maintenance mode')
+	
+	if nginx_status and uwsgi_status and token_status and building_status and directory_status and not maint_status:
+		log.info('start() system is fully started')
+	else:
+		log.info('start() system failed to fully start')
+	
+@manager.command
+def stop():
+	'''
+		Go into maintenance mode and stop all processing
+	'''
+	maint_status = health.start_maint()
+	if config.release_level == 'production':
+		log.info('stop() waiting to let current traffic complete processing..')
+		sleep(30)
+		
+	nginx_status = stop_nginx()
+	uwsgi_status = stop_uwsgi()
+	token_status = stop_tokens()
+	building_status = stop_buildings()
+	directory_status = stop_directory()
+	
+	if not nginx_status and not uwsgi_status and not token_status and not building_status and not directory_status and maint_status:
+		log.info('stop() system is fully stopped')
+	else:
+		log.info('stop() system failed to fully stopped')
+	
+@manager.command
+def status():
+	'''
+		Report on the system status
+	'''
+	nginx_status = status_nginx()
+	uwsgi_status = status_uwsgi()
+	token_status = status_tokens()
+	building_status = status_buildings()
+	directory_status = status_directory()
+	maint_status = status_maint()
+	
+	if nginx_status and uwsgi_status and token_status and building_status and directory_status and not maint_status:
+		log.info('status() system is fully running')
+	elif not nginx_status and not uwsgi_status and not token_status and maint_status:
+		log.info('status() system is fully stopped')
+	else:
+		log.info('status() system is not fully running')
+
+@manager.command
+def restart():
+	"Restart the Finti system"
+
+	stop()
+	start()
+	
+@manager.command
+def test():
+	"Run the Finti unit-tests"
+	log.info('test() run unit-tests')
+	os.chdir('tests')
+	check_output(['sh','-c', 'python all.py'])
+	os.chdir('..')
+	
+@manager.command
+def start_maint():
+	"Place the system into maintenance mode"
+	return health.start_maint()
+
+@manager.command
+def stop_maint():
+	"Return active mode from maintenance mode"
+	return health.stop_maint()
+
+@manager.command
+def status_maint():
+	"Display the maintenance status"
+	return health.stat_maint()
+
+@manager.command
+def sync_cache():
+	"Sync the cloud token storage with the local cache"
+	log.info('sync_cache() syncing token cache with cloud')
+	tokens = Tokens()
+	tokens.sync_cache()
+	
+@manager.command
+def sync_directory():
+	"Sync the building data to the LDAP/AD directories"
+	log.info('sync_directory() syncing directory with cloud')
+	bdir = BuildingDirAgent()
+	bdir.update_buildings()
+
+
+@manager.command
 def status_nginx():
 	status = False
 	try:
@@ -37,6 +146,7 @@ def status_nginx():
 
 @manager.command
 def status_tokens():
+	"Status of the tokens cache sentinel"
 	status = False
 	try:
 		check_output(['pgrep', '-f', "python tokens_app/tokens.py"])
@@ -49,6 +159,7 @@ def status_tokens():
 
 @manager.command
 def status_directory():
+	"Status of the LDAP/AD directory transfer agent"
 	status = False
 	try:
 		check_output(['pgrep', '-f', "python directory_app/building_dir_agent.py"])
@@ -61,6 +172,7 @@ def status_directory():
 
 @manager.command
 def status_buildings():
+	"Status of the buildings cache sentinel"
 	status = False
 	try:
 		check_output(['pgrep', '-f', "python buildings_app/oracle_model.py"])
@@ -74,6 +186,7 @@ def status_buildings():
 
 @manager.command	
 def status_uwsgi():
+	"Status of uWSGI"
 	status = False
 	try:
 		check_output(['pgrep', '-f', "uwsgi --ini etc/uwsgi/emperor.ini"])
@@ -84,23 +197,10 @@ def status_uwsgi():
 
 	return status
 
-@manager.command
-def status_maint():
-	"Display the maintenance status"
-	return health.stat_maint()
-
-@manager.command
-def start_maint():
-	"Place the system into maintenance mode"
-	return health.start_maint()
-
-@manager.command
-def stop_maint():
-	"Return active mode from maintenance mode"
-	return health.stop_maint()
 
 @manager.command	
 def start_uwsgi():
+	"Start of uWSGI"
 	status = status_uwsgi()
 	if status:
 		log.info('start_uwsgi() uwsgi was already running')
@@ -119,6 +219,7 @@ def start_uwsgi():
 
 @manager.command	
 def start_nginx():
+	"Start NGiNX"
 	status = status_nginx()
 	if status:
 		log.info('start_nginx() nginx was already running')
@@ -255,6 +356,7 @@ def stop_buildings():
 
 @manager.command	
 def stop_nginx():
+	"Stop NGiNX"
 	status = status_nginx()
 	if status:
 		try:
@@ -274,6 +376,7 @@ def stop_nginx():
 
 @manager.command	
 def stop_uwsgi():
+	"Stop uWSGI"
 	status = status_uwsgi()
 	if status:
 		try:
@@ -296,99 +399,6 @@ def stop_uwsgi():
 	
 	return status
 
-@manager.command
-def start():
-	'''
-		Start system and allow live traffic flow
-	'''
-	nginx_status = start_nginx()
-	uwsgi_status = start_uwsgi()
-	token_status = start_tokens()
-	building_status = start_buildings()
-	directory_status = start_directory()
-	maint_status = False
-	
-	if nginx_status and uwsgi_status and token_status:
-		sync_cache()
-		log.info('start() leaving maintenance mode')
-		maint_status = health.stop_maint()
-	else:
-		log.info('start() not leaving maintenance mode')
-	
-	if nginx_status and uwsgi_status and token_status and building_status and directory_status and not maint_status:
-		log.info('start() system is fully started')
-	else:
-		log.info('start() system failed to fully start')
-	
-@manager.command
-def stop():
-	'''
-		Go into maintenance mode and stop all processing
-	'''
-	maint_status = health.start_maint()
-	if config.release_level == 'production':
-		log.info('stop() waiting to let current traffic complete processing..')
-		sleep(30)
-		
-	nginx_status = stop_nginx()
-	uwsgi_status = stop_uwsgi()
-	token_status = stop_tokens()
-	building_status = stop_buildings()
-	directory_status = stop_directory()
-	
-	if not nginx_status and not uwsgi_status and not token_status and not building_status and not directory_status and maint_status:
-		log.info('stop() system is fully stopped')
-	else:
-		log.info('stop() system failed to fully stopped')
-	
-@manager.command
-def status():
-	'''
-		Report on the system status
-	'''
-	nginx_status = status_nginx()
-	uwsgi_status = status_uwsgi()
-	token_status = status_tokens()
-	building_status = status_buildings()
-	directory_status = status_directory()
-	maint_status = status_maint()
-	
-	if nginx_status and uwsgi_status and token_status and building_status and directory_status and not maint_status:
-		log.info('status() system is fully running')
-	elif not nginx_status and not uwsgi_status and not token_status and maint_status:
-		log.info('status() system is fully stopped')
-	else:
-		log.info('status() system is not fully running')
-
-@manager.command
-def restart():
-	"Restart the system"
-
-	stop()
-	start()
-	
-@manager.command
-def sync_cache():
-	"Sync the cloud token storage with the local cache"
-	log.info('sync_cache() syncing token cache with cloud')
-	tokens = Tokens()
-	tokens.sync_cache()
-	
-@manager.command
-def sync_directory():
-	"Sync the building data to the LDAP/AD directories"
-	log.info('sync_directory() syncing directory with cloud')
-	bdir = BuildingDirAgent()
-	bdir.update_buildings()
-
-	
-@manager.command
-def test():
-	"Run the Finti unit-tests"
-	log.info('test() run unit-tests')
-	os.chdir('tests')
-	check_output(['sh','-c', 'python all.py'])
-	os.chdir('..')
 	
 	
 if __name__ == '__main__':

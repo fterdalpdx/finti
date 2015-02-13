@@ -86,7 +86,18 @@ def status_uwsgi():
 
 @manager.command
 def status_maint():
+	"Display the maintenance status"
 	return health.stat_maint()
+
+@manager.command
+def start_maint():
+	"Place the system into maintenance mode"
+	return health.start_maint()
+
+@manager.command
+def stop_maint():
+	"Return active mode from maintenance mode"
+	return health.stop_maint()
 
 @manager.command	
 def start_uwsgi():
@@ -125,6 +136,7 @@ def start_nginx():
 	return status
 @manager.command	
 def start_directory():
+	"Start the LDAP/AD directory transfer agent"
 	status = status_directory()
 	if status:
 		log.info('start_directory() directory agent was already running')
@@ -143,6 +155,7 @@ def start_directory():
 
 @manager.command	
 def stop_directory():
+	"Stop the LDAP/AD directory transfer agent"
 	status = status_directory()
 	if status:
 		try:
@@ -163,6 +176,7 @@ def stop_directory():
 
 @manager.command	
 def start_tokens():
+	"Start the tokens cache sentinel"
 	status = status_tokens()
 	if status:
 		log.info('start_tokens() token manager was already running')
@@ -181,6 +195,7 @@ def start_tokens():
 
 @manager.command	
 def stop_tokens():
+	"Stop the tokens cache sentinel"
 	status = status_tokens()
 	if status:
 		try:
@@ -200,6 +215,7 @@ def stop_tokens():
 
 @manager.command	
 def start_buildings():
+	"Start the buildings cache sentinel"
 	status = status_buildings()
 	if status:
 		log.info('start_buildings() buildings manager was already running')
@@ -218,6 +234,7 @@ def start_buildings():
 
 @manager.command	
 def stop_buildings():
+	"Stop the buildings cache sentinel"
 	status = status_buildings()
 	if status:
 		try:
@@ -345,20 +362,21 @@ def status():
 
 @manager.command
 def restart():
-	'''
-		Restart the system
-	'''
+	"Restart the system"
+
 	stop()
 	start()
 	
 @manager.command
 def sync_cache():
+	"Sync the cloud token storage with the local cache"
 	log.info('sync_cache() syncing token cache with cloud')
 	tokens = Tokens()
 	tokens.sync_cache()
 	
 @manager.command
 def sync_directory():
+	"Sync the building data to the LDAP/AD directories"
 	log.info('sync_directory() syncing directory with cloud')
 	bdir = BuildingDirAgent()
 	bdir.update_buildings()
@@ -366,6 +384,7 @@ def sync_directory():
 	
 @manager.command
 def test():
+	"Run the Finti unit-tests"
 	log.info('test() run unit-tests')
 	os.chdir('tests')
 	check_output(['sh','-c', 'python all.py'])

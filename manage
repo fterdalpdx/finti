@@ -364,6 +364,13 @@ def sync_directory():
 	bdir.update_buildings()
 
 	
+@manager.command
+def test():
+	log.info('test() run unit-tests')
+	os.chdir('tests')
+	check_output(['sh','-c', 'python all.py'])
+	os.chdir('..')
+	
 	
 if __name__ == '__main__':
 	manager.run()

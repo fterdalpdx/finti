@@ -134,6 +134,7 @@ def sync_directory():
 
 @manager.command
 def status_nginx():
+	"Status of NGiNX"
 	status = False
 	try:
 		check_output(['pgrep', '-f', "nginx: master process"])

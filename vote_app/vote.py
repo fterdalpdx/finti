@@ -6,7 +6,7 @@ Created on Sep 23, 2014
 
 import logging.config
 from config import config
-import vote_app.oracle_model
+import vote_app.vote_model
 from optparse import OptionParser
 from cats import here_kitty
 
@@ -19,7 +19,7 @@ class Vote():
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('vote')
 		self.log.debug('init(): starting')
-		self.model = vote_app.oracle_model.VoteModel()
+		self.model = vote_app.vote_model.VoteModel()
 	
 	def verify_eligibility(self, odin_name):
 		'''
@@ -33,7 +33,7 @@ class Vote():
 				}
 		}
 		
-		is_eligible = self.model.verify_eligibility()
+		is_eligible = self.model.verify_eligibility(odin_name)
 		if is_eligible == 'true':
 			status = {'success': {'voter': 'true'}}
 			self.log.info('verify_eligibility(): student is eligible to vote in student election: ' + odin_name)

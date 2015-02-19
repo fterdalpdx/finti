@@ -51,6 +51,11 @@ class Config(object):
 		self.database_port = '1526'
 
 
+		# O R G
+		
+		self.org_scope_manage_buildings = 'manage_buildings'
+		
+		
 		# B U I L D I N G S
 
 		self.buildings_api_version = 'v1'
@@ -104,17 +109,17 @@ class Config(object):
 		#  P E O P L E
 		
 		self.people_api_version = 'v1'
-		self.vote_uri_path = '/people/%s/voter' % self.people_api_version
+		self.vote_uri_path = '/people/%s/vote' % self.people_api_version
 		self.people_err_bad_id = "malformed_identifier"
 		self.people_err_dne = "person_does_not_exist"
 		self.people_err_gen = "request_failed"
 		
-		self.people_voter_scope = '/people/voter'
+		self.people_scope_vote = '/people/vote'
 		
-		self.person_code_by_error = {
-			self.person_err_bad_id: 400,
-			self.person_err_dne:	404,
-			self.person_err_gen: 400,
+		self.people_code_by_error = {
+			self.people_err_bad_id: 400,
+			self.people_err_dne:	404,
+			self.people_err_gen: 400,
 		}
 		
 		#  D I R E C T O R Y

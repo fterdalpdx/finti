@@ -58,7 +58,7 @@ def get_building(building_identifier):
 	
 
 @web.route(config.buildings_uri_path, methods = ['POST'])
-@auth.requires_auth(scope='manage_buildings')
+@auth.requires_auth(scope=config.org_scope_manage_buildings)
 def add_building():
 	'''
 		Creates a new Portland State University building.
@@ -90,7 +90,7 @@ def add_building():
 
 
 @web.route(config.buildings_uri_path, methods = ['PUT'])
-@auth.requires_auth(scope='manage_buildings')
+@auth.requires_auth(scope=config.org_scope_manage_buildings)
 def update_building():
 	'''
 		Updates an existing Portland State University building.
@@ -122,7 +122,7 @@ def update_building():
 
 	
 @web.route(config.buildings_uri_path + '/<building_identifier>', methods = ['DELETE'])
-@auth.requires_auth(scope='manage_buildings')
+@auth.requires_auth(scope=config.org_scope_manage_buildings)
 def delete_building(building_identifier):
 	'''
 		Change the given building status to inactive in the list of current Portland State University buildings.

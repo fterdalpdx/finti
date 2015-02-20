@@ -132,6 +132,7 @@ sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vass
 sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/tokens_app.ini
 sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/health_app.ini
 sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/vote_app.ini
+sed "s%BASE%$BASE%g" < $BASE/etc/uwsgi/uwsgi-template.ini > $BASE/etc/uwsgi/vassals/hold_app.ini
 
 # Generate NginX config file from template
 sed "s%BASE%$BASE%g" < $BASE/etc/nginx-template.conf > $BASE/nginx/conf/nginx.conf

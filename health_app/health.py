@@ -90,7 +90,7 @@ class Health():
 				self.log.critical("check_health_status(): building data failure")
 				return {'result': 'error', 'message': 'building data failure'}
 			
-			cache.delete(token_hash)
+			#cache.delete(token_hash)
 		except Exception as ex:
 			self.log.critical("check_health_status(): building data failure: " + str(ex))
 			return {'result': 'error', 'message': 'building data failure: ' + str(ex)}

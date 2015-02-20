@@ -105,16 +105,21 @@ class Config(object):
 		self.docs_url = 'https://sites.google.com/a/pdx.edu/web-services/'
 		self.pushbullet_api_token = self.decode('cc17ba4b11a68924fb4ca1dd0f192861469f767067427456b12973f9acf3840422bd016e8820b8556afdc97295dc49c5')
 		self.admin_token = self.decode('4d5142f10a8903f7e1eb36690133a9970c55497726426d72e7d8b26d8d4c6cdcdae7dedc3467f1a86feda6c7e9ff82a7')
+		self.dennis_psuid = self.decode('1673fb8707fbe041e6d2a73c9185e395')
+		self.brano_psuid = self.decode('3ee85a20a829c328b13a6ae11c135063')
+		self.hhauer_psuid = self.decode('8ea43d11eea271933ebebbcfef41c96b')
 		
 		#  P E O P L E
 		
 		self.people_api_version = 'v1'
 		self.vote_uri_path = '/people/%s/vote' % self.people_api_version
+		self.hold_uri_path = '/people/%s/hold' % self.people_api_version
 		self.people_err_bad_id = "malformed_identifier"
 		self.people_err_dne = "person_does_not_exist"
 		self.people_err_gen = "request_failed"
 		
 		self.people_scope_vote = '/people/vote'
+		self.people_scope_advise = '/people/advise'
 		
 		self.people_code_by_error = {
 			self.people_err_bad_id: 400,

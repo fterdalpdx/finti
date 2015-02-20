@@ -192,6 +192,7 @@ class Tokens():
 		# Build user and general cache
 		for token_ent in cloud_tokens:
 			(user, token, datetime) = token_ent
+			self.log.debug('sync_cache() adding to local tokens: ' + str(user))
 			cache.set(token, user)
 		self.log.debug('sync_cache() updated tokens, count: ' + str(len(cloud_tokens)))
 		

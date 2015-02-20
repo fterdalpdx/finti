@@ -51,6 +51,11 @@ class Config(object):
 		self.database_port = '1526'
 
 
+		# O R G
+		
+		self.org_scope_manage_buildings = 'manage_buildings'
+		
+		
 		# B U I L D I N G S
 
 		self.buildings_api_version = 'v1'
@@ -89,14 +94,43 @@ class Config(object):
 		self.ldap_base = 'ou=buildings,dc=pdx,dc=edu'
 		self.ldap_password = self.decode('811ab624272946c5b0eef331279985a01952861af321f5d9820ea452fe24a8a8')
 
+		# A D
+		
+		self.ad_dn = 'uid=finti,ou=Service Accounts,ou=CST,ou=Resources,DC=AMST,DC=XSU'
+		self.ad_base = 'ou=buildings,DC=AMST,DC=XSU'
+		self.ad_password = self.decode('811ab624272946c5b0eef331279985a01952861af321f5d9820ea452fe24a8a8')
+		
 		# M I S C
 		
 		self.docs_url = 'https://sites.google.com/a/pdx.edu/web-services/'
 		self.pushbullet_api_token = self.decode('cc17ba4b11a68924fb4ca1dd0f192861469f767067427456b12973f9acf3840422bd016e8820b8556afdc97295dc49c5')
 		self.admin_token = self.decode('4d5142f10a8903f7e1eb36690133a9970c55497726426d72e7d8b26d8d4c6cdcdae7dedc3467f1a86feda6c7e9ff82a7')
+		self.dennis_psuid = self.decode('1673fb8707fbe041e6d2a73c9185e395')
+		self.brano_psuid = self.decode('3ee85a20a829c328b13a6ae11c135063')
+		self.hhauer_psuid = self.decode('8ea43d11eea271933ebebbcfef41c96b')
 		
-		# A C T I V E   D I R E C T O R Y
+		#  P E O P L E
 		
+		self.people_api_version = 'v1'
+		self.vote_uri_path = '/people/%s/vote' % self.people_api_version
+		self.hold_uri_path = '/people/%s/hold' % self.people_api_version
+		self.people_err_bad_id = "malformed_identifier"
+		self.people_err_dne = "person_does_not_exist"
+		self.people_err_gen = "request_failed"
+		
+		self.people_scope_vote = '/people/vote'
+		self.people_scope_advise = '/people/hold/advise'
+		
+		self.people_code_by_error = {
+			self.people_err_bad_id: 400,
+			self.people_err_dne:	404,
+			self.people_err_gen: 400,
+		}
+		
+		#  D I R E C T O R Y
+		
+		self.directory_pubsub_channel = 'directory'
+
 		# H E A L T H   C H E C K
 		
 		self.health_uri_path = '/status'
@@ -159,7 +193,9 @@ class Config(object):
 class DevelopmentConfig(Config):
 	database_host = 'devl.banner.pdx.edu'
 	database_instance = 'DEVL'
-	ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
+	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
+	ad_url = 'ldap://131.252.123.10:3268/'
+	#ldap_url = 'ldaps://kaylee.oit.pdx.edu:636/'
 	tokens_spreadsheet_id = '1x7XfLNokm1YVkKbGrBQA4Ql3C5ifjVyGTVd1hbEKjlw'
 	tokens_worksheet_id = 'od6'
 	neighbors = []
@@ -175,6 +211,7 @@ class TestingConfig(Config):
 	database_host = 'test.banner.pdx.edu'
 	database_instance = 'TEST'
 	ldap_url = 'ldaps://inara.oit.pdx.edu:636/'
+	ad_url = 'ldap://131.252.107.41:3268/'
 	tokens_spreadsheet_id = '1hPN8DRqB5l-S0R1dWcP14P4TzSwACCalt5MZryDOhTY'
 	tokens_worksheet_id = 'ozcjjmt'
 	neighbors = ['kiso.oit.pdx.edu', 'yoshino.oit.pdx.edu']
@@ -190,6 +227,7 @@ class ProductionConfig(Config):
 	database_host = 'oprd.banner.pdx.edu'
 	database_instance = 'OPRD'
 	ldap_url = 'ldaps://ldap-bulk.oit.pdx.edu:636/'
+	ad_url = 'ldap://psu.ds.pdx.edu:3268/'
 	tokens_spreadsheet_id = '1aMQkO1QDrNQUhOrbHVso6SA9Y4q83utfMQtGIuj2Cn8'
 	tokens_worksheet_id = 'ovq5ph6'
 	neighbors = ['agano.oit.pdx.edu', 'shinano.oit.pdx.edu']

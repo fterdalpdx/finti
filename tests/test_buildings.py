@@ -16,6 +16,8 @@ import base64
 import json
 
 #from requests.auth import HTTPBasicAuth
+silence_all = False
+test_name = 'add'
 
 class BuildingsTest(TestCase):
 	def create_app(self):
@@ -30,12 +32,14 @@ class BuildingsTest(TestCase):
 		self.token = config.test_token
 		self.token_hash = auth.calc_hash(self.token)
 		self.cache.set(self.token_hash, 'test@test')
+		self.cache.sadd(config.org_scope_manage_buildings, 'test@test')
 
 
 	def tearDown(self):
 		#self.cache.delete(self.token_hash)
 		pass
 	
+	@unittest.skipIf(test_name <> 'get' and silence_all==True, '')
 	#@unittest.skip('weatherwax')
 	def test_get_buildings(self):
 		h = Headers()
@@ -54,6 +58,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue('short_name' in buildings[17])
 		self.assertTrue('building_identifier' in buildings[11])
 
+	@unittest.skipIf(test_name <> 'locked' and silence_all==True, '')
 	#@unittest.skip('weatherwax')
 	def test_get_building_history(self):
 		h = Headers()
@@ -66,7 +71,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue(len(history) > 0)
 
 
-	#@unittest.skip('weatherwax')
+	@unittest.skipIf(test_name <> 'get' and silence_all==True, '')
 	def test_get_building(self):
 
 		# Test the positive case of finding an expected building via URI path
@@ -118,7 +123,7 @@ class BuildingsTest(TestCase):
 		#self.assertTrue(EB_rv.status_code == 404)
 
 	
-	#@unittest.skip('weatherwax')
+	@unittest.skipIf(test_name <> 'add' and silence_all==True, '')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_add_building(self):
 		# Test of complete and correctly formated building data add
@@ -152,7 +157,7 @@ class BuildingsTest(TestCase):
 		
 		# This will succeed the first time only
 		#self.assertTrue(HEMB_rv.status_code == 200)
-		self.assertFalse(HEMB_rv.status_code == 200)
+		self.assertTrue(HEMB_rv.status_code == 400)
 		#HEMB_rv_data = json.loads(HEMB_rv.data)
 		#self.assertTrue(HEMB_rv_data['long_name'] == "High Energy Magic Building")
 		
@@ -185,6 +190,7 @@ class BuildingsTest(TestCase):
 		HEMB_rv = Client.post(self.client, path='/org/v1/buildings', data=json.dumps(HEMB),
 						 headers=h)
 		
+		print('duplicate add test, return value: ' + str(HEMB_rv))
 		self.assertTrue(HEMB_rv.status_code == 400)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 		
@@ -218,7 +224,7 @@ class BuildingsTest(TestCase):
 		self.assertTrue(HEMB_rv.status_code == 404)
 		HEMB_rv_data = json.loads(HEMB_rv.data)
 	
-	#@unittest.skip('weatherwax')
+	@unittest.skipIf(test_name <> 'valid' and silence_all==True, '')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_building_is_valid(self):
 		HEMB = {
@@ -345,7 +351,7 @@ class BuildingsTest(TestCase):
 		self.assertFalse(HEMB_rv.status_code == 200)
 		
 
-	#@unittest.skip('weatherwax')
+	@unittest.skipIf(test_name <> 'update' and silence_all==True, '')
 	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
 	def test_update_building(self):
 		# test_building_is_valid test covers this test
@@ -394,45 +400,6 @@ class BuildingsTest(TestCase):
 		print('HEMB_rv.status_code: ' + str(HEMB_rv.status_code))
 		self.assertTrue(HEMB_rv.status_code == 404)
 
-	@unittest.skip('weatherwax')
-	@unittest.skipIf(config.release_level == config.production, 'skipping modifying type unit-test against production')
-	def test_delete_building(self):
-		# Test the deletion of an existing building
-		# This test is no longer valid
-		'''
-		HEMB = {
-			"long_name": "High Energy Magic Building",
-			"geolocate_lat": 45.508593,
-			"geolocate_long": -122.682749, 
-			"rlis_lat": 45.508593,
-			"rlis_long": -122.682749, 
-			"centroid_lat": 45.508593,
-			"centroid_long": -122.682749, 
-			"short_name": "Magic Bldg",
-			"building_code": "HEMB",
-			"building_identifier": "888",
-			"state_code": "OR",
-			"city": "Ankh-Morpork",
-			"street_address": "2000 SW 5TH AVE",
-			"zipcode": "88888" }		
-		HEMB_rv = self.app.post('/org/v1/buildings', data=json.dumps(HEMB), headers={'Content-type': 'application/json'} )
-		self.assertTrue(HEMB_rv.status_code == 200)
-		HEMB_rv_data = json.loads(HEMB_rv.data)
-		self.assertTrue(HEMB_rv_data['zipcode'] == "88888")
-
-		HEMB_rv = self.app.delete('/org/v1/buildings/888')	# Delete the new building and check the result
-		self.assertTrue(HEMB_rv.status_code == 200)
-		self.assertTrue(HEMB_rv.data == "building removed")
-		
-		HEMB_rv = self.app.get('/org/v1/buildings/888')	# Really check to see if the building is gone
-		self.assertTrue(HEMB_rv.status_code == 404)
-		
-		# Test the deletion of a non-existent building
-		
-		HEMB_rv = self.app.delete('/org/v1/buildings/080808')	# Delete the new building and check the result
-		self.assertTrue(HEMB_rv.status_code == 404)
-		
-		'''
 
 if __name__ == "__main__":
 	#import sys;sys.argv = ['', 'Test.testName']

@@ -18,6 +18,42 @@
             ], 
             "level": "DEBUG"
         },
+        "vote": {
+            "handlers": [
+                "vote",
+                "vote_logstash",
+                "pushbullet",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "vote_model": {
+            "handlers": [
+                "vote_model",
+                "vote_model_logstash",
+                "pushbullet",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "hold": {
+            "handlers": [
+                "hold",
+                "hold_logstash",
+                "pushbullet",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
+        "hold_model": {
+            "handlers": [
+                "hold_model",
+                "hold_model_logstash",
+                "pushbullet",
+                "console"
+            ], 
+            "level": "DEBUG"
+        },
         "health": {
             "handlers": [
                 "health",
@@ -90,6 +126,78 @@
             "maxBytes": 10485760, 
             "mode": "a", 
             "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "vote": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/vote.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "vote_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/vote.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "vote_model": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/vote_model.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "vote_model_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/vote_model.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json",
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "hold": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/hold.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "hold_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/hold.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+        "hold_model": {
+            "backupCount": 5, 
+            "level": "DEBUG", 
+            "filename": "BASE/hold_model.log", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler"
+        }, 
+	    "hold_model_logstash": {
+            "backupCount": 2, 
+            "level": "DEBUG", 
+            "filename": "BASE/hold_model.json", 
+            "maxBytes": 10485760, 
+            "mode": "a", 
+            "formatter": "json",
             "class": "logging.handlers.RotatingFileHandler"
         }, 
         "health": {

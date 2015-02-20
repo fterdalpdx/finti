@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+  <title>Pushbullet API Documentation</title>
+  <!-- <link rel="stylesheet" href="/css/pushbullet.css"> -->
+  <link rel="stylesheet" href="http://www.pushbullet.com/css/common.css">
+  <link rel="icon" type="image/x-icon" href="http://www.pushbullet.com/favicon.ico">
+  <link rel="canonical" href="https://docs.pushbullet.com/v2/pushes/">
+  <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <style>
+    #header img {
+      margin:0;
+    }
+    #footer {
+      background-color:#fff;
+    }
+    #footer .area .col {
+      padding:0px;
+    }
+    h1 {
+      line-height:39px;
+    }
+    h2 {
+      font-size:24px;
+      line-height:30px;
+      margin:20px 0;
+    }
+    h4 {
+      font-size:19px !important;
+      font-weight:bold !important;
+      line-height:26px !important;
+      margin:20px 0 !important;
+    }
+    hr {
+      border:0;
+      border-top:1px solid #eeeeee;
+      border-bottom:1px solid #ffffff;
+      margin:20px 0px;
+    }
+    pre {
+      font-size:14px;
+      overflow-x:auto;
+    }
+    .entry {
+      margin:10px 20px !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="fake-header"></div>
+  <div style="line-height:24px; font-size:15px">
+    <div class="page markdown">
+      <div class="inner" style="background:white;box-shadow:0 0 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.12);overflow:hidden;padding:60px 120px 120px 120px;">
+        <h1>People</h1>
+
+<h2>https://ws.oit.pdx.edu/org/v1/people</h2>
+
+<hr>
+
+<h3>URI Paths</h3>
+<ul>
+<li><code>/people/v1/person</code> - The details of a specific person.</li>
+<li><code>/people/v1/search</code> - Search for a person or a group of people.</li>
+<li><code>/people/v1/voter</code> - Check if the specified person is eligible to vote in student elections.</li>
+<li><code>/people/v1/holds</code> - Academic and administrative holds for a given person.</li>
+</ul>
+
+<h3>Attributes</h3>
+
+<h4><code>/people/v1/voter</code> - Check voting eligibility for student elections..</h4>
+<p>The following voter query response is a <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> dictionary containing properties which describes the eligibility of a person to vote in the PSU student elections.</p>
+<pre>{
+  "login": &#60;string, required&#62;,
+  "voter": &#60;string, required&#62;
+}</pre>
+<ul>
+<li><code>login</code> - The Odin login name for the user, ex: “toby”.</li>
+<li><code>voter</code> - Whether or not the person is eligible to vote, ex: “voter”: “false” means that the given person is ineligible to vote in the student elections.</li>
+</ul>
+<p>All text fields, including the id field passed as arguments, must contain only mixed case alphanumeric, comma, period, hyphen, underscore and space characters.</p>
+
+<h4><code>/people/v1/search</code> - Search for a person or a group of people.</h4>
+<p>The following person descriptor is a <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> dictionary containing properties which describe a Portland State University person.</p>
+<pre>{
+  "id":  &#60;string, required&#62;,
+  "first_name": &#60;string, required&#62;,
+  "last_code": &#60;string, required&#62;
+}</pre>
+<ul>
+<li><code>id</code> - The unique long-lived identifier for the person, ex: “1938f7d3-9320-499b-b1c8-2d1b5d249f9b”.  The 36-character Banner generated UDC Identifier.</li>
+<li><code>first_name</code> - The first name of a person, ex: “Esme”.  Upto XX unicode characters and originates from Banner preferred first name.</li>
+<li><code>last_name</code> - The last name of a person, ex: “Weatherwax”. Longer than one and less than or equal to XX unicode characters.</li>
+</ul>
+<p>All text fields, including the id field passed as arguments, must contain only mixed case alphanumeric, comma, period, hyphen, underscore and space characters.</p>
+
+
+<h3>Actions</h3>
+<h4><code>DELETE</code> - Deactivate a person</h4>
+<pre><b>DELETE</b> https://ws.oit.pdx.edu/org/<i>version</i>/people/<i>person_identifier</i></pre>
+<p>Change the given person status to inactive in the list of current Portland State University people.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>person_identifier</code> - Unique person identifier.</li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Malformed person_identifier</li>
+      <li><code>403</code> - Forbidden</li>
+      <li><code>404</code> - person does not exist</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+</ul>
+<h4><code>GET</code> - List All PSU people</h4>
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/<i>version</i>/people</pre>
+<p>Retrieve the list of current Portland State University people.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Request failed</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON array of personDescriptor elements</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>GET</code> - Get a person</h4>
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/<i>version</i>/people/<i>person_identifier</i></pre>
+<p>Retrieve a current Portland State University person descriptor.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>person_identifier</code> - Unique person identifier.</li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Malformed person_identifier</li>
+      <li><code>404</code> - person does not exist</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON personDescriptor</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>GET</code> - person Change History</h4>
+<pre><b>GET</b> https://ws.oit.pdx.edu/org/<i>version</i>/people/<i>person_identifier</i>/history</pre>
+<p>Retrieve a history of changes for a Portland State University person.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>person_identifier</code> - Unique person identifier.</li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Malformed person_identifier</li>
+      <li><code>404</code> - person does not exist</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON array of personDescriptor elements</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>POST</code> - Create a New person</h4>
+<pre><b>POST</b> https://ws.oit.pdx.edu/org/<i>version</i>/people/<i>person_identifier</i>/history</pre>
+<p>Creates a new Portland State University person.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>person_identifier</code> - Unique person identifier.</li>
+    </ul>
+  </li>
+  <li>
+    JSON Parameters
+    <ul>
+      <li><code>personDescriptor</code> - New person descriptor</code></li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Request failed</li>
+      <li><code>403</code> - Forbidden</li>
+      <li><code>404</code> - person descriptor is not valid. Details of descriptor errors are reported.</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON personDescriptor element of the newly created person on success, otherwise nothing</li>
+    </ul>
+  </li>
+</ul>
+
+<h4><code>PUT</code> - Update an Existing person</h4>
+<pre><b>PUT</b> https://ws.oit.pdx.edu/org/<i>version</i>/people/<i>person_identifier</i></pre>
+<p>Updates an existing Portland State University person.</p>
+<ul>
+  <li>
+    Parameters
+    <ul>
+      <li><code>version</code> - API version</code></li>
+      <li><code>person_identifier</code> - Unique person identifier.</li>
+    </ul>
+  </li>
+  <li>
+    JSON Parameters
+    <ul>
+      <li><code>personDescriptor</code> - Updated person descriptor</code></li>
+    </ul>
+  </li>
+  <li>
+    Status Codes
+    <ul>
+      <li><code>200</code> - Action succeeded</li>
+      <li><code>400</code> - Request failed</li>
+      <li><code>403</code> - Forbidden</li>
+      <li><code>404</code> - person descriptor is not valid. Details of descriptor errors are reported.</li>
+    </ul>
+  </li>
+  <li>
+    API Versions
+    <ul>
+      <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Return
+    <ul>
+      <li>This action returns a UTF-8 encoded JSON personDescriptor element of the updated person on success, otherwise nothing</li>
+    </ul>
+  </li>
+</ul>
+</body>
+</html>

@@ -41,7 +41,7 @@ class BuildingsAuthTest(TestCase):
 		rv = Client.open(self.client, path='/org/v1/buildings',
 						 headers=h)
 		self.assert_200(rv)
-		cache.delete(token_hash)
+		#cache.delete(token_hash)
 	
 			
 if __name__ == "__main__":

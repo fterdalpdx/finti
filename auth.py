@@ -11,22 +11,21 @@ import binascii
 from config import config
 
 def check_auth(login, password, required_scope):
-	"""This function is called to check if a login /
-	password combination is valid.
-	"""
-	
+	"""This function is called to check if a login, password, and scope combination is valid. """
+
 	# Hash the login, the password is ignored
 	login_hash = calc_hash(login)
 	cache = StrictRedis(db=config.tokens_cache_redis_db)	# TODO: Should be at application scope instead of request scope
 	user = cache.get(login_hash)	# lookup our person
+	#print('check_auth: login: ' + login + ' scope: '+ required_scope + ', user: ' + str(user))
 	if (user is None):				# if the user has a valid token
 		return False
 	elif (required_scope == 'general'):
 		return True
-	elif (cache.sismember(required_scope, user) is None):
-		return False				# but the user does not have the required scope
+	elif (cache.sismember(required_scope, user) == True): 
+		return True				# and the user has the required scope
 	else:
-		return True					# and the user has the required scope
+		return False			# but the user does not have the required scope
 
 def calc_hash(token):
 	hash_raw = hashlib.sha256(token)
@@ -44,7 +43,7 @@ def forbidden():
 	return make_response('Forbidden', 403, {'Content-Type': 'application/json'})
 
 def requires_auth(scope=""):
-	def required_auth_wrapper(f):
+	def requires_auth_wrapper(f):
 		@wraps(f)
 		def decorated(*args, **kwargs):
 			auth = request.authorization
@@ -54,4 +53,4 @@ def requires_auth(scope=""):
 				return forbidden()
 			return f(*args, **kwargs)
 		return decorated
-	return required_auth_wrapper
+	return requires_auth_wrapper

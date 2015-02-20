@@ -119,7 +119,7 @@ class Config(object):
 		self.people_err_gen = "request_failed"
 		
 		self.people_scope_vote = '/people/vote'
-		self.people_scope_advise = '/people/advise'
+		self.people_scope_advise = '/people/hold/advise'
 		
 		self.people_code_by_error = {
 			self.people_err_bad_id: 400,

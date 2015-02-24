@@ -1,0 +1,32 @@
+#!/bin/sh
+
+calc_stats(){
+	hostport=$1
+	uri_path=$2
+	samples=100
+	i=0
+	while [ $i -lt $samples ]; do
+		/usr/bin/time -f 'real %e' -o /tmp/$$.$i curl -s --insecure -u "$TOKEN:" -H "Content-Type: application/json" $hostport$uri_path > /dev/null
+		i=`expr $i + 1`
+	done
+	cat /tmp/$$.* | sed 's/real //' > /tmp/$$.all
+	printf "$uri_path: "
+	awk '{for(i=1;i<=NF;i++) {sum[i] += $i; sumsq[i] += ($i)^2}} 
+		  END {for (i=1;i<=NF;i++) {
+		  print sum[i]/NR, sqrt((sumsq[i]-sum[i]^2/NR)/NR)}
+		 }' /tmp/$$.all
+	#rm /tmp/$$.*
+}
+
+paths="/org/v1/buildings/LH /org/v1/buildings /people/v1/hold/advise/auth/943094860"
+#hostport='https://ws.oit.pdx.edu'
+hostport='localhost:8888'
+
+#https://ws-test.oit.pdx.edu/people/v1/vote/hhauer
+
+calc_stats https://ws-test.oit.pdx.edu /people/v1/vote/hhauer
+
+for path in $paths; do
+	calc_stats $hostport $path
+done
+

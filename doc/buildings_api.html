@@ -64,7 +64,7 @@
 
 <pre><b>GET</b> https://ws.oit.pdx.edu/org/v1/buildings</pre>
 
-<h5>Attributes</h5>
+<h3>Attributes</h3>
 <p>The following building descriptor is a <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> dictionary containing properties which describe a Portland State University building.</p>
 <pre>{
   "long_name":  &#60;string&#62;,
@@ -97,7 +97,7 @@
 <li><code>start_date, end_date</code> - The date range in which a building_descriptor is valid, specified as ISO-8601 date format, ex:  2015-01-07 represents January 7th, 2015.</li>
 </ul>
 <p>All text fields, including building_identifiers passed as arguments, must contain only mixed case alphanumeric, comma, period, hyphen, underscore and space characters.</p>
-<h5>Actions</h5>
+<h3>Actions</h3>
 <h4><code>DELETE</code> - Deactivate a Building</h4>
 <pre><b>DELETE</b> https://ws.oit.pdx.edu/org/<i>version</i>/buildings/<i>building_identifier</i></pre>
 <p>Change the given building status to inactive in the list of current Portland State University buildings.</p>
@@ -122,6 +122,12 @@
     API Versions
     <ul>
       <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Required Scope
+    <ul>
+      <li><code>/org/buildings</code> - Access token must be associated with the required scope</li>
     </ul>
   </li>
 </ul>
@@ -255,6 +261,12 @@
     </ul>
   </li>
   <li>
+    Required Scope
+    <ul>
+      <li><code>/org/buildings</code> - Access token must be associated with the required scope</li>
+    </ul>
+  </li>
+  <li>
     Return
     <ul>
       <li>This action returns a UTF-8 encoded JSON BuildingDescriptor element of the newly created building on success, otherwise nothing</li>
@@ -292,6 +304,12 @@
     API Versions
     <ul>
       <li><code>v1</code> - Initial release</li>
+    </ul>
+  </li>
+  <li>
+    Required Scope
+    <ul>
+      <li><code>/org/buildings</code> - Access token must be associated with the required scope</li>
     </ul>
   </li>
   <li>

@@ -1,1 +1,1 @@
-from buildings_app.get_instance import app
+from buildings_app.get_instance import application

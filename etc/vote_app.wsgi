@@ -1,1 +1,1 @@
-from vote_app.get_instance import app
+from vote_app.get_instance import application

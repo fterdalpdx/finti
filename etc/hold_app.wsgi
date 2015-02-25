@@ -1,1 +1,1 @@
-from hold_app.get_instance import app
+from hold_app.get_instance import application

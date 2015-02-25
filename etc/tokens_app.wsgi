@@ -1,1 +1,1 @@
-from tokens_app.get_instance import app
+from tokens_app.get_instance import application

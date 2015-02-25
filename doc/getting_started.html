@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<title>PSU REST API Documentation</title>
+<link rel="stylesheet" href="http://www.pushbullet.com/css/common.css">
+<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<style>
+#header img {
+	margin: 0;
+}
+
+#footer {
+	background-color: #fff;
+}
+
+#footer .area .col {
+	padding: 0px;
+}
+
+h1 {
+	line-height: 39px;
+}
+
+h2 {
+	font-size: 24px;
+	line-height: 30px;
+	margin: 20px 0;
+}
+
+h4 {
+	font-size: 19px !important;
+	font-weight: bold !important;
+	line-height: 26px !important;
+	margin: 20px 0 !important;
+}
+
+hr {
+	border: 0;
+	border-top: 1px solid #eeeeee;
+	border-bottom: 1px solid #ffffff;
+	margin: 20px 0px;
+}
+
+pre {
+	font-size: 14px;
+	overflow-x: auto;
+}
+
+.entry {
+	margin: 10px 20px !important;
+}
+</style>
+</head>
+<body>
+	<div style="line-height: 24px; font-size: 15px">
+		<div class="page markdown">
+			<div class="inner"
+				style="background: white; box-shadow: 0 0 8px rgba(0, 0, 0, .06), 0 4px 16px rgba(0, 0, 0, .12); overflow: hidden; padding: 60px 120px 120px 120px;">
+				<h1>PSU REST Web Services API</h1>
+				<h2>Getting Started</h2>
+				<p>
+					The HTTP API lets you send/receive messages and do everything else
+					the official PSU web services clients can do. To access the HTTP
+					API you'll need an access token so the server knows who you are.
+					You can get one from your <a href="https://ws.oit.pdx.edu/account">Account
+						Settings page.</a>
+				</p>
+				<p>Once you have your access token, you can use it to access PSU
+					web services through the PSU web services API:</p>
+				<h5>EXAMPLE REQUEST</h5>
+				<pre>curl -u &lt;your_access_token_here&gt;: https://ws.oit.pdx.edu/org/v1/buildings/LH</pre>
+				<h5>EXAMPLE RESPONSE</h5>
+
+				<pre>{
+  "building_code" :  "LH",
+  "long_name":       "Lincoln Hall",
+  "short_name" :     "Lincoln Hall",
+  "street_address" : "1620 SW PARK AVE",
+  "city" :           "Portland",
+  ...
+}</pre>
+
+				<p>
+					All of our examples use the curl command line tool already
+					available on most systems. If you don't have it installed you can
+					download it on the <a href="http://curl.haxx.se/download.html">curl
+						website.</a>
+				</p>
+				<h2>Talking to the API</h2>
+				<p>
+					All requests should be over HTTPS and use a <a
+						href="http://en.wikipedia.org/wiki/JSON">JSON</a> body with the
+					Content-Type header set to <i>"application/json"</i>.
+				</p>
+				<h4>Authentication</h4>
+				<p>
+					This API is organized around <a
+						href="http://en.wikipedia.org/wiki/Representational_state_transfer">REST</a>
+					and uses <a
+						href="http://en.wikipedia.org/wiki/Basic_access_authentication">HTTP
+						Basic Auth</a> for authentication.
+				</p>
+				<p>
+					To authenticate for the API, use your access token as the username
+					in the HTTP Basic Auth header, along with an empty password. Your
+					access token can be found on the <a
+						href="https://ws.oit.pdx.edu/account">Account Settings</a>&nbsp;page.
+					Keep in mind that this key has access to your PSU web services
+					account under your identity, so don't go posting it all over the
+					internets.
+				</p>
+				<h4>From an App</h4>
+				<h5>EXAMPLE REQUEST</h5>
+				<pre>curl -u &lt;your_access_token_here&gt;: https://ws.oit.pdx.edu/org/v1/buildings</pre>
+				<h4>From a Browser</h4>
+				<p>We allow CORS requests, so you can make a request from any
+					browser:</p>
+				<h5>EXAMPLE XMLHTTPREQUEST</h5>
+				<pre>  var xhr = new XMLHttpRequest()
+  xhr.open("GET", "https://ws.oit.pd.edu/org/v1/buildings", false)
+  xhr.setRequestHeader("Authorization", "Bearer &lt;your_access_token_here&gt;")
+  xhr.send()
+  console.log(xhr)
+</pre>
+				<h3>Responses</h3>
+				<p>
+					Responses are always <a href="http://en.wikipedia.org/wiki/JSON">JSON</a>.
+					Keys are either present with a non-null value, or entirely absent
+					from the response.
+				</p>
+				<h5>EXAMPLE RESPONSE</h5>
+				<pre>{
+  "building_code": "LH",
+  "long_name": "Lincoln Hall",
+  "short_name": "Lincoln Hall",
+  "street_address": "1620 SW PARK AVE",
+  "city": "Portland",
+  ...
+}</pre>
+				<h4>HTTP Status Code Meanings</h4>
+				<ul>
+					<li><code>200 OK</code> - Everything worked as expected.</li>
+					<li><code>400 Bad Request</code> - Usually this results from
+						missing a required parameter.</li>
+					<li><code>401 Unauthorized</code> - No valid access token
+						provided.</li>
+					<li><code>403 Forbidden</code> - The access token is not valid
+						for that request.</li>
+					<li><code>404 Not Found</code> - The requested item doesn't
+						exist.</li>
+					<li><code>5XX Server Error</code> - Something went wrong on
+						PSU web services side.</li>
+				</ul>
+				<h4>Errors</h4>
+				<p>
+					Error responses (any non-200 error code) contain information on the
+					kind of error that happened. The response JSON will have an
+					<code>error</code>
+					property with the following fields:
+				</p>
+				<ul>
+					<li><code>type</code> - A machine-readable code to refer to this type of error. Either
+					<code>invalid_request</code>
+					for client side errors or
+					<code>server</code>
+					for server side errors.</li>
+					<li><code>message</code> - A (mostly) human-readable error message.
+					</li>
+					<li><code>param</code> - (OPTIONAL) Appears sometimes during an
+						invalid_request error to say which parameter in the request caused
+						the error.
+					</li>
+					<li><code>cat</code> - Some sort of ASCII cat to offset the pain of
+						receiving an error message.
+					</li>
+				</ul>
+				<h5>EXAMPLE ERROR</h5>
+				<pre>{
+  "error": {
+      "message": "The resource could not be found.",
+      "type": "invalid_request",
+      "cat": "~(=^‥^)"
+  }
+}</pre>
+
+				<h4>Pagination</h4>
+				<p>
+					When listing objects, if you receive a
+					<code>cursor</code>
+					in the response, it means the results are on multiple pages. To
+					request the next page of results, use this cursor as the parameter
+					<code>cursor</code>
+					in a further request. Any time you list a collection of objects,
+					they may be multiple pages (objects are always returned with the
+					most recent ones first). You can specify a
+					<code>limit</code>
+					parameter on any calls that return a list of objects to get a
+					smaller number of objects on each page. The default (maximum) limit
+					is 500, including deleted objects.
+				</p>
+
+				<h4>Syncing Changes</h4>
+				<p>
+					Some calls to list objects accept a
+					<code>modified_after</code>
+					property (a <a href="http://en.wikipedia.org/wiki/Unix_time">timestamp</a>).
+					Any objects modified since that time will be returned, most
+					recently modified first. The
+					<code>modified_after</code>
+					parameter should be the most recent
+					<code>modified</code>
+					value from an object returned by the server (don't trust the local
+					machine's timestamp as it usually is not the same value as the
+					server).
+				</p>
+				<h4>Deleted Objects</h4>
+				<p>
+					When you query with a
+					<code>modified_after</code>
+					timestamp to sync changed objects to a device, you need to know if
+					an object was deleted so you can remove it locally. Deleted objects
+					will have &nbsp; <code>active</code> = <code>false</code>
+					and all properties except for direct identifiers will be missing
+					from the returned object.
+				</p>
+				<h1>API Calls</h1>
+				<h2>Objects</h2>
+				<ul>
+					<li><a
+						href="https://sites.google.com/a/pdx.edu/web-services/home/api/buildings-api"><code>/org/v1/buildings</code></a>
+						- Catalog of Portland State University buildings.</li>
+					<li><a
+						href="https://sites.google.com/a/pdx.edu/web-services/home/api/vote-api"><code>/people/v1/vote</code></a>
+						- Voter eligibility verification for ASPSU student elections.</li>
+					<li><a
+						href="https://sites.google.com/a/pdx.edu/web-services/home/api/hold-api"><code>/people/v1/hold/advise</code></a>
+						- View and clear freshman student advising holds</li>
+				</ul>
+				<h2>Accounts</h2>
+				<ul>
+					<li><a
+						href="https://script.google.com/a/macros/pdx.edu/s/AKfycbzTj8aFkCAJSrx997q3nHw_dAxZBXAZy2g2n40I4aqLcARfMA8/exec"><code>/account</code></a>
+						- Create and manage your access token for using web services.</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	</div>
+</body>
+</html>

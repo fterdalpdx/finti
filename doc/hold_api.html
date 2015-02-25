@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<title>Pushbullet API Documentation</title>
+<!-- <link rel="stylesheet" href="/css/pushbullet.css"> -->
+<link rel="stylesheet" href="http://www.pushbullet.com/css/common.css">
+<link rel="icon" type="image/x-icon"
+	href="http://www.pushbullet.com/favicon.ico">
+<link rel="canonical" href="https://docs.pushbullet.com/v2/pushes/">
+<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<style type="text/css">
+#header img {
+	margin: 0;
+}
+
+#footer {
+	background-color: #fff;
+}
+
+#footer .area .col {
+	padding: 0px;
+}
+
+h1 {
+	line-height: 39px;
+}
+
+h2 {
+	font-size: 24px;
+	line-height: 30px;
+	margin: 20px 0;
+}
+
+h4 {
+	font-size: 19px !important;
+	font-weight: bold !important;
+	line-height: 26px !important;
+	margin: 20px 0 !important;
+}
+
+hr {
+	border: 0;
+	border-top: 1px solid #eeeeee;
+	border-bottom: 1px solid #ffffff;
+	margin: 20px 0px;
+}
+
+pre {
+	font-size: 14px;
+	overflow-x: auto;
+}
+
+.entry {
+	margin: 10px 20px !important;
+}
+</style>
+</head>
+<body>
+	<div id="fake-header"></div>
+	<div style="line-height: 24px; font-size: 15px">
+		<div class="page markdown">
+			<div class="inner"
+				style="background: white; box-shadow: 0 0 8px rgba(0, 0, 0, .06), 0 4px 16px rgba(0, 0, 0, .12); overflow: hidden; padding: 60px 120px 120px 120px;">
+				<h1>Hold</h1>
+
+				<h2>https://ws.oit.pdx.edu/people/v1/hold/advise</h2>
+
+				<hr>
+
+				<h3>URI Paths</h3>
+				<ul>
+					<li><code>/people/v1/hold/advise</code> - View and clear
+						freshman student advising holds</li>
+				</ul>
+
+				<h3>Actions</h3>
+
+				<h4>
+					<code>GET</code>
+					- Check if a Student has a first year advising hold applied
+				</h4>
+				<pre>
+					<b>GET</b> https://ws.oit.pdx.edu/people/<b>version</b>/hold/advise/check/<b>odinid</b>
+				</pre>
+				<ul>
+					<li>Parameters
+						<ul>
+							<li><code>version</code> - API version<code></code></li>
+							<li><code>psuid</code> - The '9'-number of the Student to
+								check for an advising hold<code></code></li>
+						</ul>
+					</li>
+					<li>Status Codes
+						<ul>
+							<li><code>200</code> - Action succeeded without error</li>
+							<li><code>400</code> - Request failed</li>
+							<li><code>404</code> - Student was not found</li>
+						</ul>
+					</li>
+					<li>API Versions
+						<ul>
+							<li><code>v1</code> - Initial release</li>
+						</ul>
+					</li>
+					<li>Required Scope
+						<ul>
+							<li><code>/people/hold/advise</code> - Access token must be
+								associated with the required scope</li>
+						</ul>
+					</li>
+					<li>Returns
+						<ul>
+							<li>If student found and has advising hold: <code>{"hold":
+									"true"}</code></li>
+							<li>If student found and does not have an advising hold: <code>{"hold":
+									"false"}</code></li>
+							<li>If student not found: <pre>{
+    "error": {
+        "message": "The student could not be found.",
+        "type":     "person_does_not_exist",
+        "cat":      "~(=^..^)"
+    }
+}</pre></li>
+						</ul>
+					</li>
+				</ul>
+
+				<h4>
+					<code>GET</code>
+					- Check if an advisor is authorized to clear advising holds
+				</h4>
+				<pre>
+					<b>GET</b> https://ws.oit.pdx.edu/people/<b>version</b>/hold/advise/auth/<b>odinid</b>
+				</pre>
+				<ul>
+					<li>Parameters
+						<ul>
+							<li><code>version</code> - API version<code></code></li>
+							<li><code>psuid</code> - The '9'-number of the advisor to
+								check for an advising hold clearing authorization<code></code></li>
+						</ul>
+					</li>
+					<li>Status Codes
+						<ul>
+							<li><code>200</code> - Action succeeded without error</li>
+							<li><code>400</code> - Request failed</li>
+							<li><code>404</code> - Advisor was not found</li>
+						</ul>
+					</li>
+					<li>API Versions
+						<ul>
+							<li><code>v1</code> - Initial release</li>
+						</ul>
+					</li>
+					<li>Required Scope
+						<ul>
+							<li><code>/people/hold/advise</code> - Access token must be
+								associated with the required scope</li>
+						</ul>
+					</li>
+					<li>Returns
+						<ul>
+							<li>If advisor is authorized to clear advising holds: <code>{"authorized":
+									"true"}</code></li>
+							<li>If advisor is not authorized to clear advising holds: <code>{"authorized":
+									"false"}</code></li>
+							<li>If advisor not found: <pre>{
+    "error": {
+        "message": "The advisor could not be found.",
+        "type":     "person_does_not_exist",
+        "cat":      "~(=^..^)"
+    }
+}</pre></li>
+						</ul>
+					</li>
+				</ul>
+
+				<h4>
+					<code>POST</code>
+					- Clear the first year advising hold by an advisor for a student
+				</h4>
+				<pre>
+					<b>POST</b> https://ws.oit.pdx.edu/people/<b>version</b>/hold/advise/clear/<b>advisor_id</b>/<b>student_id</b>
+				</pre>
+				<ul>
+					<li>Parameters
+						<ul>
+							<li><code>version</code> - API version<code></code></li>
+							<li><code>advisor_id</code> - The '9'-number of the advisor
+								clearing the advising hold.<code></code></li>
+							<li><code>student_id</code> - The '9'-number of the student
+								having the advising hold cleared<code></code></li>
+						</ul>
+					</li>
+					<li>Status Codes
+						<ul>
+							<li><code>200</code> - Action succeeded without error</li>
+							<li><code>400</code> - Request failed</li>
+							<li><code>404</code> - Advisor or student was not found</li>
+						</ul>
+					</li>
+					<li>API Versions
+						<ul>
+							<li><code>v1</code> - Initial release</li>
+						</ul>
+					</li>
+					<li>Required Scope
+						<ul>
+							<li><code>/people/hold/advise</code> - Access token must be
+								associated with the required scope</li>
+						</ul>
+					</li>
+					<li>Returns
+						<ul>
+							<li>Advising hold cleared: <code>{"hold": "cleared"}</code></li>
+							<li>If advisor is not authorized to clear advising holds: <code>{"hold":
+									"not authorized"}</code></li>
+							<li>If advisor not found: <pre>{
+    "error": {
+        "message": "The person could not be found.",
+        "type":     "person_does_not_exist",
+        "cat":      "~(=^..^)"
+    }
+}</pre></li>
+						</ul>
+					</li>
+				</ul>
+
+
+			</div>
+		</div>
+	</div>
+</body>
+</html>

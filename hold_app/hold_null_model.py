@@ -33,6 +33,8 @@ class HoldNullModel():
 			self.log.info('verify_authorization(): verifying authorization to clear holds from null db for person: ' + advisor_psuid)
 			if advisor_psuid == config.brano_psuid:
 				is_authorized = 'true'
+			elif advisor_psuid == 'aand@pdx.edu':
+				is_authorized = 'true'
 			elif advisor_psuid == config.dennis_psuid:
 				is_authorized = 'false'
 			else:

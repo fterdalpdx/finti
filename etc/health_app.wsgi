@@ -7,4 +7,3 @@ def application(environ, start_response):
 	from health_app.get_instance import app
 	
 	return app(environ, start_response)
-	

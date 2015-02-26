@@ -4,9 +4,8 @@ Created on Dec 31, 2014
 @author: dennis
 '''
 import unittest
-#from buildings_app.oracle_model import model
-#import hold_app.hold_model
-import hold_app.hold_null_model
+import hold_app.hold_model
+#import hold_app.hold_null_model
 from config import config
 import time
 
@@ -17,8 +16,8 @@ class Test(unittest.TestCase):
 
 
 	def setUp(self):
-		#self.model = hold_app.hold_model.HoldModel()
-		self.model = hold_app.hold_null_model.HoldNullModel()
+		self.model = hold_app.hold_model.HoldModel()
+		#self.model = hold_app.hold_null_model.HoldNullModel()
 
 
 	def tearDown(self):

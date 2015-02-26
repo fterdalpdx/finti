@@ -119,6 +119,8 @@ class Config(object):
 		self.people_err_dne = "person_does_not_exist"
 		self.people_err_gen = "request_failed"
 		
+		self.hold_db_user = 'advising_user'
+		self.hold_db_password = self.decode('58b72d3ba9b7a9689c36ee2bd465832b')
 		self.people_scope_vote = '/people/vote'
 		self.people_scope_advise = '/people/hold/advise'
 		

@@ -31,7 +31,7 @@ class HoldModel():
 			is_authorized = 'false'
 
 			dsn = cx_Oracle.makedsn(*config.database_dsn)
-			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
+			db = cx_Oracle.connect(config.hold_db_user, config.hold_db_password, dsn)
 			cursor = db.cursor()
 						
 			self.log.info('verify_authorization(): verifying authorization to clear holds from db for person: ' + advisor_psuid)

@@ -36,10 +36,9 @@ class HoldModel():
 						
 			self.log.info('verify_authorization(): verifying authorization to clear holds from db for person: ' + advisor_psuid)
 			is_authorized = 'true'
-			'''
-			   Not implemented yet in DB
-			is_authorized = cursor.callfunc('f_advisingHoldClearAuth', cx_Oracle.STRING, [advisor_psuid])
-			'''
+
+			is_authorized = cursor.callfunc('zskadvpt.f_advisingHoldClearAuth', cx_Oracle.STRING, [advisor_psuid])
+
 			self.log.info('verify_authorization(): verifying eligibility to vote from db, result: ' + str(is_authorized))
 			
 			db.close()
@@ -69,10 +68,8 @@ class HoldModel():
 						
 			self.log.info('get_advising_hold(): getting the advising hold status from db for person: ' + student_psuid)
 			has_hold = 'false'
-			'''
-			   Not implemented yet in DB
-			has_hold = cursor.callfunc('f_advisingHoldCheck', cx_Oracle.STRING, [student_psuid])
-			'''
+			has_hold = cursor.callfunc('zskadvpt.f_advisingHoldCheck', cx_Oracle.STRING, [student_psuid])
+
 			self.log.info('get_advising_hold(): advising hold status from banner: ' + str(has_hold))
 			
 			db.close()
@@ -105,10 +102,8 @@ class HoldModel():
 						
 			self.log.info('clear_advising_hold(): clearing advising hold from db for person: ' + student_psuid)
 			is_cleared = 'false'
-			'''
-			   Not implemented yet in DB
-			is_cleared = cursor.callfunc('f_advisingHoldClear', cx_Oracle.STRING, [advisor_psuid, student_psuid])
-			'''
+			is_cleared = cursor.callfunc('zskadvpt.f_advisingHoldClear', cx_Oracle.STRING, [advisor_psuid, student_psuid])
+
 			self.log.info('clear_advising_hold(): advising hold status from banner: ' + str(is_cleared))
 			
 			db.close()

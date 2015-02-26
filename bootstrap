@@ -80,7 +80,7 @@ if grep -q '^ORACLE_HOME' $BASE/venv/bin/activate; then
 	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
 	grep -v '^ORACLE_HOME' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
 fi
-echo "ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME" >> $BASE/venv/bin/activate
+echo "ORACLE_HOME=$BASE/lib/oracle/; export ORACLE_HOME" >> $BASE/venv/bin/activate
 
 # Set the LD_LIBRARY_PATH (for Oracle)
 
@@ -88,7 +88,7 @@ if grep -q '^LD_LIBRARY_PATH' $BASE/venv/bin/activate; then
 	cp $BASE/venv/bin/activate $BASE/venv/bin/.activate
 	grep -v '^LD_LIBRARY_PATH' $BASE/venv/bin/.activate > $BASE/venv/bin/activate
 fi
-echo "LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH" >> $BASE/venv/bin/activate
+echo "LD_LIBRARY_PATH=$BASE/lib/oracle; export LD_LIBRARY_PATH" >> $BASE/venv/bin/activate
 
 # Set the release level for the environment
 

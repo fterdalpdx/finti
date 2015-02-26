@@ -285,7 +285,8 @@
         "syslog": {
         	"class": "logging.handlers.SysLogHandler",
         	"address": "/dev/log",
-        	"facility": 23
+        	"facility": 23,
+        	"formatter": "splunk"
         },
         "console": {
             "formatter": "default", 
@@ -306,10 +307,14 @@
         "default": {
             "datefmt": "%Y.%m.%dT%H:%M:%S", 
             "format": "%(asctime)s %(levelname)-8s %(name)-15s %(message)s"
-        }, 
+	    }, 
         "json": {
             "()": "logstash_formatter.LogstashFormatter"
         }, 
+        "splunk": {
+            "datefmt": "%Y.%m.%dT%H:%M:%S", 
+            "format": "%(pathname)s [%(process)d]: %(asctime)s %(levelname)-8s %(name)-15s %(message)s"
+	    },
         "dateTime": {
             "datefmt": "%Y.%m.%dT%H:%M:%S", 
             "format": "%(asctime)s %(levelname)-8s %(name)-15s %(message)s"

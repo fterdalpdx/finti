@@ -299,7 +299,6 @@
             "class": "PushbulletHandler.PushbulletHandler", 
             "level": "ERROR"
         } 
-         
  	},
     "version": 1, 
     "filters": {}, 

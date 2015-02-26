@@ -35,6 +35,10 @@ class HoldNullModel():
 				is_authorized = 'true'
 			elif advisor_psuid == 'aand@pdx.edu':
 				is_authorized = 'true'
+			elif advisor_psuid == 'aand':
+				is_authorized = 'true'
+			elif advisor_psuid == 'brano':
+				is_authorized = 'true'
 			elif advisor_psuid == config.dennis_psuid:
 				is_authorized = 'false'
 			else:
@@ -95,7 +99,7 @@ class HoldNullModel():
 			self.log.info('clear_advising_hold(): clearing advising hold from db for person: ' + student_psuid)
 			is_cleared = 'false'
 
-			if advisor_psuid == config.brano_psuid:
+			if advisor_psuid == config.brano_psuid or advisor_psuid == 'brano' or advisor_psuid == 'aand':
 				if student_psuid == config.hhauer_psuid:
 					is_cleared = 'success'
 				else:

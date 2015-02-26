@@ -99,6 +99,10 @@ class VoteAuthTest(TestCase):
 						 headers=h)
 		self.assert_200(rv)
 		
+		rv = Client.post(self.client, path='/people/v1/hold/advise/clear/' + 'aand' + '/' + config.hhauer_psuid,
+						 headers=h)
+		self.assert_200(rv)
+		
 		cache.srem(config.people_scope_advise, 'test@test')
 
 		rv = Client.post(self.client, path='/people/v1/hold/advise/clear/' + config.brano_psuid + '/' + config.hhauer_psuid,

@@ -63,8 +63,8 @@ fi
 
 # Help cx_Oracle find its way
 
-LD_LIBRARY_PATH=$BASE/lib/oracle/instantclient_11_2.x86-64/; export LD_LIBRARY_PATH
-ORACLE_HOME=$BASE/lib/oracle/instantclient_11_2.x86-64/; export ORACLE_HOME
+LD_LIBRARY_PATH=$BASE/lib/oracle; export LD_LIBRARY_PATH
+ORACLE_HOME=$BASE/lib/oracle/; export ORACLE_HOME
 
 # Add to our PYTHONPATH
 

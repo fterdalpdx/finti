@@ -37,6 +37,15 @@ class Test(unittest.TestCase):
 		is_eligible = self.model.verify_eligibility('rincewind_lumberjack')
 		self.assertTrue(is_eligible == 'dne')
 		
+		# Verify the correct failure mode for oracle
+		dsn = self.model.dsn
+		self.model.dsn = 'foo'
+		
+		is_eligible = self.model.verify_eligibility('hhauer')
+		self.assertTrue(is_eligible == 'db error')
+		self.model.dsn = dsn	# Fix oracle 
+		
+		
 if __name__ == "__main__":
 	
 	unittest.main()

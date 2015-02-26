@@ -15,6 +15,7 @@ class VoteModel():
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('vote_model')
 		self.log.info('init() initializing VoteModel')
+		self.dsn = cx_Oracle.makedsn(*config.database_dsn)
 			
 
 	def verify_eligibility(self, odin_name):
@@ -28,10 +29,9 @@ class VoteModel():
 		'''
 		try:
 			self.log.debug('verify_eligibility(): verifying voting eligibility for: ' + odin_name)
-			is_eligible = 'false'
+			is_eligible = 'db error'
 
-			dsn = cx_Oracle.makedsn(*config.database_dsn)
-			db = cx_Oracle.connect(config.lms_login, config.lms_password, dsn)
+			db = cx_Oracle.connect(config.lms_login, config.lms_password, self.dsn)
 			cursor = db.cursor()
 						
 			self.log.info('verify_eligibility(): verifying eligibility to vote from db for person: ' + odin_name)

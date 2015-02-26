@@ -44,6 +44,7 @@ class Vote():
 			self.log.info('verify_eligibility(): student did not exist in lookup in banner: ' + odin_name)
 		else:
 			self.log.error('verify_eligibility(): unexpected result from verify_eligibility request: ' + is_eligible)
+			status['message'] = is_eligible
 		
 		return status
 	

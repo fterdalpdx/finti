@@ -25,6 +25,16 @@ class VoteTest(unittest.TestCase):
 		#rv = self.app.get('/status')
 		#self.assertTrue(rv.status_code == 200)
 		self.assertTrue(vote.verify_eligibility('dennis') == {'success': {'voter': 'false'}})
+		self.assertTrue(vote.verify_eligibility('hhauer') == {'success': {'voter': 'true'}})
+		self.assertTrue('error' in vote.verify_eligibility('rincewind'))
+		
+		# Verify correct failure mode for oracle
+		dsn = vote.model.dsn
+		vote.model.dsn = ''
+		self.assertTrue('error' in vote.verify_eligibility('hhauer'))
+		vote.model.dsn = dsn	# Fix oracle 
+		
+	
 		
 if __name__ == "__main__":
 	unittest.main()

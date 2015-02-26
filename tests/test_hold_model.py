@@ -10,7 +10,7 @@ import hold_app.hold_null_model
 from config import config
 import time
 
-silence_all = True
+silence_all = False
 test_name = 'auth'
 
 class Test(unittest.TestCase):

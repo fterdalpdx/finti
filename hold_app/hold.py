@@ -6,7 +6,8 @@ Created on Sep 23, 2014
 
 import logging.config
 from config import config
-import hold_app.hold_model
+#import hold_app.hold_model
+import hold_app.hold_null_model
 from optparse import OptionParser
 from cats import here_kitty
 
@@ -19,7 +20,8 @@ class Hold():
 		logging.config.dictConfig(config.logging_conf_dict)
 		self.log = logging.getLogger('hold')
 		self.log.debug('init(): starting')
-		self.model = hold_app.hold_model.HoldModel()
+		#self.model = hold_app.hold_model.HoldModel()
+		self.model = hold_app.hold_null_model.HoldNullModel()
 	
 	def verify_authorization(self, psuid):
 		'''
